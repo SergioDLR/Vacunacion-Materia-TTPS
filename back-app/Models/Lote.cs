@@ -20,6 +20,8 @@ namespace VacunacionApi.Models
         public int IdVacunaDesarrollada { get; set; }
         [Column("Fecha_Vencimiento", TypeName = "date")]
         public DateTime FechaVencimiento { get; set; }
+        [Column("Disponible")]
+        public bool Disponible { get; set; }
 
         [ForeignKey(nameof(IdVacunaDesarrollada))]
         [InverseProperty(nameof(VacunaDesarrollada.Lote))]

@@ -22,6 +22,8 @@ namespace VacunacionApi.Models
         public string Descripcion { get; set; }
         [Column("Id_Pandemia")]
         public int? IdPandemia { get; set; }
+        [Column("Cantidad_Dosis")]
+        public int CantidadDosis { get; set; }
 
         [ForeignKey(nameof(IdPandemia))]
         [InverseProperty(nameof(Pandemia.Vacuna))]

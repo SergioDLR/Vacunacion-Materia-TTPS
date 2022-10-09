@@ -25,6 +25,10 @@ namespace VacunacionApi.Models
         public int IntervaloMinimoMeses { get; set; }
         [Column("Precio_Vacuna")]
         public double PrecioVacuna { get; set; }
+        [Column("Fecha_Desde", TypeName = "date")]
+        public DateTime FechaDesde { get; set; }
+        [Column("Fecha_Hasta", TypeName = "date")]
+        public DateTime? FechaHasta { get; set; }
 
         [ForeignKey(nameof(IdMarcaComercial))]
         [InverseProperty(nameof(MarcaComercial.VacunaDesarrollada))]
