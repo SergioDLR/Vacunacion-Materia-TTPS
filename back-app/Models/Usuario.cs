@@ -8,6 +8,10 @@ namespace VacunacionApi.Models
 {
     public partial class Usuario
     {
+        public Usuario()
+        {
+        }
+
         public Usuario(RequestUsuarioDTO model)
         {
             Email = model.Email;
