@@ -2,11 +2,20 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using VacunacionApi.DTO;
 
 namespace VacunacionApi.Models
 {
     public partial class Usuario
     {
+        public Usuario(RequestUsuarioDTO model)
+        {
+            Email = model.Email;
+            Password = model.Password;
+            IdJurisdiccion = model.IdJurisdiccion;
+            IdRol = model.IdRol;
+        }
+
         [Key]
         public int Id { get; set; }
         [Required]
