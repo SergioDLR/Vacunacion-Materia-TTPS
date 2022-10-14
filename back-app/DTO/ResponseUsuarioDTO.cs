@@ -5,10 +5,6 @@ namespace VacunacionApi.Controllers
 {
     public class ResponseUsuarioDTO : ResponseCabeceraDTO
     {
-        public ResponseUsuarioDTO()
-        { 
-        }
-
         public ResponseUsuarioDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string emailAdministrador, 
             string email, string password, int idJurisdiccion, int idRol, string descripcionJurisdiccion, string descripcionRol)
         {
