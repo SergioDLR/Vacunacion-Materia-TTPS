@@ -1,10 +1,21 @@
 import RoutesDefinition from "./components/navigation/routesDefinition";
-
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import NavBar from "./components/Nav/NavBar";
+import UserContextProvider from "./components/Context/UserContext";
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#0052cc",
+    },
+  },
+});
 function App() {
   return (
-    <>
-      <RoutesDefinition />
-    </>
+    <ThemeProvider theme={theme}>
+      <UserContextProvider>
+        <RoutesDefinition />
+      </UserContextProvider>
+    </ThemeProvider>
   );
 }
 
