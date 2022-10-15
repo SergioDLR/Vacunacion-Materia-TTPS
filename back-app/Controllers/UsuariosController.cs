@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VacunacionApi.DTO;
@@ -22,42 +21,70 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Usuarios/GetAll?emailAdministrador=juan@gmail.com
-        [HttpGet]
-        [Route("GetAll")]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetAll(string emailAdministrador)
+        // GET: api/Usuarios/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UsuarioDTO>> GetUsuarioDTO(int id)
         {
             try
             {
-                ResponseUsuarioDTO responseUsuarioDTO = null;
-                List<string> errores = new List<string>();
+                Usuario usuario = await _context.Usuario.FindAsync(id);
+                if (usuario != null)
+                {
+                    Jurisdiccion jurisdiccion = await GetJurisdiccion(usuario.IdJurisdiccion.Value);
+                    Rol rol = await GetRol(usuario.IdRol);
+                    UsuarioDTO usuarioDTO = new UsuarioDTO(usuario.Id, usuario.Email, usuario.Password, usuario.IdJurisdiccion.Value,
+                        usuario.IdRol, jurisdiccion.Descripcion, rol.Descripcion);
 
-                errores = VerificarFormatoEmailsAdministradorUsuario(emailAdministrador, emailUsuario, errores);
+                    return Ok(usuarioDTO);
+                }
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+
+            return NotFound(string.Format("El usuario con identificador {0} no está registrado en el sistema", id));
+        }
+
+        // GET: api/Usuarios/GetAll?emailAdministrador=juan@gmail.com
+        [HttpGet]
+        [Route("GetAll")]
+        public async Task<ActionResult<ResponseListaUsuariosDTO>> GetAll(string emailAdministrador)
+        {
+            try
+            {
+                ResponseListaUsuariosDTO responseListaUsuariosDTO = null;
+                List<string> errores = new List<string>();
+                List<UsuarioDTO> listaUsuariosDTO = new List<UsuarioDTO>();
+                
                 errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
 
-                Usuario usuarioExistente = await CuentaUsuarioExists(emailUsuario, "", "GetAccountAdministrador");
-                if (usuarioExistente == null)
-                    errores.Add(string.Format("El email {0} no está registrado en el sistema", emailUsuario));
-
                 if (errores.Count > 0)
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Rechazada", true, errores, emailAdministrador, emailUsuario, null, 0, 0, null, null);
+                { 
+                    responseListaUsuariosDTO = new ResponseListaUsuariosDTO("Rechazada", true, errores, emailAdministrador, listaUsuariosDTO);
+                }
                 else
                 {
-                    Jurisdiccion jurisdiccionExistente = await JurisdiccionExists(usuarioExistente.IdJurisdiccion.Value);
-                    Rol rolExistente = await RolExists(usuarioExistente.IdRol);
+                    List<Usuario> usuarios = await _context.Usuario.ToListAsync();
 
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Aceptada", false, errores, emailAdministrador, usuarioExistente.Email, usuarioExistente.Password,
-                        usuarioExistente.IdJurisdiccion.Value, usuarioExistente.IdRol, jurisdiccionExistente.Descripcion, rolExistente.Descripcion);
+                    foreach (Usuario usuario in usuarios)
+                    {
+                        Jurisdiccion jurisdiccion = await GetJurisdiccion(usuario.IdJurisdiccion.Value);
+                        Rol rol = await GetRol(usuario.IdRol);
+                        UsuarioDTO usuarioDTO = new UsuarioDTO(usuario.Id, usuario.Email, usuario.Password, 
+                            usuario.IdJurisdiccion.Value, usuario.IdRol, jurisdiccion.Descripcion, rol.Descripcion);
+                        listaUsuariosDTO.Add(usuarioDTO);
+                    }
+                 
+                    responseListaUsuariosDTO = new ResponseListaUsuariosDTO("Aceptada", false, errores, emailAdministrador, listaUsuariosDTO);
                 }
 
-                return Ok(responseUsuarioDTO);
+                return Ok(responseListaUsuariosDTO);
             }
             catch (Exception error)
             {
                 return BadRequest(error.Message);
             }
-
-            return await _context.Usuario.ToListAsync();
         }
 
         // GET: api/Usuarios/GetUsuario?emailAdministrador=juan@gmail.com&emailUsuario=maria@gmail.com
@@ -73,19 +100,19 @@ namespace VacunacionApi.Controllers
                 errores = VerificarFormatoEmailsAdministradorUsuario(emailAdministrador, emailUsuario, errores);
                 errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
                 
-                Usuario usuarioExistente = await CuentaUsuarioExists(emailUsuario, "", "GetAccountAdministrador");
+                Usuario usuarioExistente = await GetUsuario(emailUsuario, "", "GetAccountAdministrador");
                 if (usuarioExistente == null)
                     errores.Add(string.Format("El email {0} no está registrado en el sistema", emailUsuario));
 
                 if (errores.Count > 0)
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Rechazada", true, errores, emailAdministrador, emailUsuario, null, 0, 0, null, null);
+                    responseUsuarioDTO = LoadResponseUsuarioDTO("Rechazada", true, errores, emailAdministrador, 
+                        new Usuario(0, emailUsuario, null, 0, 0), null, null);
                 else
                 {
-                    Jurisdiccion jurisdiccionExistente = await JurisdiccionExists(usuarioExistente.IdJurisdiccion.Value);
-                    Rol rolExistente = await RolExists(usuarioExistente.IdRol);
+                    Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(usuarioExistente.IdJurisdiccion.Value);
+                    Rol rolExistente = await GetRol(usuarioExistente.IdRol);
                     
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Aceptada", false, errores, emailAdministrador, usuarioExistente.Email, usuarioExistente.Password, 
-                        usuarioExistente.IdJurisdiccion.Value, usuarioExistente.IdRol, jurisdiccionExistente.Descripcion, rolExistente.Descripcion);
+                    responseUsuarioDTO = LoadResponseUsuarioDTO("Aceptada", false, errores, emailAdministrador, usuarioExistente, jurisdiccionExistente.Descripcion, rolExistente.Descripcion);
                 }
 
                 return Ok(responseUsuarioDTO);
@@ -111,24 +138,25 @@ namespace VacunacionApi.Controllers
                 List<List<string>> listaVerificacionRol = await VerificarRol(errores, model.IdRol);
                 errores = listaVerificacionRol[0];
 
-                Usuario usuarioExistente = await CuentaUsuarioExists(model.Email, model.Password, "GetAccount");
+                Usuario usuarioExistente = await GetUsuario(model.Email, model.Password, "GetAccount");
                 if (usuarioExistente == null)
                     errores.Add(string.Format("El email {0} no está registrado en el sistema", model.Email));
 
                 if (errores.Count > 0)
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Rechazada", true, errores, model.EmailAdministrador, model.Email,
-                        model.Password, model.IdJurisdiccion, model.IdRol, listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
+                    responseUsuarioDTO = LoadResponseUsuarioDTO("Rechazada", true, errores, model.EmailAdministrador, 
+                        new Usuario(0, model.Email, model.Password, model.IdJurisdiccion, model.IdRol), 
+                        listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
                 else
                 {
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Aceptada", false, errores, model.EmailAdministrador, model.Email,
-                        model.Password, model.IdJurisdiccion, model.IdRol, listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
-
                     usuarioExistente.Email = model.Email;
                     usuarioExistente.Password = model.Password;
                     usuarioExistente.IdJurisdiccion = model.IdJurisdiccion;
                     usuarioExistente.IdRol = model.IdRol;
                     _context.Entry(usuarioExistente).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
+
+                    responseUsuarioDTO = LoadResponseUsuarioDTO("Aceptada", false, errores, model.EmailAdministrador, 
+                        usuarioExistente, listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
                 }
 
                 return Ok(responseUsuarioDTO);
@@ -155,21 +183,22 @@ namespace VacunacionApi.Controllers
                 List<List<string>> listaVerificacionRol = await VerificarRol(errores, model.IdRol);
                 errores = listaVerificacionRol[0];
 
-                Usuario usuarioExistente = await CuentaUsuarioExists(model.Email, model.Password, "Create");
+                Usuario usuarioExistente = await GetUsuario(model.Email, model.Password, "Create");
                 if (usuarioExistente != null)
                     errores.Add(string.Format("El email {0} está registrado en el sistema", model.Email));
                               
                 if(errores.Count > 0)
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Rechazada", true, errores, model.EmailAdministrador, model.Email, 
-                        model.Password, model.IdJurisdiccion, model.IdRol, listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
+                    responseUsuarioDTO = LoadResponseUsuarioDTO("Rechazada", true, errores, model.EmailAdministrador, 
+                        new Usuario(0, model.Email, model.Password, model.IdJurisdiccion, model.IdRol), 
+                        listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
                 else
                 {
-                    responseUsuarioDTO = new ResponseUsuarioDTO("Aceptada", false, errores, model.EmailAdministrador, model.Email, 
-                        model.Password, model.IdJurisdiccion, model.IdRol, listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
-               
                     Usuario usuario = new Usuario(model);
                     _context.Usuario.Add(usuario);
                     await _context.SaveChangesAsync();
+                                        
+                    responseUsuarioDTO = LoadResponseUsuarioDTO("Aceptada", false, errores, model.EmailAdministrador, 
+                        usuario, listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
                 }   
                 
                 return Ok(responseUsuarioDTO);
@@ -180,9 +209,18 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        
+
 
         // Métodos privados de ayuda
+        private ResponseUsuarioDTO LoadResponseUsuarioDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string emailAdministrador,
+            Usuario usuario, string descripcionJurisdiccion, string descripcionRol)
+        {
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usuario.Id, usuario.Email, usuario.Password, usuario.IdJurisdiccion.Value, usuario.IdRol, descripcionJurisdiccion, descripcionRol);
+            ResponseUsuarioDTO responseUsuarioDTO = new ResponseUsuarioDTO(estadoTransaccion, existenciaErrores, errores, emailAdministrador, usuarioDTO);
+
+            return responseUsuarioDTO;
+        }
+
         private async Task<bool> TieneRolAdministrador(Usuario usuario)
         {
             try
@@ -203,7 +241,7 @@ namespace VacunacionApi.Controllers
             return false;
         }
 
-        private async Task<Usuario> CuentaUsuarioExists(string email, string password, string operacion)
+        private async Task<Usuario> GetUsuario(string email, string password, string operacion)
         {
             Usuario cuentaExistente = null;
 
@@ -228,7 +266,7 @@ namespace VacunacionApi.Controllers
             return cuentaExistente;
         }
 
-        private async Task<Jurisdiccion> JurisdiccionExists(int idJurisdiccion)
+        private async Task<Jurisdiccion> GetJurisdiccion(int idJurisdiccion)
         {
             Jurisdiccion jurisdiccionExistente = null;
 
@@ -245,7 +283,7 @@ namespace VacunacionApi.Controllers
             return jurisdiccionExistente;
         }
 
-        private async Task<Rol> RolExists(int idRol)
+        private async Task<Rol> GetRol(int idRol)
         {
             Rol rolExistente = null;
 
@@ -266,7 +304,7 @@ namespace VacunacionApi.Controllers
         {
             try
             {
-                Usuario usuarioSolicitante = await CuentaUsuarioExists(emailAdministrador, "", "GetAccountAdministrador");
+                Usuario usuarioSolicitante = await GetUsuario(emailAdministrador, "", "GetAccountAdministrador");
                 if (usuarioSolicitante == null)
                     errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailAdministrador));
                 else
@@ -291,7 +329,7 @@ namespace VacunacionApi.Controllers
             try
             {
                 List<string> descripciones = new List<string>();
-                Jurisdiccion jurisdiccionExistente = await JurisdiccionExists(idJurisdiccion);
+                Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(idJurisdiccion);
                 
                 if (jurisdiccionExistente == null)
                 {
@@ -319,7 +357,7 @@ namespace VacunacionApi.Controllers
             try
             {
                 List<string> descripciones = new List<string>();
-                Rol rolExistente = await RolExists(idRol);
+                Rol rolExistente = await GetRol(idRol);
 
                 if (rolExistente == null)
                 {

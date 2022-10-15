@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using VacunacionApi.DTO;
+﻿using System;
+using System.Collections.Generic;
 
-namespace VacunacionApi.Controllers
+namespace VacunacionApi.DTO
 {
     public class ResponseUsuarioDTO : ResponseCabeceraDTO
     {

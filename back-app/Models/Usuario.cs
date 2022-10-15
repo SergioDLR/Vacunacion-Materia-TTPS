@@ -12,6 +12,15 @@ namespace VacunacionApi.Models
         {
         }
 
+        public Usuario(int id, string email, string password, int idJurisdiccion, int idRol)
+        {
+            Id = id;
+            Email = email;
+            Password = password;
+            IdJurisdiccion = idJurisdiccion;
+            IdRol = idRol;
+        }
+
         public Usuario(RequestUsuarioDTO model)
         {
             Email = model.Email;
