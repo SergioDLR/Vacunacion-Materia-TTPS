@@ -60,6 +60,10 @@ namespace VacunacionApi.Controllers
                     {
                         usuarios = await _context.Usuario.Where(usuario => usuario.IdJurisdiccion == idJurisdiccion).ToListAsync();
                     }
+                    else
+                    {
+                        usuarios = await _context.Usuario.Where(usuario => usuario.IdJurisdiccion == idJurisdiccion && usuario.IdRol == idRol).ToListAsync();
+                    }
 
                     foreach (Usuario usuario in usuarios)
                     {
@@ -98,7 +102,7 @@ namespace VacunacionApi.Controllers
                 }
                 else if (emailUsuario == null && idUsuario == 0)
                 {
-                    errores.Add(string.Format("Se debe especificar algún dato del usuario a consultar"));
+                    errores.Add(string.Format("Se debe especificar email o identificador del usuario a consultar"));
                 }
                 else
                 {
