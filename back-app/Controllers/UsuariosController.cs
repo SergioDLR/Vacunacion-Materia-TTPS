@@ -21,43 +21,26 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Usuarios/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<UsuarioDTO>> GetUsuarioDTO(int id)
-        {
-            try
-            {
-                Usuario usuario = await _context.Usuario.FindAsync(id);
-                if (usuario != null)
-                {
-                    Jurisdiccion jurisdiccion = await GetJurisdiccion(usuario.IdJurisdiccion.Value);
-                    Rol rol = await GetRol(usuario.IdRol);
-                    UsuarioDTO usuarioDTO = new UsuarioDTO(usuario.Id, usuario.Email, usuario.Password, usuario.IdJurisdiccion.Value,
-                        usuario.IdRol, jurisdiccion.Descripcion, rol.Descripcion);
-
-                    return Ok(usuarioDTO);
-                }
-            }
-            catch(Exception error)
-            {
-                return BadRequest(error.Message);
-            }
-
-            return NotFound(string.Format("El usuario con identificador {0} no está registrado en el sistema", id));
-        }
-
-        // GET: api/Usuarios/GetAll?emailAdministrador=juan@gmail.com
+        // GET: api/Usuarios/GetAll?emailAdministrador=juan@gmail.com&idJurisdiccion=2&idRol=3
         [HttpGet]
         [Route("GetAll")]
-        public async Task<ActionResult<ResponseListaUsuariosDTO>> GetAll(string emailAdministrador)
+        public async Task<ActionResult<ResponseListaUsuariosDTO>> GetAll(string emailAdministrador = null, int idJurisdiccion = 0, int idRol = 0)
         {
             try
             {
                 ResponseListaUsuariosDTO responseListaUsuariosDTO = null;
                 List<string> errores = new List<string>();
                 List<UsuarioDTO> listaUsuariosDTO = new List<UsuarioDTO>();
-                
-                errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
+                List<Usuario> usuarios = new List<Usuario>();
+
+                if (emailAdministrador == null)
+                {
+                    errores.Add(string.Format("El email administrador es obligatorio"));
+                }
+                else
+                {
+                    errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
+                }
 
                 if (errores.Count > 0)
                 { 
@@ -65,7 +48,18 @@ namespace VacunacionApi.Controllers
                 }
                 else
                 {
-                    List<Usuario> usuarios = await _context.Usuario.ToListAsync();
+                    if (idJurisdiccion == 0 && idRol == 0)
+                    {
+                        usuarios = await _context.Usuario.ToListAsync();
+                    }
+                    else if (idJurisdiccion == 0)
+                    {
+                        usuarios = await _context.Usuario.Where(usuario => usuario.IdRol == idRol).ToListAsync();
+                    }
+                    else if (idRol == 0)
+                    {
+                        usuarios = await _context.Usuario.Where(usuario => usuario.IdJurisdiccion == idJurisdiccion).ToListAsync();
+                    }
 
                     foreach (Usuario usuario in usuarios)
                     {
@@ -87,22 +81,41 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        // GET: api/Usuarios/GetUsuario?emailAdministrador=juan@gmail.com&emailUsuario=maria@gmail.com
+        // GET: api/Usuarios/GetUsuario?emailAdministrador=juan@gmail.com&emailUsuario=maria@gmail.com&idUsuario=34
         [HttpGet]
         [Route("GetUsuario")]
-        public async Task<ActionResult<ResponseUsuarioDTO>> GetUsuario(string emailAdministrador, string emailUsuario)
+        public async Task<ActionResult<ResponseUsuarioDTO>> GetUsuario(string emailAdministrador = null, string emailUsuario = null, int idUsuario = 0)
         {
             try
             {
                 ResponseUsuarioDTO responseUsuarioDTO = null;
+                Usuario usuarioExistente = null;
                 List<string> errores = new List<string>();
 
-                errores = VerificarFormatoEmailsAdministradorUsuario(emailAdministrador, emailUsuario, errores);
-                errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
-                
-                Usuario usuarioExistente = await GetUsuario(emailUsuario, "", "GetAccountAdministrador");
-                if (usuarioExistente == null)
-                    errores.Add(string.Format("El email {0} no está registrado en el sistema", emailUsuario));
+                if (emailAdministrador == null)
+                {
+                    errores.Add(string.Format("El email administrador es obligatorio"));
+                }
+                else if (emailUsuario == null && idUsuario == 0)
+                {
+                    errores.Add(string.Format("Se debe especificar algún dato del usuario a consultar"));
+                }
+                else
+                {
+                    errores = VerificarFormatoEmailsAdministradorUsuario(emailAdministrador, emailUsuario, errores);
+                    errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
+
+                    if (emailAdministrador != null)
+                    {
+                        usuarioExistente = await GetUsuario(emailUsuario, "", "GetAccountAdministrador");
+                    }
+                    else
+                    {
+                        usuarioExistente = await _context.Usuario.Where(usuario => usuario.Id == idUsuario).FirstOrDefaultAsync();
+                    }
+                    if (usuarioExistente == null)
+                        errores.Add(string.Format("El email {0} no está registrado en el sistema", emailUsuario));
+                }
 
                 if (errores.Count > 0)
                     responseUsuarioDTO = LoadResponseUsuarioDTO("Rechazada", true, errores, emailAdministrador, 
