@@ -95,11 +95,15 @@ namespace VacunacionApi.Controllers
                 ResponseUsuarioDTO responseUsuarioDTO = null;
                 Usuario usuarioExistente = null;
                 List<string> errores = new List<string>();
+                bool credencialesUsuario = true;
 
                 if (emailAdministrador == null)
                     errores.Add(string.Format("El email administrador es obligatorio"));
-                else if (emailUsuario == null && idUsuario == 0)
+                if (emailUsuario == null && idUsuario == 0)
+                { 
                     errores.Add(string.Format("Se debe especificar email o identificador del usuario a consultar"));
+                    credencialesUsuario = false;
+                }
                 else
                 {
                     if (!TieneFormatoEmail(emailAdministrador))
@@ -117,15 +121,14 @@ namespace VacunacionApi.Controllers
                             if (!TieneFormatoEmail(emailUsuario))
                                 errores.Add(string.Format("El email {0} no tiene un formato válido", emailUsuario));
                             else
-                            {
                                 usuarioExistente = await GetUsuario(emailUsuario);
-
-                                if (usuarioExistente == null)
-                                    errores.Add(string.Format("El email {0} no está registrado en el sistema", emailUsuario));
-                            }
                         }
-                    }
-                    
+                    }   
+                }
+
+                if (usuarioExistente == null && credencialesUsuario)
+                {
+                    errores.Add("El usuario a consultar no está registrado en el sistema");
                 }
 
                 if (errores.Count > 0)
