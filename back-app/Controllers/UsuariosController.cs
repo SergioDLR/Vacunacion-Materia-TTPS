@@ -97,28 +97,35 @@ namespace VacunacionApi.Controllers
                 List<string> errores = new List<string>();
 
                 if (emailAdministrador == null)
-                {
                     errores.Add(string.Format("El email administrador es obligatorio"));
-                }
                 else if (emailUsuario == null && idUsuario == 0)
-                {
                     errores.Add(string.Format("Se debe especificar email o identificador del usuario a consultar"));
-                }
                 else
                 {
-                    errores = VerificarFormatoEmailsAdministradorUsuario(emailAdministrador, emailUsuario, errores);
-                    errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
-
-                    if (emailAdministrador != null)
-                    {
-                        usuarioExistente = await GetUsuario(emailUsuario, "", "GetAccountAdministrador");
-                    }
+                    if (!TieneFormatoEmail(emailAdministrador))
+                        errores.Add(string.Format("El email {0} no tiene un formato válido", emailAdministrador));
                     else
-                    {
+                        errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
+
+                    if (idUsuario != 0)
                         usuarioExistente = await _context.Usuario.Where(usuario => usuario.Id == idUsuario).FirstOrDefaultAsync();
+
+                    if(usuarioExistente == null)
+                    {
+                        if (emailUsuario != null)
+                        {
+                            if (!TieneFormatoEmail(emailUsuario))
+                                errores.Add(string.Format("El email {0} no tiene un formato válido", emailUsuario));
+                            else
+                            {
+                                usuarioExistente = await GetUsuario(emailUsuario);
+
+                                if (usuarioExistente == null)
+                                    errores.Add(string.Format("El email {0} no está registrado en el sistema", emailUsuario));
+                            }
+                        }
                     }
-                    if (usuarioExistente == null)
-                        errores.Add(string.Format("El email {0} no está registrado en el sistema", emailUsuario));
+                    
                 }
 
                 if (errores.Count > 0)
@@ -141,8 +148,9 @@ namespace VacunacionApi.Controllers
         }
 
         // PUT: api/Usuarios/ModificarUsuario
-        [HttpPut("ModificarUsuario")]
-        public async Task<ActionResult<ResponseUsuarioDTO>> ModificarUsuario([FromBody] RequestUsuarioDTO model)
+        [HttpPut]
+        [Route("ModificarUsuario")]
+        public async Task<ActionResult<ResponseUsuarioDTO>> ModificarUsuario([FromBody] RequestUsuarioUpdateDTO model)
         {
             try
             {
@@ -150,30 +158,44 @@ namespace VacunacionApi.Controllers
                 List<string> errores = new List<string>();
 
                 errores = await VerificarCredencialesUsuarioAdministrador(model.EmailAdministrador, errores);
-                List<List<string>> listaVerificacionJurisdiccion = await VerificarJurisdiccion(errores, model.IdJurisdiccion);
-                errores = listaVerificacionJurisdiccion[0];
-                List<List<string>> listaVerificacionRol = await VerificarRol(errores, model.IdRol);
-                errores = listaVerificacionRol[0];
 
-                Usuario usuarioExistente = await GetUsuario(model.Email, model.Password, "GetAccount");
+                Usuario usuarioExistente = await GetUsuario(model.Email);
                 if (usuarioExistente == null)
                     errores.Add(string.Format("El email {0} no está registrado en el sistema", model.Email));
 
+                //Verificación de nuevos datos
+                if (model.IdJurisdiccionNuevo != 0)
+                {
+                    List<List<string>> listaVerificacionJurisdiccion = await VerificarJurisdiccion(errores, model.IdJurisdiccionNuevo);
+                    errores = listaVerificacionJurisdiccion[0];
+                }
+                if (model.IdRolNuevo != 0)
+                {
+                    List<List<string>> listaVerificacionRol = await VerificarRol(errores, model.IdRolNuevo);
+                    errores = listaVerificacionRol[0];
+                }
+                
                 if (errores.Count > 0)
                     responseUsuarioDTO = LoadResponseUsuarioDTO("Rechazada", true, errores, model.EmailAdministrador, 
-                        new Usuario(0, model.Email, model.Password, model.IdJurisdiccion, model.IdRol), 
-                        listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
+                        new Usuario(0, model.Email, null, 0, 0), null, null);
                 else
                 {
-                    usuarioExistente.Email = model.Email;
-                    usuarioExistente.Password = model.Password;
-                    usuarioExistente.IdJurisdiccion = model.IdJurisdiccion;
-                    usuarioExistente.IdRol = model.IdRol;
-                    _context.Entry(usuarioExistente).State = EntityState.Modified;
+                    if (model.IdJurisdiccionNuevo != 0)
+                        usuarioExistente.IdJurisdiccion = model.IdJurisdiccionNuevo;
+
+                    if (model.IdRolNuevo != 0)
+                        usuarioExistente.IdRol = model.IdRolNuevo;
+
+                    if (model.PasswordNuevo != null && model.PasswordNuevo != "")
+                        usuarioExistente.Password = model.PasswordNuevo;
+
                     await _context.SaveChangesAsync();
 
-                    responseUsuarioDTO = LoadResponseUsuarioDTO("Aceptada", false, errores, model.EmailAdministrador, 
-                        usuarioExistente, listaVerificacionJurisdiccion[1][0], listaVerificacionRol[1][0]);
+                    Jurisdiccion juris = await GetJurisdiccion(usuarioExistente.IdJurisdiccion.Value);
+                    Rol rol = await GetRol(usuarioExistente.IdRol);
+
+                    responseUsuarioDTO = LoadResponseUsuarioDTO("Aceptada", false, errores, model.EmailAdministrador,
+                        usuarioExistente, juris.Descripcion, rol.Descripcion);
                 }
 
                 return Ok(responseUsuarioDTO);
@@ -200,7 +222,7 @@ namespace VacunacionApi.Controllers
                 List<List<string>> listaVerificacionRol = await VerificarRol(errores, model.IdRol);
                 errores = listaVerificacionRol[0];
 
-                Usuario usuarioExistente = await GetUsuario(model.Email, model.Password, "Create");
+                Usuario usuarioExistente = await GetUsuario(model.Email);
                 if (usuarioExistente != null)
                     errores.Add(string.Format("El email {0} está registrado en el sistema", model.Email));
                               
@@ -258,29 +280,33 @@ namespace VacunacionApi.Controllers
             return false;
         }
 
-        private async Task<Usuario> GetUsuario(string email, string password, string operacion)
+        private async Task<Usuario> GetUsuario(string email)
         {
-            Usuario cuentaExistente = null;
-
             try
             {
-                if (operacion == "GetAccount")
+                Usuario cuentaExistente = new Usuario();
+                List<Usuario> listaUsuarios = await _context.Usuario.ToListAsync();
+
+                foreach (Usuario item in listaUsuarios)
                 {
-                    cuentaExistente = await _context.Usuario
-                        .Where(user => user.Email == email && user.Password == password).FirstOrDefaultAsync();
+                    if (item.Email == email)
+                    {
+                        cuentaExistente.Id = item.Id;
+                        cuentaExistente.Email = item.Email;
+                        cuentaExistente.IdJurisdiccion = item.IdJurisdiccion;
+                        cuentaExistente.IdRol = item.IdRol;
+                    }
                 }
-                if (operacion == "Create" || operacion == "GetAccountAdministrador")
-                {
-                    cuentaExistente = await _context.Usuario
-                        .Where(user => user.Email == email).FirstOrDefaultAsync();
-                }
+
+                if (cuentaExistente.Email != null)
+                    return cuentaExistente;
             }
             catch
             {
-
+                
             }
 
-            return cuentaExistente;
+            return null;
         }
 
         private async Task<Jurisdiccion> GetJurisdiccion(int idJurisdiccion)
@@ -321,7 +347,7 @@ namespace VacunacionApi.Controllers
         {
             try
             {
-                Usuario usuarioSolicitante = await GetUsuario(emailAdministrador, "", "GetAccountAdministrador");
+                Usuario usuarioSolicitante = await GetUsuario(emailAdministrador);
                 if (usuarioSolicitante == null)
                     errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailAdministrador));
                 else
@@ -395,26 +421,22 @@ namespace VacunacionApi.Controllers
             return erroresConcatDescripciones;
         }
 
-        private List<string> VerificarFormatoEmailsAdministradorUsuario(string emailAdministrador, string emailUsuario, List<string> errores)
+        private bool TieneFormatoEmail(string email)
         {
             try
             {
                 Regex regex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$"); 
-                Match matchEmailAdministrador = regex.Match(emailAdministrador);
-                Match matchEmailUsuario = regex.Match(emailUsuario);
-
-                if (!matchEmailAdministrador.Success) 
-                    errores.Add("El email administrador tiene un formato inválido");
-
-                if (!matchEmailUsuario.Success)
-                    errores.Add("El email usuario tiene un formato inválido");
+                Match matchEmail = regex.Match(email);
+                
+                if (matchEmail.Success) 
+                    return true;
             }
             catch
             {
 
             }
 
-            return errores;
+            return false;
         }
     }
 }
