@@ -189,6 +189,7 @@ namespace VacunacionApi.Controllers
                     if (model.PasswordNuevo != null && model.PasswordNuevo != "")
                         usuarioExistente.Password = model.PasswordNuevo;
 
+                    _context.Entry(usuarioExistente).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
 
                     Jurisdiccion juris = await GetJurisdiccion(usuarioExistente.IdJurisdiccion.Value);
