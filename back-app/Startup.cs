@@ -33,7 +33,11 @@ namespace VacunacionApi
 
             //Conexión por defecto a la base de datos
             var connection = Configuration.GetConnectionString("VacunasConnection");
-            services.AddDbContextPool<VacunasContext>(options => options.UseSqlServer(connection));
+            services.AddDbContext<VacunasContext>(options =>
+            {
+                options.UseSqlServer(connection);
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            });
 
             services.AddControllers();
         }
