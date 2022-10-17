@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VacunacionApi.DTO;
 using VacunacionApi.Models;
 
 namespace VacunacionApi.Controllers
@@ -20,11 +21,45 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Roles
+        // GET: api/Roles/GetAll?idJurisdiccion=3
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Rol>>> GetRol()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<RolDTO>>> GetAll(int idJurisdiccion = 0)
         {
-            return await _context.Rol.ToListAsync();
+            try
+            {
+                List<Rol> roles = new List<Rol>();
+
+                if (idJurisdiccion != 0)
+                {
+                    Jurisdiccion jurisdiccion = await _context.Jurisdiccion.Where(jur => jur.Id == idJurisdiccion).FirstOrDefaultAsync();
+                    if (jurisdiccion != null)
+                    {
+                        if (jurisdiccion.Descripcion == "Nación")
+                        {
+                            roles = await _context.Rol.Where(r => r.Descripcion == "Operador Nacional").ToListAsync();
+                        }
+                        else
+                            roles = await _context.Rol.Where(r => r.Descripcion != "Operador Nacional").ToListAsync();
+                    }
+                }
+                else
+                    roles = await _context.Rol.ToListAsync();
+
+                List<RolDTO> rolesDTO = new List<RolDTO>();
+
+                foreach (Rol rol in roles)
+                {
+                    RolDTO rolDTO = new RolDTO(rol.Id, rol.Descripcion);
+                    rolesDTO.Add(rolDTO);
+                }
+
+                return Ok(rolesDTO);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/Roles/5
