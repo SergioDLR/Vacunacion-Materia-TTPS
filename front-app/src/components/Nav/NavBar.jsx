@@ -11,7 +11,7 @@ const NavBar = () => {
       <CssBaseline />
       <AppBar sx={{ backgroundColor: "black" }}>
         <Toolbar>
-          <Link to={"login"} style={{ textDecoration: "none" }}>
+          <Link to={"/login"} style={{ textDecoration: "none" }}>
             <Button variant="contained">Iniciar sesion</Button>
           </Link>
         </Toolbar>

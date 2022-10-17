@@ -15,6 +15,9 @@ const AdminNavBar = () => {
           <Link to={"/admin/users"} style={{ textDecoration: "none" }}>
             <Button variant="contained">Usuarios</Button>
           </Link>
+          <Button sx={{ backgroundColor: "red", marginLeft: 1 }} variant="contained">
+            Cerrar sesion
+          </Button>
         </Toolbar>
       </AppBar>
       <Toolbar />

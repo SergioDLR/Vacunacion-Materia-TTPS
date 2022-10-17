@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -27,6 +27,10 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
   const [idJurisdiccion, setIdJurisdiccion] = useState(-1);
   const [idRol, setIdRol] = useState(-1);
   const { userSesion } = useContext(UserContext);
+
+  const [jurisdicciones, setJurisdicciones] = useState([]);
+  const [roles, setRoles] = useState([]);
+
   const handleChangeMail = (e) => {
     setEmail(e.target.value);
   };
@@ -47,7 +51,7 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
     if (idRol === -1) return alert.show("Completa el campo de rol");
     axios
       .post(`${allUrls.user}CrearUsuario`, {
-        EmailAdministrador: userSesion.mail,
+        EmailAdministrador: userSesion.email,
         Email: email,
         Password: password,
         IdJurisdiccion: idJurisdiccion,
@@ -63,8 +67,16 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
           else alert.show("Ocurrio un error, intentolo mas tarde");
         }
       })
-      .catch((error) => alert.show(`${error}Ocurrio un error, intentolo mas tarde`));
+      .catch((error) => alert.error(`Ocurrio el error: ${error}`));
   };
+  useEffect(() => {
+    try {
+      axios.get(`${allUrls.roles}GetAll`).then((response) => setRoles(response.data));
+      axios.get(`${allUrls.jurisdiccion}GetAll`).then((response) => setJurisdicciones(response.data));
+    } catch (e) {
+      alert.error(`Ocurrio un error: ${e}`);
+    }
+  }, []);
   return (
     <div>
       <Modal
@@ -109,12 +121,11 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
                 label="Jurisdiccion"
                 defaultValue={1}
               >
-                <MenuItem value={1} autoFocus={true}>
-                  Buenos Aires
-                </MenuItem>
-                <MenuItem value={2}>Catamarca</MenuItem>
-                <MenuItem value={3}>Chaco</MenuItem>
-                <MenuItem value={3}>Nacion</MenuItem>
+                {jurisdicciones.map((element, index) => (
+                  <MenuItem value={element.id} key={index}>
+                    {element.descripcion}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl fullWidth sx={{ marginTop: 1 }}>
@@ -127,12 +138,11 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
                 value={idRol}
                 label="Rol"
               >
-                <MenuItem value={1} autoFocus={true}>
-                  Administrador
-                </MenuItem>
-                <MenuItem value={2}>Analista provincial</MenuItem>
-                <MenuItem value={3}>Operador nacional</MenuItem>
-                <MenuItem value={4}>Vacunador</MenuItem>
+                {roles.map((element, index) => (
+                  <MenuItem value={element.id} key={index}>
+                    {element.descripcion}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <Button

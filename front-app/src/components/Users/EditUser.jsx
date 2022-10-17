@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
@@ -20,16 +20,15 @@ const style = {
   p: 4,
 };
 
-const AddUSer = ({ open, handleClose, getUsers }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
   const alert = useAlert();
+  const [password, setPassword] = useState(userSelected.password);
   const [idJurisdiccion, setIdJurisdiccion] = useState(-1);
   const [idRol, setIdRol] = useState(-1);
   const { userSesion } = useContext(UserContext);
-  const handleChangeMail = (e) => {
-    setEmail(e.target.value);
-  };
+
+  const [jurisdicciones, setJurisdicciones] = useState([]);
+  const [roles, setRoles] = useState([]);
 
   const handleChangePassword = (e) => {
     setPassword(e.target.value);
@@ -46,17 +45,17 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
     if (idJurisdiccion === -1) return alert.show("Completa el campo de jurisdiccion");
     if (idRol === -1) return alert.show("Completa el campo de rol");
     axios
-      .post(`${allUrls.user}CrearUsuario`, {
-        EmailAdministrador: userSesion.mail,
-        Email: email,
-        Password: password,
-        IdJurisdiccion: idJurisdiccion,
-        IdRol: idRol,
+      .put(`${allUrls.user}ModificarUsuario`, {
+        EmailAdministrador: userSesion.email,
+        Email: userSelected.email,
+        PasswordNuevo: password,
+        IdJurisdiccionNuevo: idJurisdiccion,
+        IdRolNuevo: idRol,
       })
       .then((response) => {
         if (response.data.estadoTransaccion === "Aceptada") {
           handleClose();
-          alert.show("Creado correctamente");
+          alert.show("Modificado correctamente");
           getUsers();
         } else {
           if (response.data.existenciaErrores) alert.show(response.data.errores);
@@ -65,6 +64,21 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
       })
       .catch((error) => alert.show(`${error}Ocurrio un error, intentolo mas tarde`));
   };
+  useEffect(() => {
+    try {
+      axios.get(`${allUrls.roles}GetAll`).then((response) => setRoles(response.data));
+      axios.get(`${allUrls.jurisdiccion}GetAll`).then((response) => setJurisdicciones(response.data));
+    } catch (e) {
+      alert.error(`Ocurrio un error: ${e}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    setPassword(userSelected.password);
+    setIdJurisdiccion(userSelected.idJurisdiccion);
+    setIdRol(userSelected.idRol);
+  }, [open, userSelected]);
+
   return (
     <div>
       <Modal
@@ -76,10 +90,12 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Crear nuevo usuario
+            Editar un usuario
           </Typography>
           <form onSubmit={handleSubmit}>
-            <h2>Editando el usuario:</h2>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Editando: {userSelected.email}
+            </Typography>
             <TextField
               sx={{ display: "block", marginTop: 1 }}
               fullWidth
@@ -88,42 +104,48 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
               variant="filled"
               type="password"
               required
+              value={password}
               onChange={handleChangePassword}
             />
+            <p>
+              <strong> Jurisdiccion anterior: {userSelected.descripcionJurisdiccion} </strong>
+            </p>
             <FormControl fullWidth sx={{ marginTop: 1 }}>
-              <InputLabel id="input-jurisdiccion">Jurisdiccion</InputLabel>
+              <InputLabel id="input-jurisdiccion">Nueva Jurisdiccion:</InputLabel>
               <Select
                 labelId="input-jurisdiccion"
                 id="input-jurisdiccion-select"
                 onChange={handleChangeJurisdiccion}
                 value={idJurisdiccion}
-                label="Jurisdiccion"
+                label="Nueva jurisdiccion"
                 defaultValue={1}
               >
-                <MenuItem value={1} autoFocus={true}>
-                  Buenos Aires
-                </MenuItem>
-                <MenuItem value={2}>Catamarca</MenuItem>
-                <MenuItem value={3}>Chaco</MenuItem>
-                <MenuItem value={3}>Nacion</MenuItem>
+                {jurisdicciones.map((element, index) => (
+                  <MenuItem value={element.id} key={index}>
+                    {element.descripcion}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
+
+            <p>
+              <strong> Rol anterior: {userSelected.descripcionRol} </strong>
+            </p>
             <FormControl fullWidth sx={{ marginTop: 1 }}>
-              <InputLabel id="input-rol">Rol</InputLabel>
+              <InputLabel id="input-rol">Nuevo Rol:</InputLabel>
               <Select
                 defaultValue={1}
                 labelId="input-rol"
                 id="input-jurisdiccion-select"
                 onChange={handleChangeRol}
                 value={idRol}
-                label="Rol"
+                label="Nuevo rol"
               >
-                <MenuItem value={1} autoFocus={true}>
-                  Administrador
-                </MenuItem>
-                <MenuItem value={2}>Analista provincial</MenuItem>
-                <MenuItem value={3}>Operador nacional</MenuItem>
-                <MenuItem value={4}>Vacunador</MenuItem>
+                {roles.map((element, index) => (
+                  <MenuItem value={element.id} key={index}>
+                    {element.descripcion}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <Button
@@ -144,7 +166,7 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
               }}
               variant="contained"
             >
-              Registrar
+              Modificar
             </Button>
           </form>
         </Box>
@@ -152,4 +174,4 @@ const AddUSer = ({ open, handleClose, getUsers }) => {
     </div>
   );
 };
-export default AddUSer;
+export default EditUser;

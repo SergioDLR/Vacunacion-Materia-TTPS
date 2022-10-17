@@ -26,18 +26,23 @@ const UserListContainer = () => {
   }, []);
 
   const getUsers = () => {
-    axios
-      .get(`${allUrls.user}GetAll?emailAdministrador=${userSesion.mail}`)
-      .then((response) => {
-        if (response.data.estadoTransaccion === "Aceptada") {
-          setUsers(response.data.listaUsuariosDTO);
-        } else {
-          alert.show(response.data.errores);
-        }
-        setIsLoading(false);
-      })
-      .catch((e) => console.log(e));
+    try {
+      axios
+        .get(`${allUrls.user}GetAll?emailAdministrador=${userSesion.email}`)
+        .then((response) => {
+          if (response?.data.estadoTransaccion === "Aceptada") {
+            setUsers(response?.data.listaUsuariosDTO);
+          } else {
+            alert.error(response?.data.errores);
+          }
+          setIsLoading(false);
+        })
+        .catch((e) => console.log(e));
+    } catch (e) {
+      alert.error(`Ocurrio un error indeterminado ${e}`);
+    }
   };
+
   return (
     <Container>
       {!isLoading ? (
@@ -49,7 +54,7 @@ const UserListContainer = () => {
           >
             Agregar usuario
           </Button>
-          <UserList users={users} />
+          <UserList users={users} getUsers={getUsers} />
           <AddUSer open={open} handleClose={handleClose} getUsers={getUsers} />
         </>
       ) : (
