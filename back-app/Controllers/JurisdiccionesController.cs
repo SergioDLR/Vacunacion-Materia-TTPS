@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VacunacionApi.DTO;
 using VacunacionApi.Models;
 
 namespace VacunacionApi.Controllers
@@ -20,11 +21,45 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Jurisdicciones
+        // GET: api/Jurisdicciones/GetAll?idRol=3
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Jurisdiccion>>> GetJurisdiccion()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<JurisdiccionDTO>>> GetAll(int idRol = 0)
         {
-            return await _context.Jurisdiccion.ToListAsync();
+            try
+            {
+                List<Jurisdiccion> jurisdicciones = new List<Jurisdiccion>();
+
+                if (idRol != 0)
+                {
+                    Rol rol = await _context.Rol.Where(r => r.Id == idRol).FirstOrDefaultAsync();
+                    if (rol != null) 
+                    {
+                        if (rol.Descripcion == "Operador Nacional")
+                        {
+                            jurisdicciones = await _context.Jurisdiccion.Where(jur => jur.Descripcion == "Nación").ToListAsync();
+                        }
+                        else
+                            jurisdicciones = await _context.Jurisdiccion.Where(jur => jur.Descripcion != "Nación").ToListAsync();
+                    }
+                }
+                else
+                    jurisdicciones = await _context.Jurisdiccion.ToListAsync();
+
+                List<JurisdiccionDTO> jurisdiccionesDTO = new List<JurisdiccionDTO>();
+
+                foreach (Jurisdiccion juris in jurisdicciones)
+                {
+                    JurisdiccionDTO jurisdiccionDTO = new JurisdiccionDTO(juris.Id, juris.Descripcion);
+                    jurisdiccionesDTO.Add(jurisdiccionDTO);
+                }
+
+                return Ok(jurisdiccionesDTO);
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/Jurisdicciones/5
