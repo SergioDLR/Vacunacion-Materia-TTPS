@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VacunacionApi.DTO;
 using VacunacionApi.Models;
 
 namespace VacunacionApi.Controllers
@@ -74,16 +75,21 @@ namespace VacunacionApi.Controllers
             return NoContent();
         }
 
-        // POST: api/Vacunas
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // POST: api/Vacunas/CrearVacuna
         [HttpPost]
-        public async Task<ActionResult<Vacuna>> PostVacuna(Vacuna vacuna)
+        [Route("CrearVacuna")]
+        public async Task<ActionResult<ResponseVacunaDTO>> CrearVacuna([FromBody] RequestVacunaDTO model)
         {
-            _context.Vacuna.Add(vacuna);
-            await _context.SaveChangesAsync();
+            try
+            {
+                ResponseVacunaDTO responseVacunaDTO = new ResponseVacunaDTO();
 
-            return CreatedAtAction("GetVacuna", new { id = vacuna.Id }, vacuna);
+                return Ok(responseVacunaDTO);
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // DELETE: api/Vacunas/5
