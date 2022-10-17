@@ -6,16 +6,13 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 
-const NavBar = () => {
+const AdminNavBar = () => {
   return (
     <>
       <CssBaseline />
       <AppBar sx={{ backgroundColor: "black" }}>
         <Toolbar>
-          <Link to={"login"}>
-            <Button variant="contained">Vacunas</Button>
-          </Link>
-          <Link to={"login"}>
+          <Link to={"/admin/users"} style={{ textDecoration: "none" }}>
             <Button variant="contained">Usuarios</Button>
           </Link>
         </Toolbar>
@@ -25,4 +22,4 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+export default AdminNavBar;

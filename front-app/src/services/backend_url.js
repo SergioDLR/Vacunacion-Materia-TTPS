@@ -1,6 +1,6 @@
-export const urlBase = "http://localhost:8080";
+export const urlBase = "https://localhost:5001/api";
 
 const allUrls = {
-  user: `${urlBase}/users`,
+  user: `${urlBase}/Usuarios/`,
 };
 export default allUrls;

@@ -3,6 +3,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import Home from "../Home";
 import Login from "../Login/Login";
 import HomeAdmin from "../Admin/HomeAdmin";
+import UserListContainer from "../Users/UserListContainer";
+import AdminWraper from "../Nav/AdminWraper";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -12,8 +14,20 @@ const RoutesDefinition = () => {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute role="admin">
-            <HomeAdmin />
+          <ProtectedRoute role={1}>
+            <AdminWraper>
+              <HomeAdmin />
+            </AdminWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute role={1}>
+            <AdminWraper>
+              <UserListContainer />
+            </AdminWraper>
           </ProtectedRoute>
         }
       />

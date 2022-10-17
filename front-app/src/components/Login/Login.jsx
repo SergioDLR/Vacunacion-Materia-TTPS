@@ -19,7 +19,7 @@ const Login = () => {
     if (password.length < 3) return alert("Completa el campo de la Contraseña");
     //login here
     //TODO: implement api call
-    logIn({ name: "sergio", role: "admin" });
+    logIn({ name: "sergio", role: 1, mail: "fabi@gmail.com" });
   };
   return (
     <>
