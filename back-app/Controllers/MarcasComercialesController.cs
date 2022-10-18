@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using VacunacionApi.DTO;
 using VacunacionApi.Models;
 
 namespace VacunacionApi.Controllers
@@ -20,11 +22,51 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/MarcasComerciales
+        // GET: api/MarcasComerciales/GetAll?emailOperadorNacional=juan@gmail.com
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MarcaComercial>>> GetMarcaComercial()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<ResponseListaMarcasComercialesDTO>>> GetAll(string emailOperadorNacional = null)
         {
-            return await _context.MarcaComercial.ToListAsync();
+            try
+            {
+                ResponseListaMarcasComercialesDTO responseListaMarcasComercialesDTO = new ResponseListaMarcasComercialesDTO();  
+
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+                List<MarcaComercialDTO> marcasComercialesDTO = new List<MarcaComercialDTO>();
+                bool existenciaErrores = true;
+                string transaccion = "";
+
+                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+
+                if (errores.Count == 0)
+                {
+                    existenciaErrores = false;
+                    transaccion = "Aceptada";
+                    List<MarcaComercial> marcasComerciales = await _context.MarcaComercial.ToListAsync();
+
+                    foreach (MarcaComercial item in marcasComerciales)
+                    {
+                        MarcaComercialDTO marcaComercialDTO = new MarcaComercialDTO(item.Id, item.Descripcion);
+                        marcasComercialesDTO.Add(marcaComercialDTO);
+                    }
+                }
+                else
+                {
+                    transaccion = "Rechazada";
+                } 
+                responseListaMarcasComercialesDTO.Errores = errores;
+                responseListaMarcasComercialesDTO.ExistenciaErrores = existenciaErrores;
+                responseListaMarcasComercialesDTO.EstadoTransaccion = transaccion;
+                responseListaMarcasComercialesDTO.EmailOperadorNacional = emailOperadorNacional;
+                responseListaMarcasComercialesDTO.ListasMarcasComercialesDTO = marcasComercialesDTO;
+
+                return Ok(responseListaMarcasComercialesDTO);
+            }
+            catch(Exception error) 
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/MarcasComerciales/5
@@ -73,16 +115,50 @@ namespace VacunacionApi.Controllers
             return NoContent();
         }
 
-        // POST: api/MarcasComerciales
+        // POST: api/MarcasComerciales/CrearMarcaComercial
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<MarcaComercial>> PostMarcaComercial(MarcaComercial marcaComercial)
+        [Route("CrearMarcaComercial")]
+        //el requestMarcaComercial posee toda la informacion que viene del formulario
+        public async Task<ActionResult<ResponseMarcaComercialDTO>> CrearMarcaComercial([FromBody] RequestMarcaComercialDTO requestMarcaComercialDTO)
         {
-            _context.MarcaComercial.Add(marcaComercial);
-            await _context.SaveChangesAsync();
+            try
+            {
+                ResponseMarcaComercialDTO responseMarcaComercialDTO = null;
+                MarcaComercialDTO marcaComercialDTO = new MarcaComercialDTO();
 
-            return CreatedAtAction("GetMarcaComercial", new { id = marcaComercial.Id }, marcaComercial);
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+
+                errores = await VerificarCredencialesOperadorNacional(requestMarcaComercialDTO.EmailOperadorNacional, errores);
+               
+                if(errores.Count > 0)
+                {
+                    marcaComercialDTO.Descripcion = requestMarcaComercialDTO.DescripcionMarcaComercial;
+                    responseMarcaComercialDTO = new ResponseMarcaComercialDTO(requestMarcaComercialDTO.EmailOperadorNacional, "Rechazada", true, errores, marcaComercialDTO);
+                } 
+                else
+                {                    
+                    //creo la instancia del objeto original. Del model
+                    MarcaComercial marcaComercial = new MarcaComercial();
+                    marcaComercial.Descripcion = requestMarcaComercialDTO.DescripcionMarcaComercial;
+
+                    //guardo en la base de datos
+                    _context.MarcaComercial.Add(marcaComercial);
+                    await _context.SaveChangesAsync();
+
+                    marcaComercialDTO.Descripcion = marcaComercial.Descripcion;
+                    marcaComercialDTO.Id = marcaComercial.Id;
+                    responseMarcaComercialDTO = new ResponseMarcaComercialDTO(requestMarcaComercialDTO.EmailOperadorNacional, "Aceptada", false, errores, marcaComercialDTO);
+                }
+
+                return Ok(responseMarcaComercialDTO);
+            }   
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // DELETE: api/MarcasComerciales/5
@@ -101,9 +177,70 @@ namespace VacunacionApi.Controllers
             return marcaComercial;
         }
 
+
+        //metodos privados
         private bool MarcaComercialExists(int id)
         {
             return _context.MarcaComercial.Any(e => e.Id == id);
+        }
+
+        private async Task<bool> TieneRolOperadorNacional(Usuario usuario)
+        {
+            try
+            {
+                Rol rolOperadorNacional = await _context.Rol
+                    .Where(rol => rol.Descripcion == "Operador Nacional").FirstOrDefaultAsync();
+
+                if (rolOperadorNacional.Id == usuario.IdRol)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+
+            }
+            return false;
+        }
+
+        private async Task<Usuario> CuentaUsuarioExists(string email)
+        {
+            Usuario cuentaExistente = null;
+            try
+            {
+                cuentaExistente = await _context.Usuario
+                    .Where(user => user.Email == email).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return cuentaExistente;
+        }
+
+        private async Task<List<string>> VerificarCredencialesOperadorNacional(string emailOperadorNacional, List<string> errores)
+        {
+            try
+            {
+                Usuario usuarioSolicitante = await CuentaUsuarioExists(emailOperadorNacional);
+                if (usuarioSolicitante != null)
+                {
+                    if (!await TieneRolOperadorNacional(usuarioSolicitante))
+                    {
+                        errores.Add(String.Format("El usuario {0} no tiene el rol de operador nacional", emailOperadorNacional));
+                    }
+                }
+                else
+                {
+                    errores.Add(string.Format("El usuario {0} no existe en el sistema", emailOperadorNacional));
+                }
+            }  
+            catch
+            {
+
+            }
+
+            return errores;
         }
     }
 }
