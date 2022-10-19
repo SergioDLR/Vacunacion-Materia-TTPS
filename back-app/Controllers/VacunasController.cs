@@ -90,7 +90,7 @@ namespace VacunacionApi.Controllers
 
                 if (listaVerificacionTipoVacuna[1][0] == "Vacuna de Calendario")
                 {
-                    List<VacunaCalendarioDTO> vacunasCalendario = GetVacunasCalendario();
+                    List<VacunaCalendarioAnualPandemiaDTO> vacunasCalendario = GetVacunasCalendario();
                     if (!vacunasCalendario.Any(v => v.Descripcion == model.Descripcion))
                         errores.Add(string.Format("La descripción {0} no corresponde a una vacuna de calendario", model.Descripcion));
                 }
@@ -123,8 +123,38 @@ namespace VacunacionApi.Controllers
 
                     if (listaVerificacionTipoVacuna[1][0] == "Vacuna de Calendario")
                     {
-                        List<VacunaCalendarioDTO> vacunasCalendario = GetVacunasCalendario();
+                        VacunaCalendarioAnualPandemiaDTO vacunaCalendarioDTO = GetVacunaCalendarioByDescripcion(model.Descripcion);
                         _context.Vacuna.Add(vacuna);
+                        vacunaCalendarioDTO.Id = vacuna.Id;
+                        VacunaCalendarioAnualPandemiaDTO vacCal = RespaldarDosisReglasByVacuna(vacunaCalendarioDTO);
+                        if (vacCal != null)
+                        {
+                            await _context.SaveChangesAsync();
+                            responseVacunaDTO = new ResponseVacunaDTO("Aceptada", false, errores, model.EmailOperadorNacional, 
+                                new VacunaDTO(vacCal.Id, vacCal.Descripcion, model.IdTipoVacuna, listaVerificacionTipoVacuna[1][0], model.IdPandemia.Value, null, vacCal.Dosis.Count, vacCal.Dosis));
+                        }
+                        else
+                        {
+                            errores.Add("Error de conexión con la base de datos");
+                            responseVacunaDTO = new ResponseVacunaDTO("Rechazada", true, errores, model.EmailOperadorNacional, new VacunaDTO(0, model.Descripcion, model.IdTipoVacuna, null, model.IdPandemia.Value, null, 0, null));
+                        }
+                    }
+                    if (listaVerificacionTipoVacuna[1][0] == "Vacuna Anual")
+                    {
+                        _context.Vacuna.Add(vacuna);
+                        VacunaCalendarioAnualPandemiaDTO vacunaAnual = new VacunaCalendarioAnualPandemiaDTO(vacuna.Id, model.Descripcion, new DosisDTO(0, 0, "Dosis Anual", new List<ReglaDTO>());
+                        VacunaCalendarioAnualPandemiaDTO vacCal = RespaldarDosisReglasByVacuna(vacunaAnual);
+                        if (vacCal != null)
+                        {
+                            await _context.SaveChangesAsync();
+                            responseVacunaDTO = new ResponseVacunaDTO("Aceptada", false, errores, model.EmailOperadorNacional,
+                                new VacunaDTO(vacCal.Id, vacCal.Descripcion, model.IdTipoVacuna, listaVerificacionTipoVacuna[1][0], model.IdPandemia.Value, null, vacCal.Dosis.Count, vacCal.Dosis));
+                        }
+                        else
+                        {
+                            errores.Add("Error de conexión con la base de datos");
+                            responseVacunaDTO = new ResponseVacunaDTO("Rechazada", true, errores, model.EmailOperadorNacional, new VacunaDTO(0, model.Descripcion, model.IdTipoVacuna, null, model.IdPandemia.Value, null, 0, null));
+                        }
                     }
                 }
 
@@ -373,17 +403,17 @@ namespace VacunacionApi.Controllers
             return listaDosis;
         }
 
-        private List<VacunaCalendarioDTO> GetVacunasCalendario()
+        private List<VacunaCalendarioAnualPandemiaDTO> GetVacunasCalendario()
         {
-            List<VacunaCalendarioDTO> vacunasCalendario = null;
+            List<VacunaCalendarioAnualPandemiaDTO> vacunasCalendario = null;
 
             try
             {
-                vacunasCalendario = new List<VacunaCalendarioDTO>()
+                vacunasCalendario = new List<VacunaCalendarioAnualPandemiaDTO>()
                 {
-                    new VacunaCalendarioDTO(1, "Hepatitis B (HB)", ArmarListaDosisDTO("Hepatitis B (HB)")),
-                    new VacunaCalendarioDTO(2, "BCG", ArmarListaDosisDTO("BCG")),
-                    new VacunaCalendarioDTO(3, "Rotavirus", ArmarListaDosisDTO("Rotavirus"))
+                    new VacunaCalendarioAnualPandemiaDTO(1, "Hepatitis B (HB)", ArmarListaDosisDTO("Hepatitis B (HB)")),
+                    new VacunaCalendarioAnualPandemiaDTO(2, "BCG", ArmarListaDosisDTO("BCG")),
+                    new VacunaCalendarioAnualPandemiaDTO(3, "Rotavirus", ArmarListaDosisDTO("Rotavirus"))
                     //new VacunaCalendarioDTO(4, "Neumococo Conjugada"),
                     //new VacunaCalendarioDTO(5, "Quíntuple Pentavalente"),
                     //new VacunaCalendarioDTO(6, "Salk IPV"),
@@ -407,6 +437,54 @@ namespace VacunacionApi.Controllers
             }
 
             return vacunasCalendario;
+        }
+
+        private VacunaCalendarioAnualPandemiaDTO RespaldarDosisReglasByVacuna(VacunaCalendarioAnualPandemiaDTO vacunaCalendario)
+        {
+            try
+            {
+                foreach (DosisDTO dosisDTO in vacunaCalendario.Dosis)
+                {
+                    Dosis dosis = new Dosis(0, dosisDTO.Descripcion);
+                    _context.Dosis.Add(dosis);
+                    EntidadVacunaDosis entidadVacunaDosis = new EntidadVacunaDosis(vacunaCalendario.Id, dosis.Id, dosisDTO.Orden);
+                    _context.EntidadVacunaDosis.Add(entidadVacunaDosis);
+                    dosisDTO.Id = dosis.Id;
+
+                    foreach (ReglaDTO reglaDTO in dosisDTO.Reglas)
+                    {
+                        Regla regla = new Regla(reglaDTO.Descripcion, reglaDTO.MesesVacunacion, reglaDTO.EdadMinimaMeses, reglaDTO.IntervaloMinimoMeses, reglaDTO.OtraRegla);
+                        _context.Regla.Add(regla);
+                        EntidadDosisRegla entidadDosisRegla = new EntidadDosisRegla(dosis.Id, regla.Id);
+                        _context.EntidadDosisRegla.Add(entidadDosisRegla);
+                        reglaDTO.Id = regla.Id;
+                    }
+                }
+
+                return vacunaCalendario;
+            }
+            catch 
+            { 
+            
+            }
+
+            return null;
+        }
+
+        private VacunaCalendarioAnualPandemiaDTO GetVacunaCalendarioByDescripcion(string descripcion)
+        {
+            VacunaCalendarioAnualPandemiaDTO vacunaCalendarioDTO = null;
+
+            try 
+            {
+                VacunaCalendarioAnualPandemiaDTO vacunaCalendario = GetVacunasCalendario().Where(vac => vac.Descripcion == descripcion).FirstOrDefault();
+            }
+            catch
+            {
+
+            }
+
+            return vacunaCalendarioDTO;
         }
     }
 }

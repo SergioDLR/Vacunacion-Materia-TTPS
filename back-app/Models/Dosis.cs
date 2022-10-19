@@ -13,7 +13,12 @@ namespace VacunacionApi.Models
             EntidadVacunaDosis = new HashSet<EntidadVacunaDosis>();
             VacunaAplicada = new HashSet<VacunaAplicada>();
         }
-
+        public Dosis(int id, string descripcion)
+        {
+            Id = id;
+            Descripción = descripcion;
+        }
+        
         [Key]
         public int Id { get; set; }
         [Required]

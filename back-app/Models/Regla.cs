@@ -11,6 +11,14 @@ namespace VacunacionApi.Models
         {
             EntidadDosisRegla = new HashSet<EntidadDosisRegla>();
         }
+        public Regla(string descripcion, string mesesVacunacion, int? edadMinimaMeses, int? intervaloMinimoMeses, string otraRegla)
+        {
+            Descripcion = descripcion;
+            MesesVacunacion = mesesVacunacion;
+            EdadMinimaMeses = edadMinimaMeses;
+            IntervaloMinimoMeses = intervaloMinimoMeses;
+            OtraRegla = otraRegla;
+        }
 
         [Key]
         public int Id { get; set; }
