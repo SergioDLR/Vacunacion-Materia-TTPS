@@ -5,19 +5,17 @@ using System.Threading.Tasks;
 
 namespace VacunacionApi.DTO
 {
-    public class DosisDTO
+    public class VacunaCalendarioDTO
     {
-        public DosisDTO(int id, int orden, string descripcion, List<ReglaDTO> reglas)
+        public VacunaCalendarioDTO(int id, string descripcion, List<DosisDTO> dosis)
         {
             Id = id;
-            Orden = orden;
             Descripcion = descripcion;
-            Reglas = reglas;
+            Dosis = dosis;
         }
 
         public int Id { get; set; }
-        public int Orden { get; set; }
         public string Descripcion { get; set; }
-        public List<ReglaDTO> Reglas { get; set; }
+        public List<DosisDTO> Dosis { get; set; }
     }
 }

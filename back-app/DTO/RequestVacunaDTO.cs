@@ -21,11 +21,7 @@ namespace VacunacionApi.DTO
         [StringLength(250, ErrorMessage = "El campo descripción debe tener una longitud máxima de 250 caracteres")]
         public string Descripcion { get; set; }
 
-        [Range(1, 10000, ErrorMessage = "El campo id pandemia tiene un formato inválido")]
+        [Range(0, 10000, ErrorMessage = "El campo id pandemia tiene un formato inválido")]
         public int? IdPandemia { get; set; }
-
-        [Required(ErrorMessage = "El campo cantidad dosis es obligatorio")]
-        [Range(1, 10000, ErrorMessage = "El campo cantidad dosis tiene un formato inválido")]
-        public int CantidadDosis { get; set; }
     }
 }
