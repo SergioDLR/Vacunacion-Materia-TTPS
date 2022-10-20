@@ -11,6 +11,9 @@ const UserContextProvider = ({ children }) => {
     if (userSesion?.idRol === 1) {
       navigate("/admin");
     }
+    if (userSesion?.idRol === 3) {
+      navigate("/operador");
+    }
   };
 
   useEffect(() => {
@@ -20,6 +23,9 @@ const UserContextProvider = ({ children }) => {
       setUserSesion(session);
       if (session?.idRol === 1) {
         navigate("/admin");
+      }
+      if (session?.idRol === 3) {
+        navigate("/operador");
       }
     }
   }, []);
