@@ -16,14 +16,14 @@ namespace VacunacionApi.Models
         public Dosis(int id, string descripcion)
         {
             Id = id;
-            Descripción = descripcion;
+            Descripcion = descripcion;
         }
         
         [Key]
         public int Id { get; set; }
         [Required]
         [StringLength(250)]
-        public string Descripción { get; set; }
+        public string Descripcion { get; set; }
 
         [InverseProperty("IdDosisNavigation")]
         public virtual ICollection<EntidadDosisRegla> EntidadDosisRegla { get; set; }

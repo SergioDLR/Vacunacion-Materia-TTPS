@@ -11,13 +11,13 @@ namespace VacunacionApi.Models
         {
             EntidadDosisRegla = new HashSet<EntidadDosisRegla>();
         }
-        public Regla(string descripcion, string mesesVacunacion, int? edadMinimaMeses, int? intervaloMinimoMeses, string otraRegla)
+        public Regla(string descripcion, string mesesVacunacion, double? lapsoMinimoDias, double? lapsoMaximoDias, string otros)
         {
             Descripcion = descripcion;
             MesesVacunacion = mesesVacunacion;
-            EdadMinimaMeses = edadMinimaMeses;
-            IntervaloMinimoMeses = intervaloMinimoMeses;
-            OtraRegla = otraRegla;
+            LapsoMinimoDias = lapsoMinimoDias;
+            LapsoMaximoDias = lapsoMaximoDias;
+            Otros = otros;
         }
 
         [Key]
@@ -28,13 +28,13 @@ namespace VacunacionApi.Models
         [Column("Meses_Vacunacion")]
         [StringLength(250)]
         public string MesesVacunacion { get; set; }
-        [Column("Edad_Minima_Meses")]
-        public int? EdadMinimaMeses { get; set; }
-        [Column("Intervalo_Minimo_Meses")]
-        public int? IntervaloMinimoMeses { get; set; }
-        [Column("Otra_Regla")]
+        [Column("Lapso_Minimo_Dias")]
+        public double? LapsoMinimoDias { get; set; }
+        [Column("Lapso_Maximo_Dias")]
+        public double? LapsoMaximoDias { get; set; }
+        [Column("Otros")]
         [StringLength(250)]
-        public string OtraRegla { get; set; }
+        public string Otros { get; set; }
 
         [InverseProperty("IdReglaNavigation")]
         public virtual ICollection<EntidadDosisRegla> EntidadDosisRegla { get; set; }

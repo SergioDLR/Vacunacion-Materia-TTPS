@@ -18,6 +18,10 @@ namespace VacunacionApi.Models
         public DateTime FechaEntrega { get; set; }
         [Column("Cantidad_Vacunas")]
         public int CantidadVacunas { get; set; }
+        [Column("Aplicadas")]
+        public int Aplicadas { get; set; }
+        [Column("Vencidas")]
+        public int Vencidas { get; set; }
 
         [ForeignKey(nameof(IdJurisdiccion))]
         [InverseProperty(nameof(Jurisdiccion.Distribucion))]

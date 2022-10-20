@@ -142,7 +142,15 @@ namespace VacunacionApi.Controllers
                     if (listaVerificacionTipoVacuna[1][0] == "Vacuna Anual")
                     {
                         _context.Vacuna.Add(vacuna);
-                        VacunaCalendarioAnualPandemiaDTO vacunaAnual = new VacunaCalendarioAnualPandemiaDTO(vacuna.Id, model.Descripcion, new DosisDTO(0, 0, "Dosis Anual", new List<ReglaDTO>());
+                        List<ReglaDTO> listaReglas = new List<ReglaDTO>();
+                        ReglaDTO reglaDTO = new ReglaDTO(0, "Aplicar en meses de vacunación anual", "4,5,6,7,8,9", 0, 0, null);
+                        listaReglas.Add(reglaDTO);
+
+                        List<DosisDTO> listaDosis = new List<DosisDTO>();
+                        DosisDTO dosisDTO = new DosisDTO(0, 0, "Dosis Anual", listaReglas);
+                        listaDosis.Add(dosisDTO);
+
+                        VacunaCalendarioAnualPandemiaDTO vacunaAnual = new VacunaCalendarioAnualPandemiaDTO(vacuna.Id, model.Descripcion, listaDosis);
                         VacunaCalendarioAnualPandemiaDTO vacCal = RespaldarDosisReglasByVacuna(vacunaAnual);
                         if (vacCal != null)
                         {
@@ -453,7 +461,7 @@ namespace VacunacionApi.Controllers
 
                     foreach (ReglaDTO reglaDTO in dosisDTO.Reglas)
                     {
-                        Regla regla = new Regla(reglaDTO.Descripcion, reglaDTO.MesesVacunacion, reglaDTO.EdadMinimaMeses, reglaDTO.IntervaloMinimoMeses, reglaDTO.OtraRegla);
+                        Regla regla = new Regla(reglaDTO.Descripcion, reglaDTO.MesesVacunacion, reglaDTO.LapsoMinimoDias, reglaDTO.LapsoMaximoDias, reglaDTO.Otros);
                         _context.Regla.Add(regla);
                         EntidadDosisRegla entidadDosisRegla = new EntidadDosisRegla(dosis.Id, regla.Id);
                         _context.EntidadDosisRegla.Add(entidadDosisRegla);

@@ -20,6 +20,10 @@ namespace VacunacionApi.Models
         public DateTime FechaCompra { get; set; }
         [Column("Fecha_Entrega", TypeName = "date")]
         public DateTime FechaEntrega { get; set; }
+        [Column("Distribuidas")]
+        public int Distribuidas { get; set; }
+        [Column("Vencidas")]
+        public int Vencidas { get; set; }
 
         [ForeignKey(nameof(IdEstadoCompra))]
         [InverseProperty(nameof(EstadoCompra.Compra))]
