@@ -120,15 +120,18 @@ namespace VacunacionApi.Controllers
                     vacuna.Descripcion = model.Descripcion;
                     vacuna.IdPandemia = model.IdPandemia.Value;
                     vacuna.IdTipoVacuna = model.IdTipoVacuna;
+                    vacuna.CantidadDosis = 0;
+
+                    _context.Vacuna.Add(vacuna);
 
                     if (listaVerificacionTipoVacuna[1][0] == "Vacuna de Calendario")
                     {
                         VacunaCalendarioAnualPandemiaDTO vacunaCalendarioDTO = GetVacunaCalendarioByDescripcion(model.Descripcion);
-                        _context.Vacuna.Add(vacuna);
                         vacunaCalendarioDTO.Id = vacuna.Id;
                         VacunaCalendarioAnualPandemiaDTO vacCal = RespaldarDosisReglasByVacuna(vacunaCalendarioDTO);
                         if (vacCal != null)
                         {
+                            vacuna.CantidadDosis = vacCal.Dosis.Count;
                             await _context.SaveChangesAsync();
                             responseVacunaDTO = new ResponseVacunaDTO("Aceptada", false, errores, model.EmailOperadorNacional, 
                                 new VacunaDTO(vacCal.Id, vacCal.Descripcion, model.IdTipoVacuna, listaVerificacionTipoVacuna[1][0], model.IdPandemia.Value, null, vacCal.Dosis.Count, vacCal.Dosis));
@@ -141,9 +144,8 @@ namespace VacunacionApi.Controllers
                     }
                     if (listaVerificacionTipoVacuna[1][0] == "Vacuna Anual")
                     {
-                        _context.Vacuna.Add(vacuna);
                         List<ReglaDTO> listaReglas = new List<ReglaDTO>();
-                        ReglaDTO reglaDTO = new ReglaDTO(0, "Aplicar en meses de vacunación anual", "4,5,6,7,8,9", 0, 0, null);
+                        ReglaDTO reglaDTO = new ReglaDTO(0, "Aplicar en meses de vacunación anual", "4,5,6,7,8,9", 0, 0, null, true, true);
                         listaReglas.Add(reglaDTO);
 
                         List<DosisDTO> listaDosis = new List<DosisDTO>();
@@ -151,17 +153,51 @@ namespace VacunacionApi.Controllers
                         listaDosis.Add(dosisDTO);
 
                         VacunaCalendarioAnualPandemiaDTO vacunaAnual = new VacunaCalendarioAnualPandemiaDTO(vacuna.Id, model.Descripcion, listaDosis);
-                        VacunaCalendarioAnualPandemiaDTO vacCal = RespaldarDosisReglasByVacuna(vacunaAnual);
-                        if (vacCal != null)
+                        VacunaCalendarioAnualPandemiaDTO vacAnu = RespaldarDosisReglasByVacuna(vacunaAnual);
+                        if (vacAnu != null)
                         {
+                            vacuna.CantidadDosis = vacAnu.Dosis.Count;
                             await _context.SaveChangesAsync();
                             responseVacunaDTO = new ResponseVacunaDTO("Aceptada", false, errores, model.EmailOperadorNacional,
-                                new VacunaDTO(vacCal.Id, vacCal.Descripcion, model.IdTipoVacuna, listaVerificacionTipoVacuna[1][0], model.IdPandemia.Value, null, vacCal.Dosis.Count, vacCal.Dosis));
+                                new VacunaDTO(vacAnu.Id, vacAnu.Descripcion, model.IdTipoVacuna, listaVerificacionTipoVacuna[1][0], model.IdPandemia.Value, null, vacAnu.Dosis.Count, vacAnu.Dosis));
                         }
                         else
                         {
                             errores.Add("Error de conexión con la base de datos");
                             responseVacunaDTO = new ResponseVacunaDTO("Rechazada", true, errores, model.EmailOperadorNacional, new VacunaDTO(0, model.Descripcion, model.IdTipoVacuna, null, model.IdPandemia.Value, null, 0, null));
+                        }
+                    }
+                    if (listaVerificacionTipoVacuna[1][0] == "Vacuna de Pandemia")
+                    {
+                        Pandemia pandemia = await _context.Pandemia.Where(p => p.Descripcion == model.Descripcion).FirstOrDefaultAsync();
+                        if (pandemia != null)
+                        {
+                            int cantidadDosis = CalcularCantidadDosisPandemia(pandemia);
+                            List<DosisDTO> listaDosis = new List<DosisDTO>();
+                            List<ReglaDTO> listaReglas = new List<ReglaDTO>();
+                            ReglaDTO reglaDTO = new ReglaDTO(0, string.Format("Aplicar dosis cada {0} días", pandemia.IntervaloMinimoDias), null, pandemia.IntervaloMinimoDias, 0, "Anterior", true, true);
+                            listaReglas.Add(reglaDTO);
+
+                            for (int i=1; i <= cantidadDosis; i++)
+                            {
+                                DosisDTO dosisDTO = new DosisDTO(0, 0, "Dosis " + i, listaReglas);
+                                listaDosis.Add(dosisDTO);
+                            }
+
+                            VacunaCalendarioAnualPandemiaDTO vacunaPandemia = new VacunaCalendarioAnualPandemiaDTO(vacuna.Id, model.Descripcion, listaDosis);
+                            VacunaCalendarioAnualPandemiaDTO vacPan = RespaldarDosisReglasByVacuna(vacunaPandemia);
+                            if (vacPan != null)
+                            {
+                                vacuna.CantidadDosis = vacPan.Dosis.Count;
+                                await _context.SaveChangesAsync();
+                                responseVacunaDTO = new ResponseVacunaDTO("Aceptada", false, errores, model.EmailOperadorNacional,
+                                    new VacunaDTO(vacPan.Id, vacPan.Descripcion, model.IdTipoVacuna, listaVerificacionTipoVacuna[1][0], model.IdPandemia.Value, pandemia.Descripcion, vacPan.Dosis.Count, vacPan.Dosis));
+                            }
+                            else
+                            {
+                                errores.Add("Error de conexión con la base de datos");
+                                responseVacunaDTO = new ResponseVacunaDTO("Rechazada", true, errores, model.EmailOperadorNacional, new VacunaDTO(0, model.Descripcion, model.IdTipoVacuna, null, model.IdPandemia.Value, null, 0, null));
+                            }
                         }
                     }
                 }
@@ -193,6 +229,29 @@ namespace VacunacionApi.Controllers
 
 
         //Métodos privados de ayuda
+        private int CalcularCantidadDosisPandemia(Pandemia pandemia)
+        {
+            int cantidadDosis = 0;
+            DateTime fechaInicio = pandemia.FechaInicio;
+
+            try
+            {
+                fechaInicio = fechaInicio.AddDays(pandemia.IntervaloMinimoDias);
+
+                while (pandemia.FechaInicio <= pandemia.FechaFin)
+                {
+                    cantidadDosis++;
+                    fechaInicio = fechaInicio.AddDays(pandemia.IntervaloMinimoDias);
+                }
+            }
+            catch
+            {
+
+            }
+
+            return cantidadDosis;
+        }
+
         private bool VacunaExists(int id)
         {
             return _context.Vacuna.Any(e => e.Id == id);
@@ -461,7 +520,7 @@ namespace VacunacionApi.Controllers
 
                     foreach (ReglaDTO reglaDTO in dosisDTO.Reglas)
                     {
-                        Regla regla = new Regla(reglaDTO.Descripcion, reglaDTO.MesesVacunacion, reglaDTO.LapsoMinimoDias, reglaDTO.LapsoMaximoDias, reglaDTO.Otros);
+                        Regla regla = new Regla(reglaDTO.Descripcion, reglaDTO.MesesVacunacion, reglaDTO.LapsoMinimoDias, reglaDTO.LapsoMaximoDias, reglaDTO.Otros, reglaDTO.Embarazada, reglaDTO.PersonalSalud);
                         _context.Regla.Add(regla);
                         EntidadDosisRegla entidadDosisRegla = new EntidadDosisRegla(dosis.Id, regla.Id);
                         _context.EntidadDosisRegla.Add(entidadDosisRegla);

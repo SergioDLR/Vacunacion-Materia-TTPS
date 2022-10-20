@@ -7,7 +7,7 @@ namespace VacunacionApi.DTO
 {
     public class ReglaDTO
     {
-        public ReglaDTO(int id, string descripcion, string mesesVacunacion, double? lapsoMinimoDias, double? lapsoMaximoDias, string otros)
+        public ReglaDTO(int id, string descripcion, string mesesVacunacion, double? lapsoMinimoDias, double? lapsoMaximoDias, string otros, bool embarazada, bool personalSalud)
         {
             Id = id;
             Descripcion = descripcion;
@@ -15,6 +15,8 @@ namespace VacunacionApi.DTO
             LapsoMinimoDias = lapsoMinimoDias;
             LapsoMaximoDias = lapsoMaximoDias;
             Otros = otros;
+            Embarazada = embarazada;
+            PersonalSalud = personalSalud;
         }
 
         public int Id { get; set; }
@@ -23,5 +25,7 @@ namespace VacunacionApi.DTO
         public double? LapsoMinimoDias { get; set; }
         public double? LapsoMaximoDias { get; set; }
         public string Otros { get; set; }
+        public bool Embarazada { get; set; }
+        public bool PersonalSalud { get; set; }
     }
 }
