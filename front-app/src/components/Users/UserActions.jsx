@@ -11,11 +11,7 @@ const UserActions = ({ handleSelected }) => {
           <EditIcon />
         </SvgIcon>
       </Button>
-      <Button sx={{ color: "red" }}>
-        <SvgIcon>
-          <DeleteIcon />
-        </SvgIcon>
-      </Button>
+      
     </TableCell>
   );
 };
