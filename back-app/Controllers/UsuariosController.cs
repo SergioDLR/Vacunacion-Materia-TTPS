@@ -276,6 +276,9 @@ namespace VacunacionApi.Controllers
 
                 errores = await VerificarCredencialesUsuarioAdministrador(model.EmailAdministrador, errores);
 
+                if (model.Email == model.EmailAdministrador)
+                    errores.Add(string.Format("El usuario {0} no tiene permisos para editar sus propias credenciales", model.EmailAdministrador));
+
                 if (errores.Count > 0)
                     responseUsuarioDTO = LoadResponseUsuarioDTO("Rechazada", true, errores, model.EmailAdministrador, 
                         new Usuario(0, model.Email, null, 0, 0), null, null);

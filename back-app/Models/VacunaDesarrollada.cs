@@ -21,8 +21,6 @@ namespace VacunacionApi.Models
         public int IdMarcaComercial { get; set; }
         [Column("Dias_Demora_Entrega")]
         public int DiasDemoraEntrega { get; set; }
-        [Column("Intervalo_Minimo_Meses")]
-        public int IntervaloMinimoMeses { get; set; }
         [Column("Precio_Vacuna")]
         public double PrecioVacuna { get; set; }
         [Column("Fecha_Desde", TypeName = "date")]

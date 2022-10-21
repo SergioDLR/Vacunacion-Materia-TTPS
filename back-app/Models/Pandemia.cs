@@ -20,7 +20,9 @@ namespace VacunacionApi.Models
         [Column("Fecha_Inicio", TypeName = "date")]
         public DateTime FechaInicio { get; set; }
         [Column("Fecha_Fin", TypeName = "date")]
-        public DateTime? FechaFin { get; set; }
+        public DateTime FechaFin { get; set; }
+        [Column("Intervalo_Minimo_Dias")]
+        public double IntervaloMinimoDias { get; set; }
 
         [InverseProperty("IdPandemiaNavigation")]
         public virtual ICollection<Vacuna> Vacuna { get; set; }

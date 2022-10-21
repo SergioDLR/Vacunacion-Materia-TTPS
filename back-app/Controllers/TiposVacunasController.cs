@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VacunacionApi.DTO;
 using VacunacionApi.Models;
 
 namespace VacunacionApi.Controllers
@@ -20,11 +21,45 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/TiposVacunas
+        // GET: api/TiposVacunas/GetAll?idPandemia=3
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TipoVacuna>>> GetTipoVacuna()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<TipoVacunaDTO>>> GetAll(int idPandemia = 0)
         {
-            return await _context.TipoVacuna.ToListAsync();
+            try
+            {
+                List<TipoVacuna> tiposVacunas = new List<TipoVacuna>();
+
+                if (idPandemia != 0)
+                {
+                    Pandemia pandemia = await _context.Pandemia.Where(pan => pan.Id == idPandemia).FirstOrDefaultAsync();
+                    if (pandemia != null)
+                    {
+                        if (pandemia.Descripcion == "No Pandemia")
+                        {
+                            tiposVacunas = await _context.TipoVacuna.Where(tv => tv.Descripcion != "Vacuna de Pandemia").ToListAsync();
+                        }
+                        else
+                            tiposVacunas = await _context.TipoVacuna.Where(pan => pan.Descripcion == "Vacuna de Pandemia").ToListAsync();
+                    }
+                }
+                else
+                    tiposVacunas = await _context.TipoVacuna.ToListAsync();
+
+                List<TipoVacunaDTO> tiposVacunasDTO = new List<TipoVacunaDTO>();
+
+                foreach (TipoVacuna tv in tiposVacunas)
+                {
+                    TipoVacunaDTO tipoVacunaDTO = new TipoVacunaDTO(tv.Id, tv.Descripcion);
+                    tiposVacunasDTO.Add(tipoVacunaDTO);
+                }
+
+                return Ok(tiposVacunasDTO);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/TiposVacunas/5
