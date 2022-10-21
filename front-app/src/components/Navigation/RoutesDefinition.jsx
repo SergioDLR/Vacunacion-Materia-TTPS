@@ -7,6 +7,7 @@ import UserListContainer from "../Users/UserListContainer";
 import VacunasListContainer from "../OperadorNacional/vacunas/VacunasListContainer";
 import AdminWraper from "../Nav/AdminWraper";
 import OperadorWraper from "../OperadorNacional/OperadorWraper";
+import AnalistaWraper from "../AnalistaProvincial/AnalistaWraper";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -50,6 +51,36 @@ const RoutesDefinition = () => {
             <OperadorWraper>
               <VacunasListContainer />
             </OperadorWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analista"
+        element={
+          <ProtectedRoute role={2}>
+            <AnalistaWraper>
+              <h1>Bienvenido analista!</h1>
+            </AnalistaWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analista/vacunas"
+        element={
+          <ProtectedRoute role={2}>
+            <AnalistaWraper>
+              <h1>Pagina de vacunas</h1>
+            </AnalistaWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/analista/vacunados"
+        element={
+          <ProtectedRoute role={2}>
+            <AnalistaWraper>
+              <h1>Pagina de vacunados</h1>
+            </AnalistaWraper>
           </ProtectedRoute>
         }
       />

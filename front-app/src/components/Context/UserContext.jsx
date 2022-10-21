@@ -4,12 +4,16 @@ export const UserContext = createContext();
 const UserContextProvider = ({ children }) => {
   const [userSesion, setUserSesion] = useState({});
   const navigate = useNavigate();
+
   const logIn = (userSesion) => {
     const miStorage = window.localStorage;
     miStorage.setItem("session", JSON.stringify(userSesion));
     setUserSesion(userSesion);
     if (userSesion?.idRol === 1) {
       navigate("/admin");
+    }
+    if (userSesion?.idRol === 2) {
+      navigate("/analista");
     }
     if (userSesion?.idRol === 3) {
       navigate("/operador");
@@ -24,13 +28,23 @@ const UserContextProvider = ({ children }) => {
       if (session?.idRol === 1) {
         navigate("/admin");
       }
+      if (session?.idRol === 2) {
+        navigate("/analista");
+      }
       if (session?.idRol === 3) {
         navigate("/operador");
       }
     }
   }, []);
 
-  return <UserContext.Provider value={{ logIn, userSesion }}>{children}</UserContext.Provider>;
+  const cerrarSesion = () => {
+    const miStorage = window.localStorage;
+    miStorage.removeItem("session");
+    setUserSesion({});
+    navigate("/");
+  };
+
+  return <UserContext.Provider value={{ logIn, userSesion, cerrarSesion }}>{children}</UserContext.Provider>;
 };
 
 export default UserContextProvider;
