@@ -30,6 +30,27 @@ namespace VacunacionApi.Controllers
             return await _context.Vacuna.ToListAsync();
         }
 
+        // GET: api/Vacunas/GetDescripcionesVacunasCalendario
+        [HttpGet]
+        [Route("GetDescripcionesVacunasCalendario")]
+        public ActionResult<List<DescripcionVacunaCalendarioDTO>> GetDescripcionesVacunasCalendario()
+        {
+            List<DescripcionVacunaCalendarioDTO> descripcionesVacunasCalendario = new List<DescripcionVacunaCalendarioDTO>();
+
+            try
+            {
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioDTO(1, "Hepatitis B (HB)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioDTO(2, "BCG"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioDTO(3, "Rotavirus"));
+            }
+            catch
+            {
+
+            }
+
+            return descripcionesVacunasCalendario;
+        }
+
         // GET: api/Vacunas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Vacuna>> GetVacuna(int id)
