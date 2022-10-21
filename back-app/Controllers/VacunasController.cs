@@ -117,7 +117,7 @@ namespace VacunacionApi.Controllers
                         errores.Add(string.Format("La descripción {0} no corresponde a una vacuna de calendario", model.Descripcion));
                 }
 
-                if (model.IdPandemia != 0)
+                if (model.IdPandemia > 1)
                 {
                     List<List<string>> listaVerificacionPandemia = await VerificarPandemia(errores, model.IdPandemia);
                     errores = listaVerificacionPandemia[0];
@@ -135,13 +135,16 @@ namespace VacunacionApi.Controllers
                 {
                     Pandemia noPandemia = await _context.Pandemia.Where(p => p.Descripcion == "No Pandemia").FirstOrDefaultAsync();
                     model.IdPandemia = noPandemia.Id;
+
+                    if (listaVerificacionTipoVacuna[1][0] == "Vacuna de Pandemia")
+                        errores.Add("Se debe especificar un tipo de vacuna distinto al de pandemia");
                 }
 
                 errores = await VerificarCredencialesUsuarioOperadorNacional(model.EmailOperadorNacional, errores);
 
                 Vacuna vacunaExistente = await GetVacuna(model.Descripcion);
                 if (vacunaExistente != null)
-                    errores.Add(string.Format("La descripción {0} está registrada en el sistema", model.Descripcion));
+                    errores.Add(string.Format("La descripción de vacuna {0} está registrada en el sistema", model.Descripcion));
 
                 if (errores.Count > 0)
                     responseVacunaDTO = new ResponseVacunaDTO("Rechazada", true, errores, model.EmailOperadorNacional, new VacunaDTO(0, model.Descripcion, model.IdTipoVacuna, null, model.IdPandemia, null, 0, null));
