@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using VacunacionApi.DTO;
@@ -29,7 +30,7 @@ namespace VacunacionApi.Controllers
         {
             try
             {
-                ResponseListaMarcasComercialesDTO responseListaMarcasComercialesDTO = new ResponseListaMarcasComercialesDTO();  
+                ResponseListaMarcasComercialesDTO responseListaMarcasComercialesDTO = new ResponseListaMarcasComercialesDTO();
 
                 //lista vacia para los errores
                 List<string> errores = new List<string>();
@@ -54,7 +55,7 @@ namespace VacunacionApi.Controllers
                 else
                 {
                     transaccion = "Rechazada";
-                } 
+                }
                 responseListaMarcasComercialesDTO.Errores = errores;
                 responseListaMarcasComercialesDTO.ExistenciaErrores = existenciaErrores;
                 responseListaMarcasComercialesDTO.EstadoTransaccion = transaccion;
@@ -63,56 +64,116 @@ namespace VacunacionApi.Controllers
 
                 return Ok(responseListaMarcasComercialesDTO);
             }
-            catch(Exception error) 
+            catch (Exception error)
             {
                 return BadRequest(error.Message);
             }
         }
 
-        // GET: api/MarcasComerciales/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<MarcaComercial>> GetMarcaComercial(int id)
+        // GET: api/MarcasComerciales/GetMarcaComercial?emailOperadorNacional=pedro@hotmail.com&idMarcaComercial=5
+        [HttpGet]
+        [Route("GetMarcaComercial")]
+        public async Task<ActionResult<ResponseMarcaComercialDTO>> GetMarcaComercial(string emailOperadorNacional = null, int idMarcaComercial = 0)
         {
-            var marcaComercial = await _context.MarcaComercial.FindAsync(id);
-
-            if (marcaComercial == null)
-            {
-                return NotFound();
-            }
-
-            return marcaComercial;
-        }
-
-        // PUT: api/MarcasComerciales/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutMarcaComercial(int id, MarcaComercial marcaComercial)
-        {
-            if (id != marcaComercial.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(marcaComercial).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MarcaComercialExists(id))
+                ResponseMarcaComercialDTO responseMarcaComercialDTO = new ResponseMarcaComercialDTO();
+
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+                bool existenciaErrores = true;
+                string transaccion = "";
+
+                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                MarcaComercial marcaExistente = await _context.MarcaComercial.Where(mc => mc.Id == idMarcaComercial).FirstOrDefaultAsync();
+
+                if (marcaExistente == null)
+                    errores.Add(String.Format("La marca comercial con identificador {0} no está registrada en el sistema", idMarcaComercial));
+                if (errores.Count == 0)
                 {
-                    return NotFound();
+                    existenciaErrores = false;
+                    transaccion = "Aceptada";
                 }
                 else
                 {
-                    throw;
+                    transaccion = "Rechazada";
                 }
+                responseMarcaComercialDTO.Errores = errores;
+                responseMarcaComercialDTO.ExistenciaErrores = existenciaErrores;
+                responseMarcaComercialDTO.EstadoTransaccion = transaccion;
+                responseMarcaComercialDTO.MarcaComercialDTO = new MarcaComercialDTO(marcaExistente.Id, marcaExistente.Descripcion);
+                return Ok(responseMarcaComercialDTO);   
             }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
 
-            return NoContent();
+        // PUT: api/MarcasComerciales/ModificarMarcaComercial/
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPut]
+        [Route("ModificarMarcaComercial")]
+        public async Task<ActionResult<ResponseMarcaComercialDTO>> ModificarMarcaComercial([FromBody] RequestMarcaComercialUpdateDTO model)
+        {
+            try
+            {
+                ResponseMarcaComercialDTO responseMarcaComercialDTO = null;
+                List<string> errores = new List<string>();
+                Usuario usuarioExistente = await GetUsuario(model.EmailOperadorNacional);
+
+                if (usuarioExistente != null)
+                {
+                    Rol rol = await GetRol(usuarioExistente.IdRol);
+                    
+                    if (rol != null)
+                    {
+                        if (rol.Descripcion != "Operador Nacional")
+                        {
+                            errores.Add(String.Format("El Usuario {0} no tiene rol operador nacional", model.EmailOperadorNacional));
+                        }
+                    }
+                    else
+                        errores.Add(String.Format("El rol con identificador {0} no está registrado en el sistema", usuarioExistente.IdRol));
+                }
+                else
+                    errores.Add(String.Format("El mail {0} no está registrado en el sistema", model.EmailOperadorNacional));
+
+                MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Descripcion == model.DescripcionMarcaComercial).FirstOrDefaultAsync();
+                if (marcaComercialExistente != null)
+                {
+                    MarcaComercial marcaNueva = await _context.MarcaComercial.Where(mc => mc.Descripcion == model.DescripcionMarcaComercialNueva).FirstOrDefaultAsync();
+                    if (marcaNueva != null)
+                        errores.Add(String.Format("La marca comercial {0} está registrada en el sistema", model.DescripcionMarcaComercialNueva));
+                }
+                else
+                    errores.Add(String.Format("La marca comercial {0} no está registrada en el sistema", model.DescripcionMarcaComercial));
+
+                if (errores.Count > 0)
+                {
+                    responseMarcaComercialDTO.Errores = errores;
+                    responseMarcaComercialDTO.ExistenciaErrores = true;
+                    responseMarcaComercialDTO.EstadoTransaccion = "Rechazada";
+                    responseMarcaComercialDTO.MarcaComercialDTO = new MarcaComercialDTO(0, model.DescripcionMarcaComercialNueva);
+                }
+                else
+                {
+                    marcaComercialExistente.Descripcion = model.DescripcionMarcaComercialNueva;
+                    _context.Entry(marcaComercialExistente).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    responseMarcaComercialDTO.Errores = errores;
+                    responseMarcaComercialDTO.ExistenciaErrores = false;
+                    responseMarcaComercialDTO.EstadoTransaccion = "Aceptada";
+                    responseMarcaComercialDTO.MarcaComercialDTO = new MarcaComercialDTO(marcaComercialExistente.Id, model.DescripcionMarcaComercialNueva);
+                }
+                return Ok(responseMarcaComercialDTO);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // POST: api/MarcasComerciales/CrearMarcaComercial
@@ -161,24 +222,7 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        // DELETE: api/MarcasComerciales/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<MarcaComercial>> DeleteMarcaComercial(int id)
-        {
-            var marcaComercial = await _context.MarcaComercial.FindAsync(id);
-            if (marcaComercial == null)
-            {
-                return NotFound();
-            }
-
-            _context.MarcaComercial.Remove(marcaComercial);
-            await _context.SaveChangesAsync();
-
-            return marcaComercial;
-        }
-
-
-        //metodos privados
+        //metodos privados-----------------------------------
         private bool MarcaComercialExists(int id)
         {
             return _context.MarcaComercial.Any(e => e.Id == id);
@@ -241,6 +285,53 @@ namespace VacunacionApi.Controllers
             }
 
             return errores;
+        }
+
+        private async Task<Usuario> GetUsuario(string email)
+        {
+            try
+            {
+                Usuario cuentaExistente = new Usuario();
+                List<Usuario> listaUsuarios = await _context.Usuario.ToListAsync();
+
+                foreach (Usuario item in listaUsuarios)
+                {
+                    if (item.Email == email)
+                    {
+                        cuentaExistente.Id = item.Id;
+                        cuentaExistente.Email = item.Email;
+                        cuentaExistente.Password = item.Password;
+                        cuentaExistente.IdJurisdiccion = item.IdJurisdiccion.Value;
+                        cuentaExistente.IdRol = item.IdRol;
+                    }
+                }
+
+                if (cuentaExistente.Email != null)
+                    return cuentaExistente;
+            }
+            catch
+            {
+
+            }
+
+            return null;
+        }
+
+        private async Task<Rol> GetRol(int idRol)
+        {
+            Rol rolExistente = null;
+
+            try
+            {
+                rolExistente = await _context.Rol
+                    .Where(rol => rol.Id == idRol).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return rolExistente;
         }
     }
 }
