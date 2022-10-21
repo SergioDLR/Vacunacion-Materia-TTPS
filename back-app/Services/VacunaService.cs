@@ -10,7 +10,7 @@ namespace VacunacionApi.Services
     {
         public List<DosisDTO> ArmarListaDosisDTOHepatitisBHB()
         {
-            List<DosisDTO> listaDosis = null;
+            List<DosisDTO> listaDosis = new List<DosisDTO>();
 
             try
             {
@@ -53,7 +53,7 @@ namespace VacunacionApi.Services
 
         public List<DosisDTO> ArmarListaDosisDTOBCG()
         {
-            List<DosisDTO> listaDosis = null;
+            List<DosisDTO> listaDosis = new List<DosisDTO>();
 
             try
             {
@@ -75,7 +75,7 @@ namespace VacunacionApi.Services
 
         public List<DosisDTO> ArmarListaDosisDTORotavirus()
         {
-            List<DosisDTO> listaDosis = null;
+            List<DosisDTO> listaDosis = new List<DosisDTO>();
 
             try
             {

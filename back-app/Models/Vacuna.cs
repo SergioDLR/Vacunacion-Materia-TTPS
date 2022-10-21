@@ -21,7 +21,7 @@ namespace VacunacionApi.Models
         [StringLength(250)]
         public string Descripcion { get; set; }
         [Column("Id_Pandemia")]
-        public int? IdPandemia { get; set; }
+        public int IdPandemia { get; set; }
         [Column("Cantidad_Dosis")]
         public int CantidadDosis { get; set; }
 

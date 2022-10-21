@@ -22,6 +22,6 @@ namespace VacunacionApi.DTO
         public string Descripcion { get; set; }
 
         [Range(0, 10000, ErrorMessage = "El campo id pandemia tiene un formato inválido")]
-        public int? IdPandemia { get; set; }
+        public int IdPandemia { get; set; }
     }
 }
