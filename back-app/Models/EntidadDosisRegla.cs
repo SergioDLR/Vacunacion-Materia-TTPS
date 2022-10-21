@@ -8,6 +8,12 @@ namespace VacunacionApi.Models
     [Table("Entidad_Dosis_Regla")]
     public partial class EntidadDosisRegla
     {
+        public EntidadDosisRegla(int idDosis, int idRegla)
+        {
+            IdDosis = idDosis;
+            IdRegla = idRegla;
+        }
+
         [Key]
         public int Id { get; set; }
         [Column("Id_Dosis")]

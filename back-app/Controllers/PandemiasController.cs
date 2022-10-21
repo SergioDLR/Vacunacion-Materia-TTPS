@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VacunacionApi.DTO;
 using VacunacionApi.Models;
 
 namespace VacunacionApi.Controllers
@@ -20,11 +21,45 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Pandemias
+        // GET: api/Pandemias/GetAll?idTipoVacuna=3
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pandemia>>> GetPandemia()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<PandemiaDTO>>> GetAll(int idTipoVacuna = 0)
         {
-            return await _context.Pandemia.ToListAsync();
+            try
+            {
+                List<Pandemia> pandemias = new List<Pandemia>();
+
+                if (idTipoVacuna != 0)
+                {
+                    TipoVacuna tipoVacuna = await _context.TipoVacuna.Where(tv => tv.Id == idTipoVacuna).FirstOrDefaultAsync();
+                    if (tipoVacuna != null)
+                    {
+                        if (tipoVacuna.Descripcion == "Vacuna de Calendario" || tipoVacuna.Descripcion == "Vacuna Anual")
+                        {
+                            pandemias = await _context.Pandemia.Where(pan => pan.Descripcion == "No Pandemia").ToListAsync();
+                        }
+                        else
+                            pandemias = await _context.Pandemia.Where(pan => pan.Descripcion != "No Pandemia").ToListAsync();
+                    }
+                }
+                else
+                    pandemias = await _context.Pandemia.ToListAsync();
+
+                List<PandemiaDTO> pandemiasDTO = new List<PandemiaDTO>();
+
+                foreach (Pandemia pandemia in pandemias)
+                {
+                    PandemiaDTO pandemiaDTO = new PandemiaDTO(pandemia.Id, pandemia.Descripcion);
+                    pandemiasDTO.Add(pandemiaDTO);
+                }
+
+                return Ok(pandemiasDTO);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/Pandemias/5
