@@ -22,14 +22,6 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Vacunas/GetAll
-        [HttpGet]
-        [Route("GetAll")]
-        public async Task<ActionResult<IEnumerable<Vacuna>>> GetAll()
-        {
-            return await _context.Vacuna.ToListAsync();
-        }
-
         // GET: api/Vacunas/GetDescripcionesVacunasCalendario
         [HttpGet]
         [Route("GetDescripcionesVacunasCalendario")]
