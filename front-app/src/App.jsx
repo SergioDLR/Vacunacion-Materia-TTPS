@@ -1,4 +1,4 @@
-import RoutesDefinition from "@/components/navigation/routesDefinition";
+import RoutesDefinition from "@/components/navigation/RoutesDefinition";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import UserContextProvider from "./components/Context/UserContext";
 const theme = createTheme({

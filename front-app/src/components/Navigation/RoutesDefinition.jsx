@@ -11,7 +11,7 @@ import AnalistaWraper from "../AnalistaProvincial/AnalistaWraper";
 const RoutesDefinition = () => {
   return (
     <Routes>
-      <Route path="*" element={<h1>Esta ruta no existe</h1>} />
+      <Route path="*" element={<Home />} />
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route
