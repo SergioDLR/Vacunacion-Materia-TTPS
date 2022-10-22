@@ -85,7 +85,10 @@ namespace VacunacionApi.Controllers
                 string transaccion = "";
 
                 errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                
                 MarcaComercial marcaExistente = await _context.MarcaComercial.Where(mc => mc.Id == idMarcaComercial).FirstOrDefaultAsync();
+
+
 
                 if (marcaExistente == null)
                     errores.Add(String.Format("La marca comercial con identificador {0} no está registrada en el sistema", idMarcaComercial));
@@ -93,15 +96,21 @@ namespace VacunacionApi.Controllers
                 {
                     existenciaErrores = false;
                     transaccion = "Aceptada";
+                    responseMarcaComercialDTO.EmailOperadorNacional = emailOperadorNacional;
+                    responseMarcaComercialDTO.Errores = errores;
+                    responseMarcaComercialDTO.ExistenciaErrores = existenciaErrores;
+                    responseMarcaComercialDTO.EstadoTransaccion = transaccion;
+                    responseMarcaComercialDTO.MarcaComercialDTO = new MarcaComercialDTO(marcaExistente.Id, marcaExistente.Descripcion);
                 }
                 else
                 {
                     transaccion = "Rechazada";
+                    responseMarcaComercialDTO.EmailOperadorNacional = emailOperadorNacional;
+                    responseMarcaComercialDTO.Errores = errores;
+                    responseMarcaComercialDTO.ExistenciaErrores = existenciaErrores;
+                    responseMarcaComercialDTO.EstadoTransaccion = transaccion;
+                    responseMarcaComercialDTO.MarcaComercialDTO = new MarcaComercialDTO(idMarcaComercial, null);
                 }
-                responseMarcaComercialDTO.Errores = errores;
-                responseMarcaComercialDTO.ExistenciaErrores = existenciaErrores;
-                responseMarcaComercialDTO.EstadoTransaccion = transaccion;
-                responseMarcaComercialDTO.MarcaComercialDTO = new MarcaComercialDTO(marcaExistente.Id, marcaExistente.Descripcion);
                 return Ok(responseMarcaComercialDTO);   
             }
             catch (Exception error)
@@ -119,7 +128,7 @@ namespace VacunacionApi.Controllers
         {
             try
             {
-                ResponseMarcaComercialDTO responseMarcaComercialDTO = null;
+                ResponseMarcaComercialDTO responseMarcaComercialDTO = new ResponseMarcaComercialDTO();
                 List<string> errores = new List<string>();
                 Usuario usuarioExistente = await GetUsuario(model.EmailOperadorNacional);
 
@@ -193,8 +202,12 @@ namespace VacunacionApi.Controllers
                 List<string> errores = new List<string>();
 
                 errores = await VerificarCredencialesOperadorNacional(requestMarcaComercialDTO.EmailOperadorNacional, errores);
-               
-                if(errores.Count > 0)
+
+                MarcaComercial marcaExistente = await _context.MarcaComercial.Where(mc => mc.Descripcion == requestMarcaComercialDTO.DescripcionMarcaComercial).FirstOrDefaultAsync();
+                if (marcaExistente != null)
+                    errores.Add(String.Format("La marca comercial {0} está registrada en el sistema", requestMarcaComercialDTO.DescripcionMarcaComercial));
+
+                if (errores.Count > 0)
                 {
                     marcaComercialDTO.Descripcion = requestMarcaComercialDTO.DescripcionMarcaComercial;
                     responseMarcaComercialDTO = new ResponseMarcaComercialDTO(requestMarcaComercialDTO.EmailOperadorNacional, "Rechazada", true, errores, marcaComercialDTO);
