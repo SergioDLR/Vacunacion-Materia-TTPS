@@ -161,6 +161,7 @@ namespace VacunacionApi.Controllers
 
                 if (errores.Count > 0)
                 {
+                    responseMarcaComercialDTO.EmailOperadorNacional = model.EmailOperadorNacional;
                     responseMarcaComercialDTO.Errores = errores;
                     responseMarcaComercialDTO.ExistenciaErrores = true;
                     responseMarcaComercialDTO.EstadoTransaccion = "Rechazada";
@@ -172,6 +173,7 @@ namespace VacunacionApi.Controllers
                     _context.Entry(marcaComercialExistente).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
 
+                    responseMarcaComercialDTO.EmailOperadorNacional = model.EmailOperadorNacional;
                     responseMarcaComercialDTO.Errores = errores;
                     responseMarcaComercialDTO.ExistenciaErrores = false;
                     responseMarcaComercialDTO.EstadoTransaccion = "Aceptada";
