@@ -38,6 +38,7 @@ const CustomModal = ({ children, title = "Open Modal", cerrar = "Cancelar" }) =>
         >
           <Box sx={style}>
             {children}
+
             <Button variant={"contained"} color={"error"} onClick={handleClose}>
               {cerrar}
             </Button>

@@ -5,9 +5,11 @@ import Login from "../Login/Login";
 import HomeAdmin from "../Admin/HomeAdmin";
 import UserListContainer from "../Users/UserListContainer";
 import VacunasListContainer from "../OperadorNacional/vacunas/VacunasListContainer";
+import VacunasDesarrolladasContainer from "../OperadorNacional/VacunasDesarrolladas/VacunasDesarrolladasContainer";
 import AdminWraper from "../Nav/AdminWraper";
 import OperadorWraper from "../OperadorNacional/OperadorWraper";
 import AnalistaWraper from "../AnalistaProvincial/AnalistaWraper";
+import MarcasComercialesContainer from "../OperadorNacional/MarcasComerciales/MarcasComercialesContainer";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -50,6 +52,27 @@ const RoutesDefinition = () => {
           <ProtectedRoute role={3}>
             <OperadorWraper>
               <VacunasListContainer />
+            </OperadorWraper>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/operador/vacunasdesarrolladas"
+        element={
+          <ProtectedRoute role={3}>
+            <OperadorWraper>
+              <VacunasDesarrolladasContainer />
+            </OperadorWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/operador/marcascomerciales"
+        element={
+          <ProtectedRoute role={3}>
+            <OperadorWraper>
+              <MarcasComercialesContainer />
             </OperadorWraper>
           </ProtectedRoute>
         }
