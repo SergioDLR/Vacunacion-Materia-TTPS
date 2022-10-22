@@ -8,5 +8,7 @@ const allUrls = {
   pandemias: `${urlBase}/Pandemias/`,
   calendario: `${urlBase}/Vacunas/GetDescripcionesVacunasCalendario`,
   crearVacuna: `${urlBase}/Vacunas/CrearVacuna`,
+  descripcionAnual: `${urlBase}/Vacunas/GetDescripcionesVacunasAnuales`,
+  todasVacunas: `${urlBase}/Vacunas/GetAll`,
 };
 export default allUrls;

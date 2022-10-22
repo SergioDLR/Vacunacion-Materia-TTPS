@@ -16,10 +16,14 @@ const style = {
   p: 4,
 };
 
-const CustomModal = ({ children, title = "Open Modal" }) => {
+const CustomModal = ({ children, title = "Open Modal", cerrar = "Cancelar" }) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = (event, reason) => {
+    if (reason !== "backdropClick") {
+      setOpen(false);
+    }
+  };
   return (
     <>
       <Button variant={"contained"} onClick={handleOpen}>
@@ -35,7 +39,7 @@ const CustomModal = ({ children, title = "Open Modal" }) => {
           <Box sx={style}>
             {children}
             <Button variant={"contained"} color={"error"} onClick={handleClose}>
-              Cancelar
+              {cerrar}
             </Button>
           </Box>
         </Modal>

@@ -7,7 +7,8 @@ import allUrls from "../../../../services/backend_url";
 import { Button } from "@mui/material";
 import { UserContext } from "../../../Context/UserContext";
 import { useAlert } from "react-alert";
-const RegistrarVacunaContainer = () => {
+import SelectAnual from "./SelectAnual";
+const RegistrarVacunaContainer = ({ cargarTodasLasVacunas }) => {
   const [tipoVacunaSelected, setTipoVacunaSelected] = useState(0);
   const [descripcion, setDescripcion] = useState(0);
   const [optionSelectCalendario, setOptionSelectCalendario] = useState("");
@@ -29,6 +30,7 @@ const RegistrarVacunaContainer = () => {
         .then((response) => {
           if (response?.data?.estadoTransaccion === "Aceptada") {
             alert.success("Se creo la vacuna con exito");
+            cargarTodasLasVacunas();
           } else {
             response.data.errores.forEach((element) => {
               alert.error(element);
@@ -48,6 +50,9 @@ const RegistrarVacunaContainer = () => {
       />
       {tipoVacunaSelected === 1 && (
         <SelectCalendario descripcion={optionSelectCalendario} setDescripcion={setOptionSelectCalendario} />
+      )}
+      {tipoVacunaSelected === 2 && (
+        <SelectAnual descripcion={optionSelectCalendario} setDescripcion={setOptionSelectCalendario} />
       )}
       {tipoVacunaSelected === 3 && (
         <SelectPandemia

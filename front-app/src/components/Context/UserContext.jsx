@@ -5,19 +5,11 @@ const UserContextProvider = ({ children }) => {
   const [userSesion, setUserSesion] = useState({});
   const navigate = useNavigate();
 
-  const logIn = (userSesion) => {
+  const logIn = (session) => {
     const miStorage = window.localStorage;
-    miStorage.setItem("session", JSON.stringify(userSesion));
-    setUserSesion(userSesion);
-    if (userSesion?.idRol === 1) {
-      navigate("/admin");
-    }
-    if (userSesion?.idRol === 2) {
-      navigate("/analista");
-    }
-    if (userSesion?.idRol === 3) {
-      navigate("/operador");
-    }
+    miStorage.setItem("session", JSON.stringify(session));
+    setUserSesion(session);
+    checkSesionNavigate(session);
   };
 
   useEffect(() => {
@@ -25,17 +17,28 @@ const UserContextProvider = ({ children }) => {
     const session = JSON.parse(miStorage.getItem("session"));
     if (session !== null) {
       setUserSesion(session);
-      if (session?.idRol === 1) {
-        navigate("/admin");
-      }
-      if (session?.idRol === 2) {
-        navigate("/analista");
-      }
-      if (session?.idRol === 3) {
-        navigate("/operador");
-      }
+      checkSesionNavigate(session);
     }
   }, []);
+
+  const checkSesionNavigate = (session) => {
+    switch (session?.idRol) {
+      case 1:
+        navigate("/admin");
+        break;
+      case 2:
+        navigate("/analista");
+        break;
+      case 3:
+        navigate("/operador");
+        break;
+      case 4:
+        navigate("/vacunador");
+        break;
+      default:
+        console.log("hay algo raro en la sesion");
+    }
+  };
 
   const cerrarSesion = () => {
     const miStorage = window.localStorage;
