@@ -25,15 +25,15 @@ namespace VacunacionApi.Controllers
         // GET: api/Vacunas/GetDescripcionesVacunasCalendario
         [HttpGet]
         [Route("GetDescripcionesVacunasCalendario")]
-        public ActionResult<List<DescripcionVacunaCalendarioDTO>> GetDescripcionesVacunasCalendario()
+        public ActionResult<List<DescripcionVacunaCalendarioAnualDTO>> GetDescripcionesVacunasCalendario()
         {
-            List<DescripcionVacunaCalendarioDTO> descripcionesVacunasCalendario = new List<DescripcionVacunaCalendarioDTO>();
+            List<DescripcionVacunaCalendarioAnualDTO> descripcionesVacunasCalendario = new List<DescripcionVacunaCalendarioAnualDTO>();
 
             try
             {
-                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioDTO(1, "Hepatitis B (HB)"));
-                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioDTO(2, "BCG"));
-                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioDTO(3, "Rotavirus"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(1, "Hepatitis B (HB)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(2, "BCG"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(3, "Rotavirus"));
             }
             catch
             {
@@ -41,6 +41,111 @@ namespace VacunacionApi.Controllers
             }
 
             return descripcionesVacunasCalendario;
+        }
+
+        // GET: api/Vacunas/GetDescripcionesVacunasAnuales
+        [HttpGet]
+        [Route("GetDescripcionesVacunasAnuales")]
+        public ActionResult<List<DescripcionVacunaCalendarioAnualDTO>> GetDescripcionesVacunasAnuales()
+        {
+            List<DescripcionVacunaCalendarioAnualDTO> descripcionesVacunasAnuales = new List<DescripcionVacunaCalendarioAnualDTO>();
+
+            try
+            {
+                descripcionesVacunasAnuales = GetVacunasAnuales();
+            }
+            catch
+            {
+
+            }
+
+            return descripcionesVacunasAnuales;
+        }
+
+        // GET: api/Vacunas/GetAll?emailOperadorNacional=juan@gmail.com&idTipoVacuna=2
+        [HttpGet]
+        [Route("GetAll")]
+        public async Task<ActionResult<ResponseListaVacunasDTO>> GetAll(string emailOperadorNacional = null, int idTipoVacuna = 0)
+        {
+            try
+            {
+                ResponseListaVacunasDTO responseListaVacunasDTO = null;
+                List<string> errores = new List<string>();
+                List<VacunaDTO> listaVacunasDTO = new List<VacunaDTO>();
+                List<Vacuna> vacunas = new List<Vacuna>();
+
+                if (idTipoVacuna != 0)
+                {
+                    List<List<string>> listaVerificacionTipoVacuna = await VerificarTipoVacuna(errores, idTipoVacuna);
+                    errores = listaVerificacionTipoVacuna[0];
+                }
+                if (emailOperadorNacional == null)
+                {
+                    errores.Add(string.Format("El email operador nacional es obligatorio"));
+                }
+                else
+                {
+                    errores = await VerificarCredencialesUsuarioOperadorNacional(emailOperadorNacional, errores);
+                }
+
+                if (errores.Count > 0)
+                {
+                    responseListaVacunasDTO = new ResponseListaVacunasDTO("Rechazada", true, errores, emailOperadorNacional, listaVacunasDTO);
+                }
+                else
+                {
+                    if (idTipoVacuna == 0)
+                    {
+                        vacunas = await _context.Vacuna.ToListAsync();
+                    }
+                    else
+                    {
+                        vacunas = await _context.Vacuna.Where(vac => vac.IdTipoVacuna == idTipoVacuna).ToListAsync();
+                    }
+
+                    foreach (Vacuna vac in vacunas)
+                    {
+                        TipoVacuna tipoVacuna = await GetTipoVacuna(vac.IdTipoVacuna);
+                        Pandemia pandemia = await GetPandemia(vac.IdPandemia);
+                        List<EntidadVacunaDosis> listaEntidadVacunaDosis = await _context.EntidadVacunaDosis.Where(evd => evd.IdVacuna == vac.Id).ToListAsync();
+                        List<DosisDTO> dosisDTO = new List<DosisDTO>();
+                        
+                        foreach (EntidadVacunaDosis evd in listaEntidadVacunaDosis)
+                        {
+                            Dosis dosis = await _context.Dosis.Where(d => d.Id == evd.IdDosis).FirstOrDefaultAsync();
+                            List<EntidadDosisRegla> listaEntidadDosisRegla = await _context.EntidadDosisRegla.Where(edr => edr.IdDosis == evd.IdDosis).ToListAsync();
+                            List<ReglaDTO> reglasDTO = new List<ReglaDTO>();
+                            foreach (EntidadDosisRegla edr in listaEntidadDosisRegla)
+                            {
+                                Regla reg = await _context.Regla.Where(r => r.Id == edr.IdRegla).FirstOrDefaultAsync();
+                                if (reg != null)
+                                {
+                                    ReglaDTO reglaDTO = new ReglaDTO(reg.Id, reg.Descripcion, reg.MesesVacunacion, 
+                                        reg.LapsoMinimoDias, reg.LapsoMaximoDias, reg.Otros, reg.Embarazada, reg.PersonalSalud);
+                                    
+                                    reglasDTO.Add(reglaDTO);
+                                }
+                            }
+
+                            DosisDTO d = new DosisDTO(dosis.Id, evd.Orden.Value, dosis.Descripcion, reglasDTO);
+                            dosisDTO.Add(d);
+                        }
+
+                        VacunaDTO vacunaDTO = new VacunaDTO(vac.Id, vac.Descripcion, vac.IdTipoVacuna, tipoVacuna.Descripcion,
+                            vac.IdPandemia, pandemia.Descripcion, vac.CantidadDosis, dosisDTO);
+
+                        listaVacunasDTO.Add(vacunaDTO);
+                    }
+
+                    responseListaVacunasDTO = new ResponseListaVacunasDTO("Aceptada", false, errores, emailOperadorNacional, listaVacunasDTO);
+                }
+
+                return Ok(responseListaVacunasDTO);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/Vacunas/5
@@ -118,6 +223,14 @@ namespace VacunacionApi.Controllers
                     {
                         errores.Add(string.Format("La {0} no puede ser asociada a la pandemia {1}", listaVerificacionTipoVacuna[1][0], listaVerificacionPandemia[1][0]));
                     }
+                    if (listaVerificacionTipoVacuna[1][0] == "Vacuna Anual")
+                    {
+                        List<DescripcionVacunaCalendarioAnualDTO> vacunasAnuales = GetVacunasAnuales();
+                        DescripcionVacunaCalendarioAnualDTO descripcion = vacunasAnuales.Where(x => x.Descripcion == model.Descripcion).FirstOrDefault();
+
+                        if (descripcion == null)
+                            errores.Add(string.Format("La descripción {0} no corresponde a una vacuna anual", model.Descripcion));
+                    }
                     if (listaVerificacionPandemia[1][0] != model.Descripcion)
                     {
                         errores.Add(string.Format("La descripción de vacuna {0} no coincide con la pandemia {1}", model.Descripcion, listaVerificacionPandemia[1][0]));
@@ -129,7 +242,7 @@ namespace VacunacionApi.Controllers
                     model.IdPandemia = noPandemia.Id;
 
                     if (listaVerificacionTipoVacuna[1][0] == "Vacuna de Pandemia")
-                        errores.Add("Se debe especificar un tipo de vacuna distinto al de pandemia");
+                        errores.Add("El tipo de vacuna no corresponde");
                 }
 
                 errores = await VerificarCredencialesUsuarioOperadorNacional(model.EmailOperadorNacional, errores);
@@ -178,7 +291,7 @@ namespace VacunacionApi.Controllers
                     if (listaVerificacionTipoVacuna[1][0] == "Vacuna Anual")
                     {
                         List<ReglaDTO> listaReglas = new List<ReglaDTO>();
-                        ReglaDTO reglaDTO = new ReglaDTO(0, "Aplicar en meses de vacunación anual", "4,5,6,7,8,9", 0, 0, null, true, true);
+                        ReglaDTO reglaDTO = new ReglaDTO(0, model.Descripcion + " - Aplicar en meses de vacunación anual", "4,5,6,7,8,9", 0, 0, null, true, true);
                         listaReglas.Add(reglaDTO);
 
                         List<DosisDTO> listaDosis = new List<DosisDTO>();
@@ -207,7 +320,7 @@ namespace VacunacionApi.Controllers
                             int cantidadDosis = CalcularCantidadDosisPandemia(pandemia);
                             List<DosisDTO> listaDosis = new List<DosisDTO>();
                             List<ReglaDTO> listaReglas = new List<ReglaDTO>();
-                            ReglaDTO reglaDTO = new ReglaDTO(0, string.Format("Aplicar dosis cada {0} días", pandemia.IntervaloMinimoDias), null, pandemia.IntervaloMinimoDias, 0, "Anterior", true, true);
+                            ReglaDTO reglaDTO = new ReglaDTO(0, string.Format("{0} - Aplicar dosis cada {1} días", model.Descripcion, pandemia.IntervaloMinimoDias), null, pandemia.IntervaloMinimoDias, 0, "Anterior", true, true);
                             listaReglas.Add(reglaDTO);
                             
                             for (int i=0; i < cantidadDosis; i++)
@@ -230,10 +343,10 @@ namespace VacunacionApi.Controllers
                                 responseVacunaDTO = new ResponseVacunaDTO("Rechazada", true, errores, model.EmailOperadorNacional, new VacunaDTO(0, model.Descripcion, model.IdTipoVacuna, null, model.IdPandemia, null, 0, null));
                             }
                         }
-
-                        _context.Entry(vacuna).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
                     }
+
+                    _context.Entry(vacuna).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
                 }
 
                 return Ok(responseVacunaDTO);
@@ -585,6 +698,25 @@ namespace VacunacionApi.Controllers
             }
 
             return null;
+        }
+
+        private List<DescripcionVacunaCalendarioAnualDTO> GetVacunasAnuales()
+        {
+            List<DescripcionVacunaCalendarioAnualDTO> descripcionesVacunasAnuales = new List<DescripcionVacunaCalendarioAnualDTO>();
+
+            try
+            {
+                descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(1, "Antigripal"));
+                descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(2, "Neumonía"));
+                descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(3, "Sarampión"));
+                descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(4, "Tos Ferina"));
+            }
+            catch
+            {
+
+            }
+
+            return descripcionesVacunasAnuales;
         }
     }
 }

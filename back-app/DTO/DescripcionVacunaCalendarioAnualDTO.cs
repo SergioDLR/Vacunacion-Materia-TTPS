@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace VacunacionApi.DTO
 {
-    public class DescripcionVacunaCalendarioDTO
+    public class DescripcionVacunaCalendarioAnualDTO
     {
-        public DescripcionVacunaCalendarioDTO(int id, string descripcion)
+        public DescripcionVacunaCalendarioAnualDTO(int id, string descripcion)
         {
             Id = id;
             Descripcion = descripcion;
