@@ -5,6 +5,8 @@ namespace VacunacionApi.DTO
 {
     public class ResponseListaVacunasDesarrolladasDTO : ResponseCabeceraDTO
     {
+        public ResponseListaVacunasDesarrolladasDTO() { }
+
         public ResponseListaVacunasDesarrolladasDTO (string emailOperadorNacional, string estadoTransaccion, bool existenciaErrores, List<string> errores, List<VacunaDesarrolladaDTO> vacunasDesarrolladasDTO)
         {
             EmailOperadorNacional = emailOperadorNacional;

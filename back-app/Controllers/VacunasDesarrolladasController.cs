@@ -21,11 +21,52 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/VacunasDesarrolladas
+        // GET: api/VacunasDesarrolladas/GetAll
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VacunaDesarrollada>>> GetVacunaDesarrollada()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<ResponseListaVacunasDesarrolladasDTO>>> GetAll(string emailOperadorNacional = null)
         {
-            return await _context.VacunaDesarrollada.ToListAsync();
+            try
+            {
+                ResponseListaVacunasDesarrolladasDTO responseListaVacunasDesarrolladasDTO = new ResponseListaVacunasDesarrolladasDTO();
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+                List<VacunaDesarrolladaDTO> vacunasDesarrolladasDTO = new List<VacunaDesarrolladaDTO>();
+                bool existenciaErrores = true;
+                string transaccion = "";
+
+                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+
+                if(errores.Count == 0)
+                {
+                    existenciaErrores = false;
+                    transaccion = "Aceptada";
+                    List<VacunaDesarrollada> vacunasDesarrolladas = await _context.VacunaDesarrollada.ToListAsync();
+
+                    foreach(VacunaDesarrollada item in vacunasDesarrolladas)
+                    {
+                        VacunaDesarrolladaDTO vacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(item.Id, item.IdVacuna, item.IdMarcaComercial, item.DiasDemoraEntrega, item.PrecioVacuna, item.FechaHasta.Value);
+                        vacunasDesarrolladasDTO.Add(vacunaDesarrolladaDTO);
+                    }
+
+                }
+                else
+                {
+                    transaccion = "Rechazada";
+                }
+
+                responseListaVacunasDesarrolladasDTO.EmailOperadorNacional = emailOperadorNacional;
+                responseListaVacunasDesarrolladasDTO.Errores = errores;
+                responseListaVacunasDesarrolladasDTO.ExistenciaErrores = existenciaErrores;
+                responseListaVacunasDesarrolladasDTO.EstadoTransaccion = transaccion;
+                responseListaVacunasDesarrolladasDTO.ListaVacunasDesarrolladasDTO = vacunasDesarrolladasDTO;
+                return Ok(responseListaVacunasDesarrolladasDTO);
+
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);  
+            }
         }
 
         // GET: api/VacunasDesarrolladas/5
@@ -81,58 +122,64 @@ namespace VacunacionApi.Controllers
         [Route("CrearVacunaDesarrollada")]
         public async Task<ActionResult<ResponseVacunaDesarrolladaDTO>> CrearVacunaDesarrollada([FromBody] RequestVacunaDesarrolladaDTO model)
         {
-
-            ResponseVacunaDesarrolladaDTO responseVacunaDesarrolladaDTO = null;
+            try
+            {
+                ResponseVacunaDesarrolladaDTO responseVacunaDesarrolladaDTO = null;
             
-            //lista vacia para los errores
-            List<string> errores = new List<string>();
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
 
-            errores = await VerificarCredencialesOperadorNacional(model.EmailOperadorNacional, errores);
+                errores = await VerificarCredencialesOperadorNacional(model.EmailOperadorNacional, errores);
 
-            //verifico si existe la vacuna en la lista
-            Vacuna vacunaExistente = await _context.Vacuna.Where(vd => vd.Id == model.IdVacuna).FirstOrDefaultAsync();
-            if (vacunaExistente == null)
-            {
-                errores.Add(String.Format("La vacuna {0} no está registrada en el sistema", model.IdVacuna));
+                //verifico si existe la vacuna en la lista
+                Vacuna vacunaExistente = await _context.Vacuna.Where(vd => vd.Id == model.IdVacuna).FirstOrDefaultAsync();
+                if (vacunaExistente == null)
+                {
+                    errores.Add(String.Format("La vacuna {0} no está registrada en el sistema", model.IdVacuna));
+                }
+
+                //verifico si la marca comercial existe
+                MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == model.IdMarcaComercial).FirstOrDefaultAsync();
+                if(marcaComercialExistente == null)
+                {
+                    errores.Add(String.Format("La marca comercial {0} no esta registrada en el sistema", model.IdMarcaComercial));
+                }     
+
+                if (errores.Count() > 0)
+                {
+                    responseVacunaDesarrolladaDTO.EmailOperadorNacional = model.EmailOperadorNacional;
+                    responseVacunaDesarrolladaDTO.Errores = errores;
+                    responseVacunaDesarrolladaDTO.ExistenciaErrores = true;
+                    responseVacunaDesarrolladaDTO.EstadoTransaccion = "Rechazada";
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(0, model.IdVacuna, model.IdMarcaComercial, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada, model.FechaHasta.Value);
+                }
+                else
+                {
+                    //creo la instancia del objeto original. Del model
+                    VacunaDesarrollada vacunaDesarrollada = new VacunaDesarrollada();
+                    vacunaDesarrollada.IdVacuna = model.IdVacuna;
+                    vacunaDesarrollada.IdMarcaComercial = model.IdMarcaComercial;
+                    vacunaDesarrollada.DiasDemoraEntrega = model.DiasDemoraEntrega;
+                    vacunaDesarrollada.PrecioVacuna = model.PrecioVacunaDesarrollada;
+                    vacunaDesarrollada.FechaDesde = DateTime.Now;   
+                    vacunaDesarrollada.FechaHasta = model.FechaHasta;
+
+                    //guardo en la base de datos
+                    _context.VacunaDesarrollada.Add(vacunaDesarrollada);
+                    await _context.SaveChangesAsync();
+
+                    responseVacunaDesarrolladaDTO.EmailOperadorNacional = model.EmailOperadorNacional;
+                    responseVacunaDesarrolladaDTO.Errores = errores;
+                    responseVacunaDesarrolladaDTO.ExistenciaErrores = false;
+                    responseVacunaDesarrolladaDTO.EstadoTransaccion = "Aceptada";
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, model.IdVacuna, model.IdMarcaComercial, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada, model.FechaHasta.Value);
+                }
+                return Ok(responseVacunaDesarrolladaDTO);
             }
-
-            //verifico si la marca comercial existe
-            MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == model.IdMarcaComercial).FirstOrDefaultAsync();
-            if(marcaComercialExistente == null)
+            catch (Exception error)
             {
-                errores.Add(String.Format("La marca comercial {0} no esta registrada en el sistema", model.IdMarcaComercial));
-            }     
-
-            if (errores.Count() > 0)
-            {
-                responseVacunaDesarrolladaDTO.EmailOperadorNacional = model.EmailOperadorNacional;
-                responseVacunaDesarrolladaDTO.Errores = errores;
-                responseVacunaDesarrolladaDTO.ExistenciaErrores = true;
-                responseVacunaDesarrolladaDTO.EstadoTransaccion = "Rechazada";
-                responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(0, model.IdVacuna, model.IdMarcaComercial, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada, model.FechaHasta.Value);
+                return BadRequest(error.Message);
             }
-            else
-            {
-                //creo la instancia del objeto original. Del model
-                VacunaDesarrollada vacunaDesarrollada = new VacunaDesarrollada();
-                vacunaDesarrollada.IdVacuna = model.IdVacuna;
-                vacunaDesarrollada.IdMarcaComercial = model.IdMarcaComercial;
-                vacunaDesarrollada.DiasDemoraEntrega = model.DiasDemoraEntrega;
-                vacunaDesarrollada.PrecioVacuna = model.PrecioVacunaDesarrollada;
-                vacunaDesarrollada.FechaDesde = DateTime.Now;   
-                vacunaDesarrollada.FechaHasta = model.FechaHasta;
-
-                //guardo en la base de datos
-                _context.VacunaDesarrollada.Add(vacunaDesarrollada);
-                await _context.SaveChangesAsync();
-
-                responseVacunaDesarrolladaDTO.EmailOperadorNacional = model.EmailOperadorNacional;
-                responseVacunaDesarrolladaDTO.Errores = errores;
-                responseVacunaDesarrolladaDTO.ExistenciaErrores = false;
-                responseVacunaDesarrolladaDTO.EstadoTransaccion = "Aceptada";
-                responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, model.IdVacuna, model.IdMarcaComercial, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada, model.FechaHasta.Value);
-            }
-            return Ok(responseVacunaDesarrolladaDTO);
         }
 
         // DELETE: api/VacunasDesarrolladas/5
