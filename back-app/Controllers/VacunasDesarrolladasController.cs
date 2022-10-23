@@ -21,7 +21,7 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/VacunasDesarrolladas/GetAll
+        // GET: api/VacunasDesarrolladas/GetAll?emailOperadorNacional=juan@gmail.com
         [HttpGet]
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<ResponseListaVacunasDesarrolladasDTO>>> GetAll(string emailOperadorNacional = null)
@@ -69,18 +69,48 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        // GET: api/VacunasDesarrolladas/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<VacunaDesarrollada>> GetVacunaDesarrollada(int id)
+        // GET: api/VacunasDesarrolladas/GetVacunaDesarrollada?emailOperadorNacional=juan@gmail.com&idVacunaDesarrollada=5
+        [HttpGet]
+        [Route("GetVacunaDesarrollada")]
+        public async Task<ActionResult<ResponseVacunaDesarrolladaDTO>> GetVacunaDesarrollada(string emailOperadorNacional = null, int idVacunaDesarrollada = 0)
         {
-            var vacunaDesarrollada = await _context.VacunaDesarrollada.FindAsync(id);
-
-            if (vacunaDesarrollada == null)
+            try
             {
-                return NotFound();
-            }
+                ResponseVacunaDesarrolladaDTO responseVacunaDesarrolladaDTO = new ResponseVacunaDesarrolladaDTO();
 
-            return vacunaDesarrollada;
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+
+                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+
+                VacunaDesarrollada vacunaDesarrolladaExistente = await _context.VacunaDesarrollada.Where(vd => vd.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
+                if (vacunaDesarrolladaExistente == null)
+                {
+                    errores.Add(String.Format("La vacuna desarrollada con identificador {0} no esta registrada", idVacunaDesarrollada));
+                }
+                
+                if(errores.Count > 0)
+                {
+                    responseVacunaDesarrolladaDTO.EmailOperadorNacional = emailOperadorNacional;
+                    responseVacunaDesarrolladaDTO.EstadoTransaccion = "Rechazada";
+                    responseVacunaDesarrolladaDTO.ExistenciaErrores = true;
+                    responseVacunaDesarrolladaDTO.Errores = errores;
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(idVacunaDesarrollada, 0, 0, 0, 0, DateTime.Now);
+                }
+                else
+                {
+                    responseVacunaDesarrolladaDTO.EmailOperadorNacional = emailOperadorNacional;
+                    responseVacunaDesarrolladaDTO.EstadoTransaccion = "Aceptada";
+                    responseVacunaDesarrolladaDTO.ExistenciaErrores = false;
+                    responseVacunaDesarrolladaDTO.Errores = errores;
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrolladaExistente.Id, vacunaDesarrolladaExistente.IdVacuna, vacunaDesarrolladaExistente.IdMarcaComercial, vacunaDesarrolladaExistente.DiasDemoraEntrega, vacunaDesarrolladaExistente.PrecioVacuna, vacunaDesarrolladaExistente.FechaHasta.Value);
+                }
+                return Ok(responseVacunaDesarrolladaDTO);
+            }
+            catch (Exception ex)    
+            {
+                return BadRequest(ex.Message);  
+            }
         }
 
         // PUT: api/VacunasDesarrolladas/5
