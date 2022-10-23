@@ -22,7 +22,7 @@ namespace VacunacionApi.Models
         [Column("Dias_Demora_Entrega")]
         public int DiasDemoraEntrega { get; set; }
         [Column("Precio_Vacuna")]
-        public float PrecioVacuna { get; set; }
+        public double PrecioVacuna { get; set; }
         [Column("Fecha_Desde", TypeName = "date")]
         public DateTime FechaDesde { get; set; }
         [Column("Fecha_Hasta", TypeName = "date")]

@@ -29,8 +29,5 @@ namespace VacunacionApi.DTO
         [Required(ErrorMessage = "El campo precio de vacuna desarrollada es obligatorio")]
         [RegularExpression(@"^\d{1,12}(?:[.,]\d{1,2})?$", ErrorMessage = "El campo precio de vacuna tiene un formato inválido")]
         public float PrecioVacunaDesarrollada { get; set; }
-
-
-        public DateTime? FechaHasta { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace VacunacionApi.DTO
     {
         public VacunaDesarrolladaDTO() { }
 
-        public VacunaDesarrolladaDTO(int id, int idVacuna, int idMarcaComercial, int diasDeDemora, float precioVacunaDesarrollada, DateTime fechaHasta)
+        public VacunaDesarrolladaDTO(int id, int idVacuna, int idMarcaComercial, int diasDeDemora, double precioVacunaDesarrollada)
         {
             Id = id;
             IdVacuna = idVacuna;
@@ -16,14 +16,14 @@ namespace VacunacionApi.DTO
             DiasDemoraEntrega = diasDeDemora;
             PrecioVacuna = precioVacunaDesarrollada;
             FechaDesde = DateTime.Now;
-            FechaHasta = fechaHasta;
+            FechaHasta = null;
         }
 
         public int Id { get; set; }
         public int IdVacuna { get; set; }
         public int IdMarcaComercial { get; set; }
         public int DiasDemoraEntrega { get; set; }
-        public float PrecioVacuna { get; set; }
+        public double PrecioVacuna { get; set; }
         public DateTime FechaDesde { get; set; }
         public DateTime? FechaHasta { get; set; }
     }
