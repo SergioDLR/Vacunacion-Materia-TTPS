@@ -45,7 +45,9 @@ namespace VacunacionApi.Controllers
 
                     foreach(VacunaDesarrollada item in vacunasDesarrolladas)
                     {
-                        VacunaDesarrolladaDTO vacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(item.Id, item.IdVacuna, item.IdMarcaComercial, item.DiasDemoraEntrega, item.PrecioVacuna);
+                        MarcaComercial marcaComercial = await _context.MarcaComercial.Where(mc => mc.Id == item.IdMarcaComercial).FirstOrDefaultAsync();
+                        Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == item.IdVacuna).FirstOrDefaultAsync();    
+                        VacunaDesarrolladaDTO vacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(item.Id, item.IdVacuna, vacuna.Descripcion, item.IdMarcaComercial, marcaComercial.Descripcion, item.DiasDemoraEntrega, item.PrecioVacuna);
                         vacunasDesarrolladasDTO.Add(vacunaDesarrolladaDTO);
                     }
 
@@ -95,15 +97,18 @@ namespace VacunacionApi.Controllers
                     responseVacunaDesarrolladaDTO.EstadoTransaccion = "Rechazada";
                     responseVacunaDesarrolladaDTO.ExistenciaErrores = true;
                     responseVacunaDesarrolladaDTO.Errores = errores;
-                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(idVacunaDesarrollada, 0, 0, 0, 0);
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO();
                 }
                 else
                 {
+                    Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == vacunaDesarrolladaExistente.IdVacuna).FirstOrDefaultAsync();
+                    MarcaComercial marcaComercial = await _context.MarcaComercial.Where(mc => mc.Id == vacunaDesarrolladaExistente.IdMarcaComercial).FirstOrDefaultAsync();
+
                     responseVacunaDesarrolladaDTO.EmailOperadorNacional = emailOperadorNacional;
                     responseVacunaDesarrolladaDTO.EstadoTransaccion = "Aceptada";
                     responseVacunaDesarrolladaDTO.ExistenciaErrores = false;
                     responseVacunaDesarrolladaDTO.Errores = errores;
-                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrolladaExistente.Id, vacunaDesarrolladaExistente.IdVacuna, vacunaDesarrolladaExistente.IdMarcaComercial, vacunaDesarrolladaExistente.DiasDemoraEntrega, vacunaDesarrolladaExistente.PrecioVacuna);
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrolladaExistente.Id, vacunaDesarrolladaExistente.IdVacuna, vacuna.Descripcion, vacunaDesarrolladaExistente.IdMarcaComercial, marcaComercial.Descripcion, vacunaDesarrolladaExistente.DiasDemoraEntrega, vacunaDesarrolladaExistente.PrecioVacuna);
                 }
                 return Ok(responseVacunaDesarrolladaDTO);
             }
@@ -181,7 +186,7 @@ namespace VacunacionApi.Controllers
                     responseVacunaDesarrolladaDTO.Errores = errores;
                     responseVacunaDesarrolladaDTO.ExistenciaErrores = true;
                     responseVacunaDesarrolladaDTO.EstadoTransaccion = "Rechazada";
-                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(0, model.IdVacuna, model.IdMarcaComercial, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada);
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO();
                 }
                 else
                 {
@@ -198,11 +203,14 @@ namespace VacunacionApi.Controllers
                     _context.VacunaDesarrollada.Add(vacunaDesarrollada);
                     await _context.SaveChangesAsync();
 
+                    Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == vacunaDesarrollada.IdVacuna).FirstOrDefaultAsync();
+                    MarcaComercial marcaComercial = await _context.MarcaComercial.Where(mc => mc.Id == vacunaDesarrollada.IdMarcaComercial).FirstOrDefaultAsync();
+
                     responseVacunaDesarrolladaDTO.EmailOperadorNacional = model.EmailOperadorNacional;
                     responseVacunaDesarrolladaDTO.Errores = errores;
                     responseVacunaDesarrolladaDTO.ExistenciaErrores = false;
                     responseVacunaDesarrolladaDTO.EstadoTransaccion = "Aceptada";
-                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, model.IdVacuna, model.IdMarcaComercial, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada);
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, model.IdVacuna, vacuna.Descripcion, model.IdMarcaComercial, marcaComercial.Descripcion, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada);
                 }
                 return Ok(responseVacunaDesarrolladaDTO);
             }
