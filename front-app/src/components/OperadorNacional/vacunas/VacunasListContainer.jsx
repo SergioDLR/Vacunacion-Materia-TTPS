@@ -13,6 +13,7 @@ const VacunasListContainer = () => {
   const [vacunasCreadas, setVacunasCreadas] = useState([]);
   const [estaCargando, setEstaCargando] = useState(true);
   const { userSesion } = useContext(UserContext);
+  const [open, setOpen] = useState(false);
   const alert = useAlert();
   useEffect(() => {
     cargarTodasLasVacunas();
@@ -40,10 +41,8 @@ const VacunasListContainer = () => {
   };
   return (
     <Container>
-      <Button variant={"contained"}>Comprar</Button>
-      <Button variant={"contained"}>Distribuir</Button>
-      <CustomModal title={"Registrar vacuna"}>
-        <RegistrarVacunaContainer cargarTodasLasVacunas={cargarTodasLasVacunas} />
+      <CustomModal title={"Registrar vacuna"} open={open} setOpen={setOpen}>
+        <RegistrarVacunaContainer cargarTodasLasVacunas={cargarTodasLasVacunas} setOpen={setOpen} />
       </CustomModal>
       {estaCargando ? (
         <Box sx={{ marginTop: 1 }}>

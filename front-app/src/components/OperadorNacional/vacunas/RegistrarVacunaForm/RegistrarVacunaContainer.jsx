@@ -8,7 +8,7 @@ import { Button } from "@mui/material";
 import { UserContext } from "../../../Context/UserContext";
 import { useAlert } from "react-alert";
 import SelectAnual from "./SelectAnual";
-const RegistrarVacunaContainer = ({ cargarTodasLasVacunas }) => {
+const RegistrarVacunaContainer = ({ cargarTodasLasVacunas, setOpen }) => {
   const [tipoVacunaSelected, setTipoVacunaSelected] = useState(0);
   const [descripcion, setDescripcion] = useState(0);
   const [optionSelectCalendario, setOptionSelectCalendario] = useState("");
@@ -36,7 +36,9 @@ const RegistrarVacunaContainer = ({ cargarTodasLasVacunas }) => {
               alert.error(element);
             });
           }
-        });
+        })
+        .catch((error) => alert.error(`Ocurrio un error del lado del servidor ${error}`))
+        .finally(() => setOpen(false));
     } catch (e) {
       alert.error("Hay un error con el servidor");
     }
@@ -61,6 +63,9 @@ const RegistrarVacunaContainer = ({ cargarTodasLasVacunas }) => {
           setDescriptionName={setOptionSelectCalendario}
         />
       )}
+      <Button variant={"outlined"} color={"error"} onClick={() => setOpen(false)}>
+        Cancelar
+      </Button>
       {tipoVacunaSelected !== 0 && (descripcion !== 0 || optionSelectCalendario !== "") && (
         <Button variant={"contained"} onClick={handleSubmit}>
           Crear

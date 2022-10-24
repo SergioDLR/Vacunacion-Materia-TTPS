@@ -8,24 +8,33 @@ import { useAlert } from "react-alert";
 const MarcaComercial = ({ marcaComercial, cargarMarcasComerciales }) => {
   const alert = useAlert();
   const { userSesion } = useContext(UserContext);
+  const [open, setOpen] = useState(false);
   const [nuevaDescripcion, setNuevaDescripcion] = useState("");
   const handleSubmit = (event) => {
     event.preventDefault();
     if (nuevaDescripcion.length < 1) return alert.error("Complete el nombre de la marca");
-    axios
-      .put(allUrls.marcasComercialesModificar, {
-        EmailOperadorNacional: userSesion.email,
-        DescripcionMarcaComercial: marcaComercial.descripcion,
-        DescripcionMarcaComercialNueva: nuevaDescripcion,
-      })
-      .then((response) => {
-        if (response.data.estadoTransaccion === "Aceptada") {
-          alert.success("Se modifico con exito");
-          cargarMarcasComerciales();
-        } else {
-          alert.error(response.data.errores);
-        }
-      });
+    try {
+      axios
+        .put(allUrls.marcasComercialesModificar, {
+          EmailOperadorNacional: userSesion.email,
+          DescripcionMarcaComercial: marcaComercial.descripcion,
+          DescripcionMarcaComercialNueva: nuevaDescripcion,
+        })
+        .then((response) => {
+          if (response.data.estadoTransaccion === "Aceptada") {
+            alert.success("Se modifico con exito");
+            cargarMarcasComerciales();
+          } else {
+            alert.error(response.data.errores);
+          }
+        })
+        .catch((error) => {
+          alert.error(`Ocurrio un error del lado del servidor ${error}`);
+        })
+        .finally(() => setOpen(false));
+    } catch (error) {
+      alert.error(`Ocurrio un error del lado del servidor ${error}`);
+    }
   };
 
   const handleChange = (event) => {
@@ -36,7 +45,7 @@ const MarcaComercial = ({ marcaComercial, cargarMarcasComerciales }) => {
     <TableRow>
       <TableCell>{marcaComercial.descripcion}</TableCell>
       <TableCell align="right">
-        <CustomModal mostrarBotonSubmit={true} title={"Editar"}>
+        <CustomModal mostrarBotonSubmit={true} title={"Editar"} open={open} setOpen={setOpen}>
           <h2>Descripcion actual: {marcaComercial.descripcion} </h2>
           <form onSubmit={handleSubmit}>
             <TextField
@@ -45,11 +54,17 @@ const MarcaComercial = ({ marcaComercial, cargarMarcasComerciales }) => {
               value={nuevaDescripcion}
               variant="outlined"
               fullWidth
+              required
               onChange={handleChange}
             />
-            <Button variant="contained" type={"submit"}>
-              Actualizar
-            </Button>
+            <div style={{ marginTop: 5 }}>
+              <Button variant="outlined" color={"error"} type={"submit"} onClick={() => setOpen(false)}>
+                Cancelar
+              </Button>
+              <Button variant="contained" type={"submit"}>
+                Actualizar
+              </Button>
+            </div>
           </form>
         </CustomModal>
       </TableCell>
