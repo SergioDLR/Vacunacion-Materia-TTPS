@@ -4,10 +4,12 @@ const MarcasComercialesTable = ({ marcasComerciales, cargarMarcasComerciales }) 
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small">
-        <TableHead>
+        <TableHead sx={{ backgroundColor: "#2E7994" }}>
           <TableRow>
-            <TableCell>Nombre</TableCell>
-            <TableCell align="right">Acciones</TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }}>Nombre</TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
+              Acciones
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

@@ -5,6 +5,7 @@ import { useState, useContext } from "react";
 import axios from "axios ";
 import allUrls from "@/services/backend_url";
 import { useAlert } from "react-alert";
+import CustomButton from "@/components/utils/CustomButtom";
 const CargarMarcaComercial = ({ cargarMarcasComerciales }) => {
   const [open, setOpen] = useState(false);
   const alert = useAlert();
@@ -41,7 +42,7 @@ const CargarMarcaComercial = ({ cargarMarcasComerciales }) => {
 
   return (
     <>
-      <CustomModal title="Cargar marca" open={open} setOpen={setOpen}>
+      <CustomModal color={"info"} title="Cargar marca" open={open} setOpen={setOpen}>
         <h4>Cargar marca comercial:</h4>
         <form onSubmit={handleSubmit}>
           <TextField
@@ -55,18 +56,18 @@ const CargarMarcaComercial = ({ cargarMarcasComerciales }) => {
             onChange={handleChangeDescripcion}
           />
           <div style={{ marginTop: 6 }}>
-            <Button
+            <CustomButton
               type={"submit"}
-              sx={{ marginRight: 2 }}
-              variant={"outlined"}
+              sx={{ marginRight: 1 }}
+              variant={"contained"}
               color={"error"}
               onClick={() => setOpen(false)}
             >
               Cancelar
-            </Button>
-            <Button type={"submit"} variant={"contained"}>
+            </CustomButton>
+            <CustomButton type={"submit"} variant={"contained"} color={"success"}>
               Cargar
-            </Button>
+            </CustomButton>
           </div>
         </form>
       </CustomModal>

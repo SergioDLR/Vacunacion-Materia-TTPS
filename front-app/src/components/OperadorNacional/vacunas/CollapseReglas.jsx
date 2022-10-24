@@ -18,11 +18,15 @@ const CollapseReglas = ({ element }) => {
           {element.reglas.map((regla, index) => (
             <div key={index}>
               <Divider />
-              <ListItemText sx={{ pl: 4 }}>Descripcion: {regla.descripcion}</ListItemText>
+              <ListItemText sx={{ pl: 4 }}>Descripcion: {regla?.descripcion}</ListItemText>
               <Divider />
-              <ListItemText sx={{ pl: 4 }}>Lapso minimo dias: {regla.lapsoMaximoDias}</ListItemText>
+              <ListItemText sx={{ pl: 4 }}>Lapso minimo dias: {regla?.lapsoMaximoDias}</ListItemText>
               <Divider />
-              <ListItemText sx={{ pl: 4 }}>Lapso maximo dias: {regla.lapsoMinimoDias}</ListItemText>
+              <ListItemText sx={{ pl: 4 }}>Lapso maximo dias: {regla?.lapsoMinimoDias}</ListItemText>
+              <Divider />
+              {regla?.personalSalud && <ListItemText sx={{ pl: 4 }}>Habilitado para personal de salud</ListItemText>}
+              <Divider />
+              {regla?.embarazada && <ListItemText sx={{ pl: 4 }}>Habilitado para embarazada</ListItemText>}
             </div>
           ))}
         </List>

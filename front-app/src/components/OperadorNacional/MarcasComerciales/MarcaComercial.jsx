@@ -5,6 +5,7 @@ import allUrls from "@/services/backend_url";
 import axios from "axios";
 import { UserContext } from "@/components/Context/UserContext";
 import { useAlert } from "react-alert";
+import CustomButton from "@/components/utils/CustomButtom";
 const MarcaComercial = ({ marcaComercial, cargarMarcasComerciales }) => {
   const alert = useAlert();
   const { userSesion } = useContext(UserContext);
@@ -58,12 +59,12 @@ const MarcaComercial = ({ marcaComercial, cargarMarcasComerciales }) => {
               onChange={handleChange}
             />
             <div style={{ marginTop: 5 }}>
-              <Button variant="outlined" color={"error"} type={"submit"} onClick={() => setOpen(false)}>
+              <CustomButton variant="contained" color={"error"} type={"submit"} onClick={() => setOpen(false)}>
                 Cancelar
-              </Button>
-              <Button variant="contained" type={"submit"}>
+              </CustomButton>
+              <CustomButton variant="contained" color={"success"} type={"submit"}>
                 Actualizar
-              </Button>
+              </CustomButton>
             </div>
           </form>
         </CustomModal>

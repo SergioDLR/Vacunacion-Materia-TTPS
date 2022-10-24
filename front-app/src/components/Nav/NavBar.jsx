@@ -4,15 +4,17 @@ import Toolbar from "@mui/material/Toolbar";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
-
+import CustomButton from "../utils/CustomButtom";
 const NavBar = () => {
   return (
     <>
       <CssBaseline />
-      <AppBar sx={{ backgroundColor: "black" }}>
+      <AppBar sx={{ backgroundColor: "#37BBED", boxShadow: "none" }}>
         <Toolbar>
           <Link to={"/login"} style={{ textDecoration: "none" }}>
-            <Button variant="contained">Iniciar sesion</Button>
+            <CustomButton variant="contained" color="success" textColor="white">
+              Iniciar sesion
+            </CustomButton>
           </Link>
         </Toolbar>
       </AppBar>

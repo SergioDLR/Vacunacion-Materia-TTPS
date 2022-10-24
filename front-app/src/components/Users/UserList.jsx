@@ -20,12 +20,18 @@ const UserList = ({ users = [], getUsers }) => {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small">
-        <TableHead>
+        <TableHead sx={{ backgroundColor: "#2E7994" }}>
           <TableRow>
-            <TableCell>Nombre</TableCell>
-            <TableCell align="right">Jurisdiccion</TableCell>
-            <TableCell align="right">Rol</TableCell>
-            <TableCell align="right">Acciones</TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }}>Nombre</TableCell>
+            <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
+              Jurisdiccion
+            </TableCell>
+            <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
+              Rol
+            </TableCell>
+            <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
+              Acciones
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

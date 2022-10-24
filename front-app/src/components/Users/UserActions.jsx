@@ -1,16 +1,16 @@
 import { TableCell } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import SvgIcon from "@mui/material/SvgIcon";
-import DeleteIcon from "@mui/icons-material/Delete";
+import CustomButton from "../utils/CustomButtom";
 import { Button } from "@mui/material";
 const UserActions = ({ handleSelected }) => {
   return (
     <TableCell align="right">
-      <Button onClick={handleSelected}>
+      <CustomButton onClick={handleSelected} variant={"contained"} color="info">
         <SvgIcon>
           <EditIcon />
         </SvgIcon>
-      </Button>
+      </CustomButton>
     </TableCell>
   );
 };

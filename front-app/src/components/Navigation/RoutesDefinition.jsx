@@ -10,6 +10,8 @@ import AdminWraper from "../Nav/AdminWraper";
 import OperadorWraper from "../OperadorNacional/OperadorWraper";
 import AnalistaWraper from "../AnalistaProvincial/AnalistaWraper";
 import MarcasComercialesContainer from "../OperadorNacional/MarcasComerciales/MarcasComercialesContainer";
+import HomeOperador from "../OperadorNacional/home";
+import HomeAnalista from "../AnalistaProvincial/home";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -41,7 +43,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={3}>
             <OperadorWraper>
-              <h1>Bienvenido operador!</h1>
+              <HomeOperador />
             </OperadorWraper>
           </ProtectedRoute>
         }
@@ -82,7 +84,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={2}>
             <AnalistaWraper>
-              <h1>Bienvenido analista!</h1>
+              <HomeAnalista />
             </AnalistaWraper>
           </ProtectedRoute>
         }

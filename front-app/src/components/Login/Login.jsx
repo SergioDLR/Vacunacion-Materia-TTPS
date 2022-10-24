@@ -1,13 +1,16 @@
-import { TextField, Box, Paper, Container, Button } from "@mui/material";
+import { TextField, Box, Paper, Container, Button, CircularProgress } from "@mui/material";
 import { useState, useContext } from "react";
 import { UserContext } from "../Context/UserContext";
 import NavBar from "../Nav/NavBar";
 import { useAlert } from "react-alert";
 import allUrls from "../../services/backend_url";
 import axios from "axios";
+import CustomLoader from "../utils/CustomLoader";
+import CustomButton from "../utils/CustomButtom";
 const Login = () => {
   const alert = useAlert();
   const [email, setEmail] = useState("");
+  const [estaCargando, setEstaCargando] = useState(false);
   const [password, setPassword] = useState("");
   const { logIn } = useContext(UserContext);
   const handleChangeMail = (e) => {
@@ -21,6 +24,7 @@ const Login = () => {
     e.preventDefault();
     if (email.length < 5) return alert("La direccion de correo es muy corta");
     if (password.length < 3) return alert("Completa el campo de la Contraseña");
+    setEstaCargando(true);
     try {
       axios
         .get(`${allUrls.user}Login?email=${email}&password=${password}`)
@@ -29,9 +33,13 @@ const Login = () => {
             alert.error(response.data.errores);
           } else {
             logIn(response.data.usuarioDTO);
+            alert.success("Logeado correctamente");
           }
         })
-        .catch((e) => alert.error(`Ocurrio el error ${e}`));
+        .catch((e) => alert.error(`Ocurrio el error ${e}`))
+        .finally(() => {
+          setEstaCargando(false);
+        });
     } catch (e) {
       alert.error(`Ocurrio el error ${e}`);
     }
@@ -42,6 +50,7 @@ const Login = () => {
       <Container maxWidth="sm">
         <Box sx={{ marginTop: 1 }}>
           <Paper sx={{ padding: 3 }}>
+            <h3 style={{ margin: 0, marginBottom: 1 }}>Ingresar</h3>
             <form onSubmit={handleSubmit}>
               <TextField
                 sx={{ display: "block" }}
@@ -63,11 +72,12 @@ const Login = () => {
                 required
                 onChange={handleChangePassword}
               />
-              <Button type="submit" sx={{ marginTop: 1 }} variant="contained">
+              <CustomButton color={"success"} type="submit" sx={{ marginTop: 1 }} variant="contained">
                 Entrar
-              </Button>
+              </CustomButton>
             </form>
           </Paper>
+          {estaCargando && <CustomLoader />}
         </Box>
       </Container>
     </>

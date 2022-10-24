@@ -3,6 +3,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import CssBaseline from "@mui/material/CssBaseline";
+import CustomButton from "../utils/CustomButtom";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { UserContext } from "../Context/UserContext";
@@ -12,14 +13,22 @@ const AdminNavBar = () => {
   return (
     <>
       <CssBaseline />
-      <AppBar sx={{ backgroundColor: "black" }}>
+      <AppBar sx={{ backgroundColor: "#37BBED", boxShadow: "none" }}>
         <Toolbar>
           <Link to={"/admin/users"} style={{ textDecoration: "none" }}>
-            <Button variant="contained">Usuarios</Button>
+            <CustomButton textColor="white" color="info" variant="contained">
+              Usuarios
+            </CustomButton>
           </Link>
-          <Button sx={{ backgroundColor: "red", marginLeft: 1 }} onClick={cerrarSesion} variant="contained">
+          <CustomButton
+            textColor="white"
+            sx={{ marginLeft: "auto" }}
+            color="error"
+            variant="contained"
+            onClick={cerrarSesion}
+          >
             Cerrar sesion
-          </Button>
+          </CustomButton>
         </Toolbar>
       </AppBar>
       <Toolbar />

@@ -9,12 +9,11 @@ export const cargarVacunas = (setVacunasCreadas, url, emailOp, alert, efectoSecu
         } else {
           response?.data?.errores?.forEach((element) => alert.error(element));
         }
-        efectoSecundario();
       })
       .catch((e) => {
-        alert.error(e);
-        efectoSecundario();
-      });
+        alert.error(`No se pudo conectar`);
+      })
+      .finally(efectoSecundario);
   } catch (e) {
     alert.error("Ocurrio un error del lado del servidor");
   }

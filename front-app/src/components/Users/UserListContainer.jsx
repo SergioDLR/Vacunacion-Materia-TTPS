@@ -8,6 +8,7 @@ import { Button, Box } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useAlert } from "react-alert";
 import AddUSer from "./AddUser";
+import CustomButton from "../utils/CustomButtom";
 const UserListContainer = () => {
   const alert = useAlert();
   const { userSesion } = useContext(UserContext);
@@ -47,13 +48,15 @@ const UserListContainer = () => {
     <Container>
       {!isLoading ? (
         <>
-          <Button
-            variant="contained"
-            sx={{ display: "table", margin: "auto", marginTop: 1, marginBottom: 1 }}
+          <CustomButton
+            variant="outlined"
+            textColor=""
+            color="info"
+            sx={{ marginTop: 2, marginBottom: 2 }}
             onClick={handleOpen}
           >
             Agregar usuario
-          </Button>
+          </CustomButton>
           <UserList users={users} getUsers={getUsers} />
           <AddUSer open={open} handleClose={handleClose} getUsers={getUsers} />
         </>

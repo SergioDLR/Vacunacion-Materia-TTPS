@@ -2,6 +2,7 @@ import { Paper, Button, Container, Typography, Box, CircularProgress } from "@mu
 import { useState, useEffect, useContext } from "react";
 import RegistrarVacuna from "./RegistraVacuna";
 import SelectPandemia from "./RegistrarVacunaForm/SelectPandemia";
+import CustomLoader from "@/components/utils/CustomLoader";
 import RegistrarVacunaContainer from "./RegistrarVacunaForm/RegistrarVacunaContainer";
 import CustomModal from "../../utils/Modal";
 import { UserContext } from "../../Context/UserContext";
@@ -24,16 +25,12 @@ const VacunasListContainer = () => {
   };
   return (
     <Container>
-      <CustomModal title={"Registrar vacuna"} open={open} setOpen={setOpen}>
-        <RegistrarVacunaContainer cargarTodasLasVacunas={cargarTodasLasVacunas} setOpen={setOpen} />
-      </CustomModal>
-      {estaCargando ? (
-        <Box sx={{ marginTop: 1 }}>
-          <CircularProgress sx={{ display: "table", margin: "auto" }} />
-        </Box>
-      ) : (
-        <TablaVacunas vacunas={vacunasCreadas} />
-      )}
+      <Box sx={{ marginTop: 2, marginBottom: 2 }}>
+        <CustomModal color={"info"} title={"Registrar vacuna"} open={open} setOpen={setOpen}>
+          <RegistrarVacunaContainer cargarTodasLasVacunas={cargarTodasLasVacunas} setOpen={setOpen} />
+        </CustomModal>
+      </Box>
+      {estaCargando ? <CustomLoader /> : <TablaVacunas vacunas={vacunasCreadas} />}
     </Container>
   );
 };

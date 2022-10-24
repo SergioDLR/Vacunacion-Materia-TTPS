@@ -3,8 +3,9 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Button } from "@mui/material";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { UserContext } from "../Context/UserContext";
+import CustomButton from "../utils/CustomButtom";
 const OperadorNavBar = () => {
   const { cerrarSesion } = React.useContext(UserContext);
   let activeStyle = {
@@ -14,7 +15,7 @@ const OperadorNavBar = () => {
   return (
     <>
       <CssBaseline />
-      <AppBar sx={{ backgroundColor: "black" }}>
+      <AppBar sx={{ backgroundColor: "#37BBED", boxShadow: "none" }}>
         <Toolbar>
           <NavLink
             style={({ isActive }) =>
@@ -27,7 +28,9 @@ const OperadorNavBar = () => {
             }
             to={"/operador/vacunas"}
           >
-            <Button variant="contained">Vacunas</Button>
+            <CustomButton textColor="white" color="info" variant="contained">
+              Vacunas
+            </CustomButton>
           </NavLink>
           <NavLink
             style={({ isActive }) =>
@@ -40,7 +43,9 @@ const OperadorNavBar = () => {
             }
             to={"/operador/vacunasdesarrolladas"}
           >
-            <Button variant="contained">Vacunas desarrolladas</Button>
+            <CustomButton textColor="white" color="info" variant="contained">
+              Vacunas desarrolladas
+            </CustomButton>
           </NavLink>
           <NavLink
             to={"/operador/marcascomerciales"}
@@ -53,13 +58,22 @@ const OperadorNavBar = () => {
                   }
             }
           >
-            <Button variant="contained">Marcas comerciales</Button>
+            <CustomButton textColor="white" color="info" variant="contained">
+              Marcas comerciales
+            </CustomButton>
           </NavLink>
-          <Button sx={{ marginLeft: "auto" }} color="error" onClick={cerrarSesion} variant="contained">
+          <CustomButton
+            textColor="white"
+            sx={{ marginLeft: "auto" }}
+            color="error"
+            variant="contained"
+            onClick={cerrarSesion}
+          >
             Cerrar sesion
-          </Button>
+          </CustomButton>
         </Toolbar>
       </AppBar>
+
       <Toolbar />
     </>
   );

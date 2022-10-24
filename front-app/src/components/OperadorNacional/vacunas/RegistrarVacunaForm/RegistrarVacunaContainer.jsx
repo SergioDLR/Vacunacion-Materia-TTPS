@@ -8,6 +8,7 @@ import { Button } from "@mui/material";
 import { UserContext } from "../../../Context/UserContext";
 import { useAlert } from "react-alert";
 import SelectAnual from "./SelectAnual";
+import CustomButton from "@/components/utils/CustomButtom";
 const RegistrarVacunaContainer = ({ cargarTodasLasVacunas, setOpen }) => {
   const [tipoVacunaSelected, setTipoVacunaSelected] = useState(0);
   const [descripcion, setDescripcion] = useState(0);
@@ -63,13 +64,13 @@ const RegistrarVacunaContainer = ({ cargarTodasLasVacunas, setOpen }) => {
           setDescriptionName={setOptionSelectCalendario}
         />
       )}
-      <Button variant={"outlined"} color={"error"} onClick={() => setOpen(false)}>
+      <CustomButton variant={"contained"} color={"error"} onClick={() => setOpen(false)}>
         Cancelar
-      </Button>
+      </CustomButton>
       {tipoVacunaSelected !== 0 && (descripcion !== 0 || optionSelectCalendario !== "") && (
-        <Button variant={"contained"} onClick={handleSubmit}>
+        <CustomButton variant={"contained"} color={"success"} onClick={handleSubmit}>
           Crear
-        </Button>
+        </CustomButton>
       )}
     </>
   );

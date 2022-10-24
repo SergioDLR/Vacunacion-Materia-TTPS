@@ -8,6 +8,7 @@ import allUrls from "../../services/backend_url";
 import { UserContext } from "../Context/UserContext";
 import { useAlert } from "react-alert";
 import { TextField, FormControl, MenuItem, InputLabel, Select } from "@mui/material";
+import CustomButton from "../utils/CustomButtom";
 const style = {
   position: "absolute",
   top: "50%",
@@ -23,8 +24,8 @@ const style = {
 const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
   const alert = useAlert();
   const [password, setPassword] = useState(userSelected.password);
-  const [idJurisdiccion, setIdJurisdiccion] = useState(-1);
-  const [idRol, setIdRol] = useState(-1);
+  const [idJurisdiccion, setIdJurisdiccion] = useState(0);
+  const [idRol, setIdRol] = useState(0);
   const { userSesion } = useContext(UserContext);
 
   const [jurisdicciones, setJurisdicciones] = useState([]);
@@ -42,8 +43,8 @@ const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (idJurisdiccion === -1) return alert.show("Completa el campo de jurisdiccion");
-    if (idRol === -1) return alert.show("Completa el campo de rol");
+    if (idJurisdiccion === 0) return alert.show("Completa el campo de jurisdiccion");
+    if (idRol === 0) return alert.show("Completa el campo de rol");
     axios
       .put(`${allUrls.user}ModificarUsuario`, {
         EmailAdministrador: userSesion.email,
@@ -103,6 +104,7 @@ const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
               label="Nueva contraseña"
               variant="filled"
               type="password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={handleChangePassword}
@@ -120,6 +122,9 @@ const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
                 label="Nueva jurisdiccion"
                 defaultValue={1}
               >
+                <MenuItem value={0} disabled>
+                  Selecciona una opcion
+                </MenuItem>
                 {jurisdicciones.map((element, index) => (
                   <MenuItem value={element.id} key={index}>
                     {element.descripcion}
@@ -141,6 +146,9 @@ const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
                 value={idRol}
                 label="Nuevo rol"
               >
+                <MenuItem value={0} disabled>
+                  Selecciona una opcion
+                </MenuItem>
                 {roles.map((element, index) => (
                   <MenuItem value={element.id} key={index}>
                     {element.descripcion}
@@ -148,14 +156,15 @@ const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
                 ))}
               </Select>
             </FormControl>
-            <Button
+            <CustomButton
               sx={{ marginTop: 1, backgroundColor: "red", ":hover": { backgroundColor: "#a1032d" }, marginTop: 1 }}
               variant="contained"
+              color={"error"}
               onClick={handleClose}
             >
               Cancelar
-            </Button>
-            <Button
+            </CustomButton>
+            <CustomButton
               type="submit"
               sx={{
                 marginTop: 1,
@@ -167,7 +176,7 @@ const EditUser = ({ open, handleClose, getUsers, userSelected }) => {
               variant="contained"
             >
               Modificar
-            </Button>
+            </CustomButton>
           </form>
         </Box>
       </Modal>

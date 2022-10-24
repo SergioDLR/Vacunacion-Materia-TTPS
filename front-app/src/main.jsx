@@ -6,10 +6,10 @@ import { transitions, positions, Provider as AlertProvider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
 
 const options = {
-  position: positions.BOTTOM_CENTER,
+  position: positions.TOP_CENTER,
   timeout: 5000,
   offset: "30px",
-  transition: transitions.SCALE,
+  transition: transitions.FADE,
   containerStyle: {
     zIndex: 9999999999999,
   },

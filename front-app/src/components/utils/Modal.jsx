@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
+import CustomButton from "./CustomButtom";
 
 const style = {
   position: "absolute",
@@ -16,7 +17,16 @@ const style = {
   p: 4,
 };
 
-const CustomModal = ({ children, title = "Open Modal", cerrar = "Cancelar", open, setOpen, color = "primary" }) => {
+const CustomModal = ({
+  displayButton = true,
+  children,
+  title = "Open Modal",
+  cerrar = "Cancelar",
+  open,
+  setOpen,
+  color = "info",
+  textColor = "#2E7994",
+}) => {
   const handleOpen = () => setOpen(true);
   const handleClose = (event, reason) => {
     if (reason !== "backdropClick") {
@@ -25,9 +35,12 @@ const CustomModal = ({ children, title = "Open Modal", cerrar = "Cancelar", open
   };
   return (
     <>
-      <Button variant={"outlined"} color={color} onClick={handleOpen}>
-        {title}
-      </Button>
+      {displayButton && (
+        <CustomButton variant={"outlined"} color={color} textColor={textColor} onClick={handleOpen}>
+          {title}
+        </CustomButton>
+      )}
+
       <div>
         <Modal
           open={open}

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const cargarMarcas = (setMarcasComerciales, url, email, alert) => {
+export const cargarMarcas = (setMarcasComerciales, url, email, alert, efectoSecundario) => {
   try {
     axios
       .get(`${url}?emailOperadorNacional=${email}`)
@@ -13,7 +13,8 @@ export const cargarMarcas = (setMarcasComerciales, url, email, alert) => {
       })
       .catch((error) => {
         alert.error("Ocurrio un error con el servidor: " + error);
-      });
+      })
+      .finally(efectoSecundario);
   } catch (e) {
     alert.error("Ocurrio un error con el servidor");
   }

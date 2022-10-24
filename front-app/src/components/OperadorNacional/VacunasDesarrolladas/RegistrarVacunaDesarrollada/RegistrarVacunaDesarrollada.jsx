@@ -1,11 +1,12 @@
 import { useState, useEffect, useContext } from "react";
 import { UserContext } from "@/components/Context/UserContext";
-import { Button, TextField, InputLabel, Select, MenuItem, FormControl } from "@mui/material";
+import { Button, TextField, InputLabel, Select, MenuItem, FormControl, Box } from "@mui/material";
 import axios from "axios";
 import allUrls from "@/services/backend_url";
 import { cargarVacunas } from "@/services/getVacunas";
 import { useAlert } from "react-alert";
 import { cargarMarcas } from "@/services/getMarcasComerciales";
+import CustomButton from "@/components/utils/CustomButtom";
 const RegistrarVacunaDesarrollada = ({ setOpen, cargarVacunasDesarrolladas }) => {
   const { userSesion } = useContext(UserContext);
   const [diasDemora, setDiasDemora] = useState(0);
@@ -123,12 +124,14 @@ const RegistrarVacunaDesarrollada = ({ setOpen, cargarVacunasDesarrolladas }) =>
         onChange={handleChangePrecio}
         inputProps={{ min: 0 }}
       />
-      <Button variant={"contained"} color={"error"} onClick={() => setOpen(false)}>
-        Cancelar
-      </Button>
-      <Button variant={"contained"} type={"submit"}>
-        Crear
-      </Button>
+      <Box sx={{ marginTop: 2 }}>
+        <CustomButton variant={"contained"} color={"error"} onClick={() => setOpen(false)}>
+          Cancelar
+        </CustomButton>
+        <CustomButton variant={"contained"} color={"success"} type={"submit"}>
+          Crear
+        </CustomButton>
+      </Box>
     </form>
   );
 };

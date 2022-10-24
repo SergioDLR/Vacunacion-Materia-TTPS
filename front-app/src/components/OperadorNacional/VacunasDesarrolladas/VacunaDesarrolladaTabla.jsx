@@ -5,13 +5,21 @@ const VacunaDesarrolladaTabla = ({ vacunasDesarrolladas = [] }) => {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small">
-        <TableHead>
+        <TableHead sx={{ backgroundColor: "#2E7994" }}>
           <TableRow>
-            <TableCell>Vacuna</TableCell>
-            <TableCell align="right">Marca comercial</TableCell>
-            <TableCell align="right">Dias demora</TableCell>
-            <TableCell align="right">Precio</TableCell>
-            <TableCell align="right">Acciones</TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }}>Vacuna</TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
+              Marca comercial
+            </TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
+              Dias demora
+            </TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
+              Precio
+            </TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
+              Acciones
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

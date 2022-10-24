@@ -12,7 +12,7 @@ const AnalistaNavBar = () => {
   return (
     <>
       <CssBaseline />
-      <AppBar sx={{ backgroundColor: "black" }}>
+      <AppBar sx={{ backgroundColor: "#37BBED", boxShadow: "none" }}>
         <Toolbar>
           <Link to={"/analista/vacunados"} style={{ textDecoration: "none" }}>
             <Button variant="contained">Vacunados</Button>
