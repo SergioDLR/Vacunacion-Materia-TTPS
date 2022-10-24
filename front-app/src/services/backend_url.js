@@ -13,5 +13,6 @@ const allUrls = {
   marcasComerciales: `${urlBase}/MarcasComerciales/GetAll`,
   marcasComercialesModificar: `${urlBase}/MarcasComerciales/ModificarMarcaComercial`,
   marcasComercialesCrear: `${urlBase}/MarcasComerciales/CrearMarcaComercial`,
+  crearVacunaDesarrollada: `${urlBase}/VacunasDesarrolladas/CrearVacunaDesarrollada `,
 };
 export default allUrls;
