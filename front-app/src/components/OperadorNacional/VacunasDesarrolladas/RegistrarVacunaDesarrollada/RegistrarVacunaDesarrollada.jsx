@@ -6,7 +6,7 @@ import allUrls from "@/services/backend_url";
 import { cargarVacunas } from "@/services/getVacunas";
 import { useAlert } from "react-alert";
 import { cargarMarcas } from "@/services/getMarcasComerciales";
-const RegistrarVacunaDesarrollada = () => {
+const RegistrarVacunaDesarrollada = ({ setOpen, cargarVacunasDesarrolladas }) => {
   const { userSesion } = useContext(UserContext);
   const [diasDemora, setDiasDemora] = useState(0);
   const [precio, setPrecio] = useState(0);
@@ -22,13 +22,30 @@ const RegistrarVacunaDesarrollada = () => {
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
-    axios.post(allUrls.crearVacunaDesarrollada, {
-      EmailOperadorNacional: userSesion.email,
-      IdVacuna: vacunaSeleccionada,
-      IdMarcaComercial: marcaSeleccionada,
-      DiasDemoraEntrega: diasDemora,
-      PrecioVacunaDesarrollada: precio,
-    });
+    try {
+      axios
+        .post(allUrls.crearVacunaDesarrollada, {
+          EmailOperadorNacional: userSesion.email,
+          IdVacuna: vacunaSeleccionada,
+          IdMarcaComercial: marcaSeleccionada,
+          DiasDemoraEntrega: diasDemora,
+          PrecioVacunaDesarrollada: precio,
+        })
+        .then((response) => {
+          if (response?.data?.estadoTransaccion === "Aceptada") {
+            alert.success("Se creo la vacuna con exito");
+            cargarVacunasDesarrolladas();
+          } else {
+            alert.error(respones.data.errores);
+          }
+        })
+        .catch((error) => {
+          alert.error(`Ocurrio un error: ${error}`);
+        })
+        .finally(() => setOpen(false));
+    } catch (error) {
+      alert.error(`Ocurrio un error del lado del servidor ${error}`);
+    }
   };
   const handleChangeDiasDemora = (evt) => {
     setDiasDemora(evt.target.value);
@@ -106,6 +123,9 @@ const RegistrarVacunaDesarrollada = () => {
         onChange={handleChangePrecio}
         inputProps={{ min: 0 }}
       />
+      <Button variant={"contained"} color={"error"} onClick={() => setOpen(false)}>
+        Cancelar
+      </Button>
       <Button variant={"contained"} type={"submit"}>
         Crear
       </Button>

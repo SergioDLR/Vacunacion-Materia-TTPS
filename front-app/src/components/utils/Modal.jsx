@@ -16,17 +16,16 @@ const style = {
   p: 4,
 };
 
-const CustomModal = ({ children, title = "Open Modal", cerrar = "Cancelar", open, setOpen }) => {
+const CustomModal = ({ children, title = "Open Modal", cerrar = "Cancelar", open, setOpen, color = "primary" }) => {
   const handleOpen = () => setOpen(true);
   const handleClose = (event, reason) => {
     if (reason !== "backdropClick") {
       setOpen(false);
     }
   };
-
   return (
     <>
-      <Button variant={"outlined"} onClick={handleOpen}>
+      <Button variant={"outlined"} color={color} onClick={handleOpen}>
         {title}
       </Button>
       <div>
