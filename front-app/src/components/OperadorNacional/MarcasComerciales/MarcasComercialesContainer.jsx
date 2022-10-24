@@ -7,6 +7,7 @@ import { UserContext } from "@/components/Context/UserContext";
 import { useAlert } from "react-alert";
 import MarcasComercialesTable from "./MarcasComercialesTable";
 import CargarMarcaComercial from "./CargarMarcaComercial";
+import { cargarMarcas } from "@/services/getMarcasComerciales";
 const MarcasComercialesContainer = () => {
   const { userSesion } = useContext(UserContext);
   const [marcasComerciales, setMarcasComerciales] = useState([]);
@@ -16,22 +17,7 @@ const MarcasComercialesContainer = () => {
   }, []);
 
   const cargarMarcasComerciales = () => {
-    try {
-      axios
-        .get(`${allUrls.marcasComerciales}?emailOperadorNacional=${userSesion.email}`)
-        .then((response) => {
-          if (response?.data?.estadoTransaccion === "Aceptada") {
-            setMarcasComerciales(response?.data?.listasMarcasComercialesDTO);
-          } else {
-            alert.error(response?.data?.errores);
-          }
-        })
-        .catch((error) => {
-          alert.error("Ocurrio un error con el servidor: " + error);
-        });
-    } catch (e) {
-      alert.error("Ocurrio un error con el servidor");
-    }
+    cargarMarcas(setMarcasComerciales, allUrls.marcasComerciales, userSesion.email, alert);
   };
   return (
     <Container>
