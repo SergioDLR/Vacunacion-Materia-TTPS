@@ -1,7 +1,12 @@
 import { TableContainer, TableRow, TableCell, TableBody, Table, Paper, TableHead } from "@mui/material";
 import VacunaDesarrollada from "./VacunaDesarrollada";
 
-const VacunaDesarrolladaTabla = ({ vacunasDesarrolladas = [] }) => {
+const VacunaDesarrolladaTabla = ({
+  vacunasDesarrolladas = [],
+  cargarVacunasDesarrolladas,
+  vacunasDesarrolladasEliminadas,
+  mostrarEliminadas,
+}) => {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small">
@@ -24,8 +29,18 @@ const VacunaDesarrolladaTabla = ({ vacunasDesarrolladas = [] }) => {
         </TableHead>
         <TableBody>
           {vacunasDesarrolladas.map((element, index) => (
-            <VacunaDesarrollada vacuna={element} key={index} />
+            <VacunaDesarrollada cargarVacunasDesarrolladas={cargarVacunasDesarrolladas} vacuna={element} key={index} />
           ))}
+
+          {mostrarEliminadas &&
+            vacunasDesarrolladasEliminadas.map((element, index) => (
+              <VacunaDesarrollada
+                cargarVacunasDesarrolladas={cargarVacunasDesarrolladas}
+                vacuna={element}
+                key={index}
+                eliminada={true}
+              />
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
