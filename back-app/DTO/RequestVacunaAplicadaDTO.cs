@@ -35,6 +35,9 @@ namespace VacunacionApi.DTO
         [Required(ErrorMessage = "El campo personal de salud es obligatorio")]
         public bool PersonalSalud { get; set; }
 
+        [Required(ErrorMessage = "El campo fecha y hora nacimiento es obligatorio")]
+        public DateTime FechaHoraNacimiento { get; set; }
+
         [Required(ErrorMessage = "El campo id vacuna es obligatorio")]
         [Range(1, 1000000, ErrorMessage = "El campo id vacuna tiene un formato inválido")]
         public int IdVacuna { get; set; }

@@ -83,7 +83,7 @@ namespace VacunacionApi.Services
                 List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
                 ReglaDTO regla1 = new ReglaDTO(0, "Rotavirus - Aplicar desde los 2 meses del nacimiento hasta las 14 semanas y 6 días", null, 60, 104, null, false, false);
                 listaReglas1.Add(regla1);
-                DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Primera Dosis", listaReglas1);
+                DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Rotavirus - Primera Dosis", listaReglas1);
 
                 //Segunda dosis
                 List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();

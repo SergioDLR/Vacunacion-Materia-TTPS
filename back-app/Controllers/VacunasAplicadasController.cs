@@ -75,9 +75,6 @@ namespace VacunacionApi.Controllers
             return NoContent();
         }
 
-
-
-
         // POST: api/VacunasAplicadas/ConsultarVacunacion
         [HttpPost]
         [Route("ConsultarVacunacion")]
@@ -154,6 +151,11 @@ namespace VacunacionApi.Controllers
                                     responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, dosisDTO, 
                                         alertasVacunacion, vacunaDesarrolladaAplicacion);                                   
                                 }
+                                else
+                                {
+                                    alertasVacunacion.Add(string.Format("La vacuna anual {0} fue aplicada en la fecha {1}", vacunaExistente.Descripcion, vacunaAplicadaAnual.FechaVacunacion));
+                                    responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, null, alertasVacunacion, null);
+                                }
                             }
                         }
                     }
@@ -164,6 +166,7 @@ namespace VacunacionApi.Controllers
                         List<int> identificadoresDosis = new List<int>();
                         List<Dosis> dosisAplicadas = new List<Dosis>();
                         List<string> alertasVacunacion = new List<string>();
+                        List<List<string>> datosProximaDosis = new List<List<string>>();
 
                         foreach (EntidadVacunaDosis evd in entidadesVD)
                         {
@@ -187,6 +190,105 @@ namespace VacunacionApi.Controllers
                                 }
                             }
                         }
+
+                        datosProximaDosis = await ObtenerDatosProximaDosis(model.FechaHoraNacimiento, dosisAplicadas, vacunaExistente.Descripcion);
+
+                        if (datosProximaDosis[0][0] == null)
+                            responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, null, alertasVacunacion, null);
+                        else
+                        {
+                            Dosis proximaDosis = await _context.Dosis.Where(d => d.Descripcion == datosProximaDosis[0][0]).FirstOrDefaultAsync();
+                            EntidadDosisRegla entDR = await _context.EntidadDosisRegla.Where(e => e.IdDosis == proximaDosis.Id).FirstOrDefaultAsync();
+                            Regla regla = await _context.Regla.Where(r => r.Id == entDR.IdRegla).FirstOrDefaultAsync();
+
+                            ReglaDTO reglaDTO = new ReglaDTO(regla.Id, regla.Descripcion, regla.MesesVacunacion, regla.LapsoMinimoDias,
+                                            regla.LapsoMaximoDias, regla.Otros, regla.Embarazada, regla.PersonalSalud);
+                            DosisDTO dosisDTO = new DosisDTO(dosisExistente.Id, entidadVacunaDosisExistente.Orden.Value,
+                                dosisExistente.Descripcion, new List<ReglaDTO> { reglaDTO });
+
+                            VacunaDesarrolladaDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
+
+                            responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, dosisDTO,
+                                alertasVacunacion, vacunaDesarrolladaAplicacion);
+                        }
+                    }
+
+                    if (tipoVacuna.Descripcion == "Vacuna de Pandemia")
+                    {
+                        Pandemia pandemia = await _context.Pandemia.Where(p => p.Descripcion == vacunaExistente.Descripcion).FirstOrDefaultAsync();
+                        List<EntidadVacunaDosis> entidadesVD = await _context.EntidadVacunaDosis.Where(evd => evd.IdVacuna == model.IdVacuna).ToListAsync();
+                        List<int> identificadoresDosis = new List<int>();
+                        List<Dosis> dosisAplicadas = new List<Dosis>();
+                        List<string> alertasVacunacion = new List<string>();
+                        List<List<string>> datosProximaDosis = new List<List<string>>();
+                        int ordenReferenciaDosis = 0;
+                        Dosis proximaDosis = null;
+                        Regla regla = null;
+
+                        foreach (EntidadVacunaDosis evd in entidadesVD)
+                        {
+                            identificadoresDosis.Add(evd.IdDosis);
+                        }
+
+                        List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada
+                           .Where(d => d.Dni == model.Dni)
+                           .OrderBy(d => d.FechaVacunacion)
+                           .ToListAsync();
+                                                                        
+                        foreach (VacunaAplicada va in vacunasAplicadas)
+                        {
+                            if (identificadoresDosis.Contains(va.IdDosis))
+                            {
+                                Dosis d = await _context.Dosis.Where(x => x.Id == va.IdDosis).FirstOrDefaultAsync();
+
+                                if (d != null)
+                                {
+                                    dosisAplicadas.Add(d);
+                                }
+                            }
+                        }
+
+                        if (vacunasAplicadas.Count > 0)
+                            ordenReferenciaDosis = vacunasAplicadas.Count - 1;
+
+                        if (vacunasAplicadas.Count != entidadesVD.Count)
+                        {
+                            EntidadVacunaDosis evdSig = await _context.EntidadVacunaDosis.Where(evd => evd.Orden == ordenReferenciaDosis).FirstOrDefaultAsync();
+
+                            if (evdSig != null)
+                            {
+                                if (pandemia.FechaFin > DateTime.Now)
+                                {
+                                    alertasVacunacion.Add(string.Format("La pandemia {0} ha finalizado en la fecha {1}", pandemia.Descripcion, pandemia.FechaFin));
+                                }
+
+                                proximaDosis = await _context.Dosis.Where(d => d.Id == evdSig.IdDosis).FirstOrDefaultAsync();
+                                EntidadDosisRegla entDR = await _context.EntidadDosisRegla.Where(e => e.IdDosis == proximaDosis.Id).FirstOrDefaultAsync();
+                                regla = await _context.Regla.Where(r => r.Id == entDR.IdRegla).FirstOrDefaultAsync();
+
+                                ReglaDTO reglaDTO = new ReglaDTO(regla.Id, regla.Descripcion, regla.MesesVacunacion, regla.LapsoMinimoDias,
+                                   regla.LapsoMaximoDias, regla.Otros, regla.Embarazada, regla.PersonalSalud);
+                                DosisDTO dosisDTO = new DosisDTO(dosisExistente.Id, entidadVacunaDosisExistente.Orden.Value,
+                                    dosisExistente.Descripcion, new List<ReglaDTO> { reglaDTO });
+
+                                if (vacunasAplicadas.Count != 0)
+                                {
+                                    VacunaAplicada ultimaAplicacion = vacunasAplicadas.Last();
+                                    if ((DateTime.Now - ultimaAplicacion.FechaVacunacion).TotalDays < regla.LapsoMinimoDias)
+                                    {
+                                        alertasVacunacion.Add(string.Format("No ha transcurrido el tiempo mínimo de {0} días desde la última dosis aplicada", regla.LapsoMinimoDias));
+                                    }
+                                }
+
+                                VacunaDesarrolladaDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
+                                responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, dosisDTO, alertasVacunacion, vacunaDesarrolladaAplicacion);
+                            }
+                        }
+                        else
+                        {
+                            alertasVacunacion.Add(string.Format("Fueron aplicadas todas las dosis de vacuna para la pandemia {0}", pandemia.Descripcion));
+                            responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, null, alertasVacunacion, null);
+                        }
                     }
                 }
 
@@ -197,9 +299,6 @@ namespace VacunacionApi.Controllers
                 return BadRequest(error.Message);
             }
         }
-
-
-
 
         // DELETE: api/VacunasAplicadas/5
         [HttpDelete("{id}")]
@@ -392,7 +491,7 @@ namespace VacunacionApi.Controllers
             return vacunaDesarrolladaDTO;
         }
 
-        private async Task<List<List<string>>> ObtenerUltimaDosis(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
+        private async Task<List<List<string>>> ObtenerDatosProximaDosis(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
         {
             List<List<string>> listaProximasDosis = new List<List<string>>();
             
@@ -404,10 +503,10 @@ namespace VacunacionApi.Controllers
                         listaProximasDosis = await ObtenerProximaDosisHepatitisBHB(fechaNacimiento, dosisAplicadas, descripcionVacuna);
                         break;
                     case "BCG":
-                        //proximaDosis = vacunacionService.ObtenerProximaDosisBCG();
+                        listaProximasDosis = ObtenerProximaDosisBCG(fechaNacimiento, dosisAplicadas, descripcionVacuna);
                         break;
                     case "Rotavirus":
-                        //proximaDosis = vacunacionService.ObtenerProximaDosisRotavirus();
+                        listaProximasDosis = ObtenerProximaDosisRotavirus(fechaNacimiento, dosisAplicadas, descripcionVacuna);
                         break;
                     default:
                         break;
@@ -439,12 +538,13 @@ namespace VacunacionApi.Controllers
                     {
                         proximaDosis = string.Format("{0} - Primera Dosis Nacimiento", descripcionVacuna);
                     }
-                    else
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays < 4015)
                     {
-                        if ((DateTime.Now - fechaNacimiento).TotalDays < 4015)
-                        {
-                            alertasVacunacion.Add("La primera dosis debe aplicarse a partir de los 11 años de edad");
-                        }
+                        alertasVacunacion.Add("La dosis debe aplicarse en las primeras 12 horas de vida");
+                        proximaDosis = string.Format("{0} - Primera Dosis Nacimiento", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
+                    {
                         proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
                     }
                 }
@@ -458,7 +558,7 @@ namespace VacunacionApi.Controllers
                             .Where(va => va.IdDosis == ultimaDosisAplicada.Id)
                             .FirstOrDefaultAsync();
 
-                        if ((DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays > 29 &&
+                        if ((DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays >= 30 &&
                             (DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays < 180)
                         {
                             proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
@@ -468,7 +568,7 @@ namespace VacunacionApi.Controllers
                             alertasVacunacion.Add(string.Format("No se han cumplido 30 días desde la primera dosis"));
                             proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
                         }
-                        else if ((DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays > 180)
+                        else if ((DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays >= 180)
                         {
                             proximaDosis = string.Format("{0} - Tercera Dosis", descripcionVacuna);
                         }
@@ -480,6 +580,116 @@ namespace VacunacionApi.Controllers
                             alertasVacunacion.Add("La tercera dosis debe aplicarse a los 180 días de la primera dosis");
                         }
                         proximaDosis = string.Format("{0} - Tercera Dosis", descripcionVacuna);
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Tercera Dosis", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisBCG(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    double totalHoras = (DateTime.Now - fechaNacimiento).TotalHours;
+                    proximaDosis = string.Format("{0} - Dosis Única Nacimiento", descripcionVacuna);
+
+                    if (totalHoras > 1)
+                        alertasVacunacion.Add("La dosis debe aplicarse al momento del nacimiento");
+                }
+                else 
+                {
+                    alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                    proximaDosis = null;
+                }
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisRotavirus(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 60)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                        alertasVacunacion.Add("La primera dosis debe aplicarse a partir de los 60 días de vida");
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 60 && (DateTime.Now - fechaNacimiento).TotalDays < 104)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 104 && (DateTime.Now - fechaNacimiento).TotalDays < 120)
+                    {
+                        alertasVacunacion.Add("La primera dosis debe aplicarse antes de los 104 días de vida");
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 120 && (DateTime.Now - fechaNacimiento).TotalDays < 180)
+                    {
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 180)
+                    {
+                        alertasVacunacion.Add("La segunda dosis debe aplicarse antes de los 180 días de vida");
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Primera Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 120 && (DateTime.Now - fechaNacimiento).TotalDays < 180)
+                        {
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        else if ((DateTime.Now - fechaNacimiento).TotalDays >= 180)
+                        {
+                            alertasVacunacion.Add("La segunda dosis debe aplicarse antes de los 180 días de vida");
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Segunda Dosis", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
                     }
                 }
 
