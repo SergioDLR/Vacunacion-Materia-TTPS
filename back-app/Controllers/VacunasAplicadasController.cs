@@ -191,7 +191,7 @@ namespace VacunacionApi.Controllers
                             }
                         }
 
-                        datosProximaDosis = await ObtenerDatosProximaDosis(model.FechaHoraNacimiento, dosisAplicadas, vacunaExistente.Descripcion);
+                        datosProximaDosis = await ObtenerDatosProximaDosis(model.FechaHoraNacimiento, dosisAplicadas, vacunaExistente.Descripcion, model.Embarazada, model.PersonalSalud);
 
                         if (datosProximaDosis[0][0] == null)
                             responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, null, alertasVacunacion, null);
@@ -200,11 +200,12 @@ namespace VacunacionApi.Controllers
                             Dosis proximaDosis = await _context.Dosis.Where(d => d.Descripcion == datosProximaDosis[0][0]).FirstOrDefaultAsync();
                             EntidadDosisRegla entDR = await _context.EntidadDosisRegla.Where(e => e.IdDosis == proximaDosis.Id).FirstOrDefaultAsync();
                             Regla regla = await _context.Regla.Where(r => r.Id == entDR.IdRegla).FirstOrDefaultAsync();
+                            EntidadVacunaDosis evd = await _context.EntidadVacunaDosis.Where(e => e.IdDosis == proximaDosis.Id).FirstOrDefaultAsync();
 
                             ReglaDTO reglaDTO = new ReglaDTO(regla.Id, regla.Descripcion, regla.MesesVacunacion, regla.LapsoMinimoDias,
-                                            regla.LapsoMaximoDias, regla.Otros, regla.Embarazada, regla.PersonalSalud);
-                            DosisDTO dosisDTO = new DosisDTO(dosisExistente.Id, entidadVacunaDosisExistente.Orden.Value,
-                                dosisExistente.Descripcion, new List<ReglaDTO> { reglaDTO });
+                                regla.LapsoMaximoDias, regla.Otros, regla.Embarazada, regla.PersonalSalud);
+                            DosisDTO dosisDTO = new DosisDTO(proximaDosis.Id, evd.Orden.Value,
+                                proximaDosis.Descripcion, new List<ReglaDTO> { reglaDTO });
 
                             VacunaDesarrolladaDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
 
@@ -257,7 +258,7 @@ namespace VacunacionApi.Controllers
 
                             if (evdSig != null)
                             {
-                                if (pandemia.FechaFin > DateTime.Now)
+                                if (pandemia.FechaFin < DateTime.Now)
                                 {
                                     alertasVacunacion.Add(string.Format("La pandemia {0} ha finalizado en la fecha {1}", pandemia.Descripcion, pandemia.FechaFin));
                                 }
@@ -268,8 +269,8 @@ namespace VacunacionApi.Controllers
 
                                 ReglaDTO reglaDTO = new ReglaDTO(regla.Id, regla.Descripcion, regla.MesesVacunacion, regla.LapsoMinimoDias,
                                    regla.LapsoMaximoDias, regla.Otros, regla.Embarazada, regla.PersonalSalud);
-                                DosisDTO dosisDTO = new DosisDTO(dosisExistente.Id, entidadVacunaDosisExistente.Orden.Value,
-                                    dosisExistente.Descripcion, new List<ReglaDTO> { reglaDTO });
+                                DosisDTO dosisDTO = new DosisDTO(proximaDosis.Id, evdSig.Orden.Value,
+                                    proximaDosis.Descripcion, new List<ReglaDTO> { reglaDTO });
 
                                 if (vacunasAplicadas.Count != 0)
                                 {
@@ -458,7 +459,7 @@ namespace VacunacionApi.Controllers
                 List<Distribucion> distribucionesJurisdiccionVacunadorNoVencidas = await _context.Distribucion
                     .Where(d => d.IdJurisdiccion == vacunador.IdJurisdiccion
                         && d.IdLoteNavigation.IdVacunaDesarrolladaNavigation.IdVacuna == vacuna.Id
-                        && d.IdLoteNavigation.IdVacunaDesarrolladaNavigation.FechaHasta == null
+                        && d.IdLoteNavigation.FechaVencimiento > DateTime.Now
                         && d.Vencidas == 0
                         && d.Aplicadas < d.CantidadVacunas)
                     .OrderBy(lote => lote.IdLoteNavigation.FechaVencimiento)
@@ -467,9 +468,11 @@ namespace VacunacionApi.Controllers
                 if (distribucionesJurisdiccionVacunadorNoVencidas.Count > 0)
                 {
                     Distribucion distribucion = distribucionesJurisdiccionVacunadorNoVencidas.First();
-                    
+
+                    Lote lote = await _context.Lote.Where(l => l.Id == distribucion.IdLote).FirstOrDefaultAsync();
+
                     VacunaDesarrollada vacunaDesarrollada = await _context.VacunaDesarrollada
-                            .Where(vd => vd.Id == distribucion.IdLoteNavigation.IdVacunaDesarrollada)
+                            .Where(vd => vd.Id == lote.IdVacunaDesarrollada)
                             .FirstOrDefaultAsync();
 
                     if (vacunaDesarrollada != null)
@@ -478,7 +481,7 @@ namespace VacunacionApi.Controllers
 
                         if (marcaComercial != null)
                         {
-                            vacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, vacuna.Descripcion + " " + marcaComercial.Descripcion);
+                            vacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, vacuna.Descripcion + " " + marcaComercial.Descripcion, distribucion.IdLote);
                         }
                     }
                 }
@@ -491,7 +494,7 @@ namespace VacunacionApi.Controllers
             return vacunaDesarrolladaDTO;
         }
 
-        private async Task<List<List<string>>> ObtenerDatosProximaDosis(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
+        private async Task<List<List<string>>> ObtenerDatosProximaDosis(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
         {
             List<List<string>> listaProximasDosis = new List<List<string>>();
             
@@ -500,13 +503,13 @@ namespace VacunacionApi.Controllers
                 switch (descripcionVacuna)
                 {
                     case "Hepatitis B (HB)":
-                        listaProximasDosis = await ObtenerProximaDosisHepatitisBHB(fechaNacimiento, dosisAplicadas, descripcionVacuna);
+                        listaProximasDosis = await ObtenerProximaDosisHepatitisBHB(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
                         break;
                     case "BCG":
-                        listaProximasDosis = ObtenerProximaDosisBCG(fechaNacimiento, dosisAplicadas, descripcionVacuna);
+                        listaProximasDosis = ObtenerProximaDosisBCG(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
                         break;
                     case "Rotavirus":
-                        listaProximasDosis = ObtenerProximaDosisRotavirus(fechaNacimiento, dosisAplicadas, descripcionVacuna);
+                        listaProximasDosis = ObtenerProximaDosisRotavirus(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
                         break;
                     default:
                         break;
@@ -520,7 +523,7 @@ namespace VacunacionApi.Controllers
             return listaProximasDosis;
         }
 
-        public async Task<List<List<string>>> ObtenerProximaDosisHepatitisBHB(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
+        public async Task<List<List<string>>> ObtenerProximaDosisHepatitisBHB(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
         {
             string proximaDosis = null;
             List<string> listaProximasDosis = new List<string>(); 
@@ -588,6 +591,9 @@ namespace VacunacionApi.Controllers
                     }
                 }
 
+                if (embarazada)
+                    alertasVacunacion.Add("La persona se encuentra embarazada");
+
                 listaProximasDosis.Add(proximaDosis);
                 listaResultado.Add(listaProximasDosis);
                 listaResultado.Add(alertasVacunacion);
@@ -600,7 +606,7 @@ namespace VacunacionApi.Controllers
             return listaResultado;
         }
 
-        public List<List<string>> ObtenerProximaDosisBCG(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
+        public List<List<string>> ObtenerProximaDosisBCG(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
         {
             string proximaDosis = null;
             List<string> listaProximasDosis = new List<string>();
@@ -623,6 +629,12 @@ namespace VacunacionApi.Controllers
                     proximaDosis = null;
                 }
 
+                if (embarazada)
+                    alertasVacunacion.Add("La persona se encuentra embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
                 listaProximasDosis.Add(proximaDosis);
                 listaResultado.Add(listaProximasDosis);
                 listaResultado.Add(alertasVacunacion);
@@ -635,7 +647,7 @@ namespace VacunacionApi.Controllers
             return listaResultado;
         }
 
-        public List<List<string>> ObtenerProximaDosisRotavirus(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna)
+        public List<List<string>> ObtenerProximaDosisRotavirus(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
         {
             string proximaDosis = null;
             List<string> listaProximasDosis = new List<string>();
@@ -692,6 +704,12 @@ namespace VacunacionApi.Controllers
                         proximaDosis = null;
                     }
                 }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona se encuentra embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
 
                 listaProximasDosis.Add(proximaDosis);
                 listaResultado.Add(listaProximasDosis);
