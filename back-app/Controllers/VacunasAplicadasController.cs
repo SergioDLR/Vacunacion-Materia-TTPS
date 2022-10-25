@@ -192,13 +192,12 @@ namespace VacunacionApi.Controllers
                         }
 
                         datosProximaDosis = await ObtenerDatosProximaDosis(model.FechaHoraNacimiento, dosisAplicadas, vacunaExistente.Descripcion, model.Embarazada, model.PersonalSalud);
+                        alertasVacunacion = datosProximaDosis[1];
 
                         if (datosProximaDosis[0][0] == null)
                             responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, null, alertasVacunacion, null);
                         else
                         {
-                            alertasVacunacion = datosProximaDosis[1]; 
-
                             Dosis proximaDosis = await _context.Dosis.Where(d => d.Descripcion == datosProximaDosis[0][0]).FirstOrDefaultAsync();
                             EntidadDosisRegla entDR = await _context.EntidadDosisRegla.Where(e => e.IdDosis == proximaDosis.Id).FirstOrDefaultAsync();
                             Regla regla = await _context.Regla.Where(r => r.Id == entDR.IdRegla).FirstOrDefaultAsync();
@@ -531,8 +530,7 @@ namespace VacunacionApi.Controllers
             List<string> listaProximasDosis = new List<string>(); 
             List<string> alertasVacunacion = new List<string>();
             List<List<string>> listaResultado = new List<List<string>>();
-            VacunaAplicada ultimaVacunaAplicada = null;
-
+            
             try
             {
                 if (dosisAplicadas.Count == 0)
@@ -556,13 +554,18 @@ namespace VacunacionApi.Controllers
                 else
                 {
                     Dosis ultimaDosisAplicada = dosisAplicadas.Last();
-
-                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Primera Dosis", descripcionVacuna))
-                    {
-                        ultimaVacunaAplicada = await _context.VacunaAplicada
+                    Dosis primeraDosisAplicada = dosisAplicadas.First();
+                    
+                    VacunaAplicada ultimaVacunaAplicada = await _context.VacunaAplicada
                             .Where(va => va.IdDosis == ultimaDosisAplicada.Id)
                             .FirstOrDefaultAsync();
 
+                    VacunaAplicada primeraVacunaAplicada = await _context.VacunaAplicada
+                        .Where(va => va.IdDosis == primeraDosisAplicada.Id)
+                        .FirstOrDefaultAsync();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Primera Dosis", descripcionVacuna))
+                    {
                         if ((DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays >= 30 &&
                             (DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays < 180)
                         {
@@ -580,7 +583,7 @@ namespace VacunacionApi.Controllers
                     }
                     else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Segunda Dosis", descripcionVacuna))
                     {
-                        if ((DateTime.Now - ultimaVacunaAplicada.FechaVacunacion).TotalDays < 180)
+                        if ((DateTime.Now - primeraVacunaAplicada.FechaVacunacion).TotalDays < 180)
                         {
                             alertasVacunacion.Add("La tercera dosis debe aplicarse a los 180 días de la primera dosis");
                         }
