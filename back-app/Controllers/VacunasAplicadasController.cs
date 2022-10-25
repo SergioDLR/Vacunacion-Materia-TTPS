@@ -109,11 +109,11 @@ namespace VacunacionApi.Controllers
                         List<string> alertasVacunacion = new List<string>();
                         DateTime fechaActual = DateTime.Now;
                         int anioActual = fechaActual.Year;
-                        int mesActual = Convert.ToInt32(fechaActual.Month.ToString("MM"));
+                        int mesActual = Convert.ToInt32(fechaActual.Month.ToString());
 
                         if (edr != null)
                         {
-                            Regla regla = await _context.Regla.Where(r => r.Id == edr.IdDosis).FirstOrDefaultAsync();
+                            Regla regla = await _context.Regla.Where(r => r.Id == edr.IdRegla).FirstOrDefaultAsync();
 
                             if (regla != null)
                             {
@@ -197,6 +197,8 @@ namespace VacunacionApi.Controllers
                             responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, null, alertasVacunacion, null);
                         else
                         {
+                            alertasVacunacion = datosProximaDosis[1]; 
+
                             Dosis proximaDosis = await _context.Dosis.Where(d => d.Descripcion == datosProximaDosis[0][0]).FirstOrDefaultAsync();
                             EntidadDosisRegla entDR = await _context.EntidadDosisRegla.Where(e => e.IdDosis == proximaDosis.Id).FirstOrDefaultAsync();
                             Regla regla = await _context.Regla.Where(r => r.Id == entDR.IdRegla).FirstOrDefaultAsync();
@@ -250,7 +252,7 @@ namespace VacunacionApi.Controllers
                         }
 
                         if (vacunasAplicadas.Count > 0)
-                            ordenReferenciaDosis = vacunasAplicadas.Count - 1;
+                            ordenReferenciaDosis = vacunasAplicadas.Count;
 
                         if (vacunasAplicadas.Count != entidadesVD.Count)
                         {
