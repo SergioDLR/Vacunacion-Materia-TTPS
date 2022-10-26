@@ -33,7 +33,7 @@ namespace VacunacionApi.Controllers
 
                 //lista vacia para los errores
                 List<string> errores = new List<string>();
-                List<VacunaAplicadaDTO> vacunasAplicadasDTO = new List<VacunaAplicadaDTO>();
+                List<VacunaAplicadaConsultaDTO> vacunasAplicadasDTO = new List<VacunaAplicadaConsultaDTO>();
                 bool existenciaErrores = true;
                 string transaccion = "Rechazada";
                 Rol rolUsuario = null;
@@ -82,7 +82,7 @@ namespace VacunacionApi.Controllers
 
                             if (jurisdiccion.Id == usuarioExistente.IdJurisdiccion)
                             {
-                                VacunaAplicadaDTO vacunaAplicadaDTO = new VacunaAplicadaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
+                                VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
                                 vacunasAplicadasDTO.Add(vacunaAplicadaDTO);    
                             }   
                         }
@@ -98,7 +98,7 @@ namespace VacunacionApi.Controllers
                             MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
                             Dosis dosis = await getDosis(item.IdDosis);
                             
-                            VacunaAplicadaDTO vacunaAplicadaDTO = new VacunaAplicadaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
+                            VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
                             vacunasAplicadasDTO.Add(vacunaAplicadaDTO);
                         }
                     }
@@ -129,7 +129,7 @@ namespace VacunacionApi.Controllers
 
                 //lista vacia para los errores
                 List<string> errores = new List<string>();
-                List<VacunaAplicadaDTO> vacunasAplicadasDTO = new List<VacunaAplicadaDTO>();
+                List<VacunaAplicadaConsultaDTO> vacunasAplicadasDTO = new List<VacunaAplicadaConsultaDTO>();
                 bool existenciaErrores = true;
                 string transaccion = "Rechazada";
 
@@ -171,7 +171,7 @@ namespace VacunacionApi.Controllers
 
                         if(idJurisdiccion == item.IdJurisdiccion)
                         {
-                            VacunaAplicadaDTO vacunaAplicadaDTO = new VacunaAplicadaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
+                            VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
                             vacunasAplicadasDTO.Add(vacunaAplicadaDTO);
                         }
                     }

@@ -2,11 +2,11 @@
 
 namespace VacunacionApi.DTO
 {
-    public class VacunaAplicadaDTO
+    public class VacunaAplicadaConsultaDTO
     {
-        public VacunaAplicadaDTO() { }
+        public VacunaAplicadaConsultaDTO() { }
 
-        public VacunaAplicadaDTO(int dni, string apellido, string nombre, DateTime fechaDeVacunacion, string descrpcionJurisdiccion, int idLoteVacuna, int idVacunaDesarrollada, string descripcionVacuna, string descripcionMarcaComercial, string descripcionDosis) {
+        public VacunaAplicadaConsultaDTO(int dni, string apellido, string nombre, DateTime fechaDeVacunacion, string descrpcionJurisdiccion, int idLoteVacuna, int idVacunaDesarrollada, string descripcionVacuna, string descripcionMarcaComercial, string descripcionDosis) {
             Dni = dni;  
             Apellido = apellido;    
             Nombre = nombre;    

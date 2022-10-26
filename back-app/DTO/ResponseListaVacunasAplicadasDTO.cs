@@ -6,7 +6,7 @@ namespace VacunacionApi.DTO
     {
         public ResponseListaVacunasAplicadasDTO(){}
 
-        public ResponseListaVacunasAplicadasDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string emailUsuario, List<VacunaAplicadaDTO> listaVacunasAplicadasDTO)
+        public ResponseListaVacunasAplicadasDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string emailUsuario, List<VacunaAplicadaConsultaDTO> listaVacunasAplicadasDTO)
         {
             EstadoTransaccion = estadoTransaccion;  
             ExistenciaErrores = existenciaErrores;  
@@ -16,6 +16,6 @@ namespace VacunacionApi.DTO
         }
 
         public string EmailUsuario { get; set; }
-        public List<VacunaAplicadaDTO> ListaVacunasAplicadasDTO { get; set; }
+        public List<VacunaAplicadaConsultaDTO> ListaVacunasAplicadasDTO { get; set; }
     }
 }
