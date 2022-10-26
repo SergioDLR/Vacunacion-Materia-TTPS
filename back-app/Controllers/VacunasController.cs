@@ -85,7 +85,7 @@ namespace VacunacionApi.Controllers
                 }
                 else
                 {
-                    errores = await VerificarCredencialesUsuarioOperadorNacional(emailOperadorNacional, errores);
+                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(emailOperadorNacional, errores);
                 }
 
                 if (errores.Count > 0)
@@ -577,6 +577,31 @@ namespace VacunacionApi.Controllers
                     bool tieneRolOperadorNacional = await TieneRolOperadorNacional(usuarioSolicitante);
                     if (!tieneRolOperadorNacional)
                         errores.Add(string.Format("El usuario {0} no tiene rol operador nacional", emailOperadorNacional));
+                }
+            }
+            catch
+            {
+
+            }
+
+            return errores;
+        }
+
+        private async Task<List<string>> VerificarCredencialesUsuarioOperadorNacionalVacunador(string emailOperadorNacional, List<string> errores)
+        {
+            try
+            {
+                Usuario usuarioSolicitante = await _context.Usuario.Where(u => u.Email == emailOperadorNacional).FirstOrDefaultAsync();
+                if (usuarioSolicitante == null)
+                    errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailOperadorNacional));
+                else
+                {
+                    Rol rol = await _context.Rol
+                        .Where(r => r.Id == usuarioSolicitante.IdRol
+                            && (r.Descripcion == "Operador Nacional" || r.Descripcion == "Vacunador"))
+                        .FirstOrDefaultAsync();
+                    if (rol == null)
+                        errores.Add(string.Format("El usuario {0} no tiene rol operador nacional o rol vacunador", emailOperadorNacional));
                 }
             }
             catch
