@@ -12,6 +12,8 @@ import AnalistaWraper from "../AnalistaProvincial/AnalistaWraper";
 import MarcasComercialesContainer from "../OperadorNacional/MarcasComerciales/MarcasComercialesContainer";
 import HomeOperador from "../OperadorNacional/home";
 import HomeAnalista from "../AnalistaProvincial/home";
+import AplicarVacuna from "../Vacunador/AplicarVacuna";
+import VacunadorWraper from "../Vacunador/VacunadorWrapper";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -106,6 +108,26 @@ const RoutesDefinition = () => {
             <AnalistaWraper>
               <h1>Pagina de vacunados</h1>
             </AnalistaWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vacunador"
+        element={
+          <ProtectedRoute role={4}>
+            <VacunadorWraper>
+              <HomeOperador />
+            </VacunadorWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vacunador/aplicar"
+        element={
+          <ProtectedRoute role={4}>
+            <VacunadorWraper>
+              <AplicarVacuna />
+            </VacunadorWraper>
           </ProtectedRoute>
         }
       />

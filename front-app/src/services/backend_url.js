@@ -18,5 +18,8 @@ const allUrls = {
   todasVacunasDesarrolladasHabilitadas: `${urlBase}/VacunasDesarrolladas/GetAllActivas`,
   todasVacunasEliminadas: `${urlBase}/VacunasDesarrolladas/GetAllEliminados`,
   eliminarVacunaDesarrollada: `${urlBase}/VacunasDesarrolladas/DeleteVacunaDesarrollada`,
+  apiRenaper: `https://api.claudioraverta.com/personas/`,
+  consultarVacunacion: `${urlBase}/VacunasAplicadas/ConsultarVacunacion`,
+  crearVacunacion: `${urlBase}/VacunasAplicadas/CrearVacunacion`,
 };
 export default allUrls;
