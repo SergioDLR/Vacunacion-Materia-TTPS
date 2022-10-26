@@ -60,18 +60,17 @@ namespace VacunacionApi.Controllers
                                 EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Id == compra.IdEstadoCompra).FirstOrDefaultAsync();
                                 if (estadoCompra != null)
                                 {
-                                    Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == lote.IdVacunaDesarrolladaNavigation.IdVacuna).FirstOrDefaultAsync();
+                                    Vacuna vacuna = null;
+                                    VacunaDesarrollada vd = await _context.VacunaDesarrollada.Where(v => v.Id == lote.IdVacunaDesarrollada).FirstOrDefaultAsync();
 
-                                    if (vacuna != null)
+                                    if (vd != null)
                                     {
-                                        VacunaDesarrollada vacunaDesarrollada = await _context.VacunaDesarrollada
-                                            .Where(vd => vd.Id == lote.IdVacunaDesarrollada)
-                                            .FirstOrDefaultAsync();
+                                        vacuna = await _context.Vacuna.Where(v => v.Id == vd.IdVacuna).FirstOrDefaultAsync();
 
-                                        if (vacunaDesarrollada != null)
+                                        if (vacuna != null)
                                         {
-                                            MarcaComercial marcaComercial = await _context.MarcaComercial.Where(mc => mc.Id == vacunaDesarrollada.IdMarcaComercial).FirstOrDefaultAsync();
-                                            if (marcaComercial == null)
+                                            MarcaComercial marcaComercial = await _context.MarcaComercial.Where(mc => mc.Id == vd.IdMarcaComercial).FirstOrDefaultAsync();
+                                            if (marcaComercial != null)
                                             {
                                                 CompraDTO compraDTO = new CompraDTO(compra.Id, compra.IdLote, lote.FechaVencimiento, lote.IdVacunaDesarrollada,
                                                     vacuna.Descripcion + " " + marcaComercial.Descripcion, compra.IdEstadoCompra, estadoCompra.Descripcion, compra.CantidadVacunas,
@@ -155,7 +154,7 @@ namespace VacunacionApi.Controllers
                 Vacuna vacuna = null;
                 MarcaComercial marcaComercial = null;
 
-                EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Descripcion == "Pendiente").FirstOrDefaultAsync();
+                EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Descripcion == "No Recibida").FirstOrDefaultAsync();
                 if (estadoCompra == null)
                     errores.Add("Error de conexión al procesar los estados de compra");
 

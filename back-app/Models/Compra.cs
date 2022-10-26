@@ -9,7 +9,7 @@ namespace VacunacionApi.Models
     {
         public Compra(int idLote, int idEstadoCompra, int cantidadVacunas, int codigo, DateTime fechaEntrega)
         {
-            Id = idLote;
+            IdLote = idLote;
             IdEstadoCompra = idEstadoCompra;
             CantidadVacunas = cantidadVacunas;
             Codigo = codigo;
