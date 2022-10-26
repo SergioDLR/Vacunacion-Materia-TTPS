@@ -29,9 +29,15 @@ namespace VacunacionApi.Models
         [Required]
         [StringLength(250)]
         public string Apellido { get; set; }
-        public bool? Embarazada { get; set; }
+        [Column("Embarazada")]
+        public bool Embarazada { get; set; }
         [Column("Personal_Salud")]
-        public bool? PersonalSalud { get; set; }
+        public bool PersonalSalud { get; set; }
+        [Column("Fecha_Hora_Nacimiento", TypeName = "datetime")]
+        public DateTime FechaHoraNacimiento { get; set; }
+        [Column("Id_Jurisdiccion_Residencia")]
+        public int IdJurisdiccionResidencia { get; set; }
+
 
         [ForeignKey(nameof(IdDosis))]
         [InverseProperty(nameof(Dosis.VacunaAplicada))]
