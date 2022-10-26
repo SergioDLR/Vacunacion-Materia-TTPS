@@ -177,7 +177,7 @@ namespace VacunacionApi.Controllers
                     errores.Add(string.Format("La vacuna con identificador {0} no está registrada en el sistema", model.IdVacuna));
                 else
                 {
-                    VacunaDesarrolladaDTO vacunaDesarrolladaDisponible = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
+                    VacunaDesarrolladaVacunacionDTO vacunaDesarrolladaDisponible = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
                     if (vacunaDesarrolladaDisponible == null)
                         errores.Add(string.Format("No hay vacuna desarrollada en stock para la vacuna {0}", vacunaExistente.Descripcion));
                 }
@@ -241,7 +241,7 @@ namespace VacunacionApi.Controllers
                                     DosisDTO dosisDTO = new DosisDTO(dosisExistente.Id, entidadVacunaDosisExistente.Orden.Value, 
                                         dosisExistente.Descripcion, new List<ReglaDTO> { reglaDTO });
                                     
-                                    VacunaDesarrolladaDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
+                                    VacunaDesarrolladaVacunacionDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
 
                                     responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, dosisDTO, 
                                         alertasVacunacion, vacunaDesarrolladaAplicacion);                                   
@@ -303,7 +303,7 @@ namespace VacunacionApi.Controllers
                             DosisDTO dosisDTO = new DosisDTO(proximaDosis.Id, evd.Orden.Value,
                                 proximaDosis.Descripcion, new List<ReglaDTO> { reglaDTO });
 
-                            VacunaDesarrolladaDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
+                            VacunaDesarrolladaVacunacionDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
 
                             responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, dosisDTO,
                                 alertasVacunacion, vacunaDesarrolladaAplicacion);
@@ -377,7 +377,7 @@ namespace VacunacionApi.Controllers
                                     }
                                 }
 
-                                VacunaDesarrolladaDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
+                                VacunaDesarrolladaVacunacionDTO vacunaDesarrolladaAplicacion = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
                                 responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Aceptada", false, errores, model, dosisDTO, alertasVacunacion, vacunaDesarrolladaAplicacion);
                             }
                         }
@@ -614,9 +614,9 @@ namespace VacunacionApi.Controllers
             return reglaExistente;
         }
 
-        private async Task<VacunaDesarrolladaDTO> GetVacunaDesarrolladaAplicacion(Vacuna vacuna, string emailVacunador)
+        private async Task<VacunaDesarrolladaVacunacionDTO> GetVacunaDesarrolladaAplicacion(Vacuna vacuna, string emailVacunador)
         {
-            VacunaDesarrolladaDTO vacunaDesarrolladaDTO = null;
+            VacunaDesarrolladaVacunacionDTO vacunaDesarrolladaDTO = null;
 
             try
             {
@@ -647,7 +647,7 @@ namespace VacunacionApi.Controllers
 
                         if (marcaComercial != null)
                         {
-                            vacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, vacuna.Descripcion + " " + marcaComercial.Descripcion, distribucion.IdLote);
+                            vacunaDesarrolladaDTO = new VacunaDesarrolladaVacunacionDTO(vacunaDesarrollada.Id, vacuna.Descripcion + " " + marcaComercial.Descripcion, distribucion.IdLote);
                         }
                     }
                 }

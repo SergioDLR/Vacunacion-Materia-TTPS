@@ -13,7 +13,7 @@ namespace VacunacionApi.DTO
         }
 
         public ResponseVacunaAplicadaDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, RequestVacunaAplicadaDTO request, 
-            DosisDTO dosisCorrespondienteAplicacion, List<string> alertasVacunacion, VacunaDesarrolladaDTO vacunaDesarrolladaAplicacion)
+            DosisDTO dosisCorrespondienteAplicacion, List<string> alertasVacunacion, VacunaDesarrolladaVacunacionDTO vacunaDesarrolladaAplicacion)
         {
             EstadoTransaccion = estadoTransaccion;
             ExistenciaErrores = existenciaErrores;
@@ -27,6 +27,6 @@ namespace VacunacionApi.DTO
         public RequestVacunaAplicadaDTO RequestVacunaAplicada { get; set; }
         public DosisDTO DosisCorrespondienteAplicacion { get; set; }
         public List<string> AlertasVacunacion { get; set; }
-        public VacunaDesarrolladaDTO VacunaDesarrolladaAplicacion { get; set; }
+        public VacunaDesarrolladaVacunacionDTO VacunaDesarrolladaAplicacion { get; set; }
     }
 }
