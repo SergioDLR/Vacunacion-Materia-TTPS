@@ -21,11 +21,80 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Compras
+        // GET: api/Compras/GetAll
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Compra>>> GetCompra()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<ResponseListaComprasDTO>>> GetAll(string emailOperadorNacional = null, int idVacunaDesarrollada = 0)
         {
-            return await _context.Compra.ToListAsync();
+            try
+            {
+                ResponseListaComprasDTO responseListaComprasDTO = new ResponseListaComprasDTO();
+                List<CompraDTO> listaCompras = new List<CompraDTO>();
+                List<string> errores = new List<string>();
+
+                if (emailOperadorNacional == null)
+                {
+                    errores.Add("No se especificó el email operador nacional");
+                }
+                else
+                {
+                    errores = await VerificarCredencialesUsuarioOperadorNacional(emailOperadorNacional, errores);
+
+                    if (errores.Count > 0)
+                        responseListaComprasDTO = new ResponseListaComprasDTO("Rechazada", true, errores, listaCompras);
+                    else
+                    {
+                        List<Lote> listaLotes = new List<Lote>();
+
+                        if (idVacunaDesarrollada != 0)
+                            listaLotes = await _context.Lote.Where(l => l.IdVacunaDesarrollada == idVacunaDesarrollada).ToListAsync();
+                        else
+                            listaLotes = await _context.Lote.ToListAsync();
+
+                        foreach (Lote lote in listaLotes)
+                        {
+                            Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Id).FirstOrDefaultAsync();
+
+                            if (compra != null)
+                            {
+                                EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Id == compra.IdEstadoCompra).FirstOrDefaultAsync();
+                                if (estadoCompra != null)
+                                {
+                                    Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == lote.IdVacunaDesarrolladaNavigation.IdVacuna).FirstOrDefaultAsync();
+
+                                    if (vacuna != null)
+                                    {
+                                        VacunaDesarrollada vacunaDesarrollada = await _context.VacunaDesarrollada
+                                            .Where(vd => vd.Id == lote.IdVacunaDesarrollada)
+                                            .FirstOrDefaultAsync();
+
+                                        if (vacunaDesarrollada != null)
+                                        {
+                                            MarcaComercial marcaComercial = await _context.MarcaComercial.Where(mc => mc.Id == vacunaDesarrollada.IdMarcaComercial).FirstOrDefaultAsync();
+                                            if (marcaComercial == null)
+                                            {
+                                                CompraDTO compraDTO = new CompraDTO(compra.Id, compra.IdLote, lote.FechaVencimiento, lote.IdVacunaDesarrollada,
+                                                    vacuna.Descripcion + " " + marcaComercial.Descripcion, compra.IdEstadoCompra, estadoCompra.Descripcion, compra.CantidadVacunas,
+                                                    compra.Codigo, compra.FechaCompra, compra.FechaEntrega, compra.Distribuidas, compra.Vencidas);
+
+                                                listaCompras.Add(compraDTO);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        responseListaComprasDTO = new ResponseListaComprasDTO("Aceptada", false, errores, listaCompras);
+                    }
+                }
+
+                return Ok(responseListaComprasDTO);
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/Compras/5
@@ -83,13 +152,25 @@ namespace VacunacionApi.Controllers
             {
                 ResponseCompraDTO responseCompraDTO = null;
                 List<string> errores = new List<string>();
+                Vacuna vacuna = null;
+                MarcaComercial marcaComercial = null;
+
+                EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Descripcion == "Pendiente").FirstOrDefaultAsync();
+                if (estadoCompra == null)
+                    errores.Add("Error de conexión al procesar los estados de compra");
 
                 VacunaDesarrollada vacunaDesarrolladaExistente = await GetVacunaDesarrollada(model.IdVacunaDesarrollada);
+                
                 if (vacunaDesarrolladaExistente == null)
                     errores.Add(string.Format("La vacuna desarrollada con identificador {0} no está registrada en el sistema", model.IdVacunaDesarrollada));
                 else
                 {
-                    Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == vacunaDesarrolladaExistente.IdVacuna).FirstOrDefaultAsync();
+                    marcaComercial = await _context.MarcaComercial.Where(mc => mc.Id == vacunaDesarrolladaExistente.IdMarcaComercial).FirstOrDefaultAsync();
+                    if (marcaComercial == null)
+                        errores.Add("Error de conexión al procesar marca comercial");
+
+                    vacuna = await _context.Vacuna.Where(v => v.Id == vacunaDesarrolladaExistente.IdVacuna).FirstOrDefaultAsync();
+                    
                     if(vacuna != null)
                     {
                         TipoVacuna tipoVacuna = await _context.TipoVacuna.Where(tv => tv.Id == vacuna.IdTipoVacuna).FirstOrDefaultAsync();
@@ -172,7 +253,7 @@ namespace VacunacionApi.Controllers
                 errores = await VerificarCredencialesUsuarioOperadorNacional(model.EmailOperadorNacional, errores);
                               
                 if (errores.Count > 0)
-                    responseCompraDTO = new ResponseCompraDTO("Rechazada", true, errores, new CompraDTO(0, 0, null, model.IdVacunaDesarrollada, null, 0, null, model.CantidadVacunas, 0, null, null));
+                    responseCompraDTO = new ResponseCompraDTO("Rechazada", true, errores, new CompraDTO(0, 0, null, model.IdVacunaDesarrollada, null, 0, null, model.CantidadVacunas, 0, null, null, 0, 0));
                 else
                 {
                     Random randomCodigoCompra = new Random();
@@ -183,11 +264,30 @@ namespace VacunacionApi.Controllers
                         codigoCompra = randomCodigoCompra.Next(1, 100000000);
                     }
 
+                    DateTime start = DateTime.Now; 
+                    Random gen = new Random();
+                    int dias = gen.Next(1, 1000);
+                    
+                    while(start.AddDays(dias) < DateTime.Now.AddDays(vacunaDesarrolladaExistente.DiasDemoraEntrega))
+                    {
+                        dias = gen.Next(1, 1000);
+                    }
 
+                    DateTime fechaVencimiento = start.AddDays(dias);
 
+                    Lote lote = new Lote(vacunaDesarrolladaExistente.Id, fechaVencimiento);
+                    _context.Lote.Add(lote);
+                    await _context.SaveChangesAsync();
+                                       
+                    Compra compra = new Compra(lote.Id, estadoCompra.Id, model.CantidadVacunas, codigoCompra, DateTime.Now.AddDays(vacunaDesarrolladaExistente.DiasDemoraEntrega));
+                    _context.Compra.Add(compra);
+                    await _context.SaveChangesAsync();
+
+                    CompraDTO compraDTO = new CompraDTO(compra.Id, compra.IdLote, lote.FechaVencimiento, lote.IdVacunaDesarrollada, vacuna.Descripcion + " " + marcaComercial.Descripcion,
+                        compra.IdEstadoCompra, estadoCompra.Descripcion, compra.CantidadVacunas, compra.Codigo, compra.FechaCompra, compra.FechaEntrega, compra.Distribuidas, compra.Vencidas);
+
+                    responseCompraDTO = new ResponseCompraDTO("Aceptada", false, errores, compraDTO);
                 }
-
-
 
                 return Ok(responseCompraDTO);
 
