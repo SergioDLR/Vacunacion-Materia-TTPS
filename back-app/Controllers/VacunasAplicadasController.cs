@@ -253,7 +253,7 @@ namespace VacunacionApi.Controllers
                         if (vacunasAplicadas.Count > 0)
                             ordenReferenciaDosis = vacunasAplicadas.Count;
 
-                        if (vacunasAplicadas.Count != entidadesVD.Count)
+                        if (dosisAplicadas.Count != entidadesVD.Count)
                         {
                             EntidadVacunaDosis evdSig = await _context.EntidadVacunaDosis.Where(evd => evd.Orden == ordenReferenciaDosis).FirstOrDefaultAsync();
 
