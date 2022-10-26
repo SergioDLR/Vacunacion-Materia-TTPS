@@ -104,7 +104,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
           setEstaCargando(false);
         });
     } catch (e) {
-      alert.error(`${e}`);
+      alert.error(`Ya se aplico todas las dosis de esta vacuna`);
       setEstaCargando(false);
       setOpenPadre(false);
     }
@@ -178,15 +178,17 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
         >
           Cancelar
         </CustomButton>
-        <CustomButton
-          sx={{ marginTop: 1 }}
-          variant={"outlined"}
-          color={"info"}
-          textColor={"black"}
-          onClick={handleVacunacion}
-        >
-          Vacunar
-        </CustomButton>
+        {respuestaConsulta?.vacunaDesarrolladaAplicacion?.idLote !== null && (
+          <CustomButton
+            sx={{ marginTop: 1 }}
+            variant={"outlined"}
+            color={"info"}
+            textColor={"black"}
+            onClick={handleVacunacion}
+          >
+            Vacunar
+          </CustomButton>
+        )}
       </CustomModal>
     </>
   );

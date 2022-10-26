@@ -14,6 +14,7 @@ import HomeOperador from "../OperadorNacional/home";
 import HomeAnalista from "../AnalistaProvincial/home";
 import AplicarVacuna from "../Vacunador/AplicarVacuna";
 import VacunadorWraper from "../Vacunador/VacunadorWrapper";
+import Vacunados from "../AnalistaProvincial/Vacunados";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -106,7 +107,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={2}>
             <AnalistaWraper>
-              <h1>Pagina de vacunados</h1>
+              <Vacunados></Vacunados>
             </AnalistaWraper>
           </ProtectedRoute>
         }

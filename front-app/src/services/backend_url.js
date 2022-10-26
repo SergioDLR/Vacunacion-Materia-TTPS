@@ -21,5 +21,6 @@ const allUrls = {
   apiRenaper: `https://api.claudioraverta.com/personas/`,
   consultarVacunacion: `${urlBase}/VacunasAplicadas/ConsultarVacunacion`,
   crearVacunacion: `${urlBase}/VacunasAplicadas/CrearVacunacion`,
+  vacunasAplidas: `${urlBase}/VacunasAplicadas/GetAll`,
 };
 export default allUrls;

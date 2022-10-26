@@ -20,9 +20,9 @@ const CollapseReglas = ({ element }) => {
               <Divider />
               <ListItemText sx={{ pl: 4 }}>Descripcion: {regla?.descripcion}</ListItemText>
               <Divider />
-              <ListItemText sx={{ pl: 4 }}>Lapso minimo dias: {regla?.lapsoMaximoDias}</ListItemText>
+              <ListItemText sx={{ pl: 4 }}>Lapso minimo dias: {regla?.lapsoMinimoDias}</ListItemText>
               <Divider />
-              <ListItemText sx={{ pl: 4 }}>Lapso maximo dias: {regla?.lapsoMinimoDias}</ListItemText>
+              <ListItemText sx={{ pl: 4 }}>Lapso maximo dias: {regla?.lapsoMaximoDias}</ListItemText>
               <Divider />
               {regla?.personalSalud && <ListItemText sx={{ pl: 4 }}>Habilitado para personal de salud</ListItemText>}
               <Divider />

@@ -7,6 +7,18 @@ namespace VacunacionApi.Models
 {
     public partial class Compra
     {
+        public Compra(int idLote, int idEstadoCompra, int cantidadVacunas, int codigo, DateTime fechaEntrega)
+        {
+            IdLote = idLote;
+            IdEstadoCompra = idEstadoCompra;
+            CantidadVacunas = cantidadVacunas;
+            Codigo = codigo;
+            FechaCompra = DateTime.Now;
+            FechaEntrega = fechaEntrega;
+            Distribuidas = 0;
+            Vencidas = 0;
+        }
+
         [Key]
         public int Id { get; set; }
         [Column("Id_Lote")]

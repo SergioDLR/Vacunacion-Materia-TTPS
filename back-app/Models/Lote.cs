@@ -14,6 +14,13 @@ namespace VacunacionApi.Models
             VacunaAplicada = new HashSet<VacunaAplicada>();
         }
 
+        public Lote(int idVacunaDesarrollada, DateTime fechaVencimiento)
+        {
+            IdVacunaDesarrollada = idVacunaDesarrollada;
+            FechaVencimiento = fechaVencimiento;
+            Disponible = false;
+        }
+
         [Key]
         public int Id { get; set; }
         [Column("Id_Vacuna_Desarrollada")]
