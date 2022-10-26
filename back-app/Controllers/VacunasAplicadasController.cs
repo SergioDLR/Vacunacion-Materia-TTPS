@@ -75,6 +75,91 @@ namespace VacunacionApi.Controllers
             return NoContent();
         }
 
+        // POST: api/VacunasAplicadas/CrearVacunacion
+        [HttpPost]
+        [Route("CrearVacunacion")]
+        public async Task<ActionResult<ResponseCrearVacunaAplicadaDTO>> CrearVacunacion([FromBody] RequestCrearVacunaAplicadaDTO model)
+        {
+            try
+            {
+                ResponseCrearVacunaAplicadaDTO responseCrearVacunaAplicadaDTO = null;
+                List<string> errores = new List<string>();
+
+                Distribucion distribucion = await _context.Distribucion.Where(d => d.IdLote == model.IdLote).FirstOrDefaultAsync();
+                if (distribucion == null)
+                    errores.Add(string.Format("No se ha podido localizar una distribución con identificador de lote {0}", model.IdLote));
+                else if (distribucion.Vencidas > 0)
+                    errores.Add(string.Format("El lote con identificador {0} tiene las vacunas vencidas", model.IdLote));
+                else if (distribucion.Aplicadas == distribucion.CantidadVacunas)
+                    errores.Add(string.Format("El lote con identificador {0} no tiene vacunas disponibles", model.IdLote));
+
+                errores = await VerificarCredencialesUsuarioVacunador(model.EmailVacunador, errores);
+
+                Vacuna vacunaExistente = await GetVacuna(model.IdVacuna);
+                if (vacunaExistente == null)
+                    errores.Add(string.Format("La vacuna con identificador {0} no está registrada en el sistema", model.IdVacuna));
+
+                Dosis dosisExistente = await GetDosis(model.IdDosis);
+                if (dosisExistente == null)
+                    errores.Add(string.Format("La dosis con identificador {0} no está registrada en el sistema", model.IdDosis));
+
+                Regla reglaExistente = await GetRegla(model.IdRegla);
+                if (reglaExistente == null)
+                    errores.Add(string.Format("La regla con identificador {0} no está registrada en el sistema", model.IdRegla));
+
+                Lote loteExistente = await GetLote(model.IdLote);
+                if (loteExistente == null)
+                    errores.Add(string.Format("El lote con identificador {0} no está registrado en el sistema", model.IdLote));
+
+                VacunaDesarrollada vacunaDesarrolladaExistente = await GetVacunaDesarrollada(model.IdVacunaDesarrollada);
+                if (vacunaDesarrolladaExistente == null)
+                    errores.Add(string.Format("La vacuna desarrollada con identificador {0} no está registrada en el sistema", model.IdVacunaDesarrollada));
+
+                Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(model.JurisdiccionResidencia);
+                if (jurisdiccionExistente == null)
+                    errores.Add(string.Format("La jurisdicción {0} no está registrada en el sistema", model.JurisdiccionResidencia));
+
+                EntidadVacunaDosis entidadVacunaDosisExistente = await GetEntidadVacunaDosis(model.IdVacuna, model.IdDosis);
+                if (entidadVacunaDosisExistente == null)
+                    errores.Add(string.Format("La dosis con identificador {0} no está asociada a la vacuna con identificador {1}", model.IdDosis, model.IdVacuna));
+
+                if (errores.Count > 0)
+                    responseCrearVacunaAplicadaDTO = new ResponseCrearVacunaAplicadaDTO("Rechazada", true, errores, 0, model, null, null, null, null);
+                else
+                {
+                    VacunaAplicada vacunaAplicada = new VacunaAplicada();
+                    vacunaAplicada.Nombre = model.Nombre;
+                    vacunaAplicada.Apellido = model.Apellido;
+                    vacunaAplicada.Dni = model.Dni;
+                    vacunaAplicada.Embarazada = model.Embarazada;
+                    vacunaAplicada.FechaHoraNacimiento = model.FechaHoraNacimiento;
+                    vacunaAplicada.FechaVacunacion = DateTime.Now;
+                    vacunaAplicada.IdDosis = model.IdDosis;
+                    vacunaAplicada.IdJurisdiccion = (await GetUsuario(model.EmailVacunador)).IdJurisdiccion.Value;
+                    vacunaAplicada.IdJurisdiccionResidencia = jurisdiccionExistente.Id;
+                    vacunaAplicada.IdLote = model.IdLote;
+                    vacunaAplicada.PersonalSalud = model.PersonalSalud;
+                    vacunaAplicada.SexoBiologico = model.SexoBiologico;
+                    distribucion.Aplicadas -= 1;
+
+                    _context.VacunaAplicada.Add(vacunaAplicada);
+                    _context.Entry(distribucion).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    MarcaComercial mc = await _context.MarcaComercial.Where(m => m.Id == vacunaDesarrolladaExistente.IdMarcaComercial).FirstOrDefaultAsync();
+
+                    responseCrearVacunaAplicadaDTO = new ResponseCrearVacunaAplicadaDTO("Aceptada", false, errores, vacunaAplicada.Id, model,
+                        vacunaExistente.Descripcion, dosisExistente.Descripcion, reglaExistente.Descripcion, vacunaExistente.Descripcion + " " + mc.Descripcion);
+                }
+
+                return Ok(responseCrearVacunaAplicadaDTO);
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
         // POST: api/VacunasAplicadas/ConsultarVacunacion
         [HttpPost]
         [Route("ConsultarVacunacion")]
@@ -90,10 +175,20 @@ namespace VacunacionApi.Controllers
                 Vacuna vacunaExistente = await GetVacuna(model.IdVacuna);
                 if (vacunaExistente == null)
                     errores.Add(string.Format("La vacuna con identificador {0} no está registrada en el sistema", model.IdVacuna));
+                else
+                {
+                    VacunaDesarrolladaDTO vacunaDesarrolladaDisponible = await GetVacunaDesarrolladaAplicacion(vacunaExistente, model.EmailVacunador);
+                    if (vacunaDesarrolladaDisponible == null)
+                        errores.Add(string.Format("No hay vacuna desarrollada en stock para la vacuna {0}", vacunaExistente.Descripcion));
+                }
 
                 Dosis dosisExistente = await GetDosis(model.IdDosis);
                 if (dosisExistente == null)
                     errores.Add(string.Format("La dosis con identificador {0} no está registrada en el sistema", model.IdDosis));
+
+                Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(model.JurisdiccionResidencia);
+                if (jurisdiccionExistente == null)
+                    errores.Add(string.Format("La jurisdicción {0} no está registrada en el sistema", model.JurisdiccionResidencia));
 
                 EntidadVacunaDosis entidadVacunaDosisExistente = await GetEntidadVacunaDosis(model.IdVacuna, model.IdDosis);
                 if (entidadVacunaDosisExistente == null)
@@ -293,6 +388,8 @@ namespace VacunacionApi.Controllers
                         }
                     }
                 }
+                else
+                    responseVacunaAplicadaDTO = new ResponseVacunaAplicadaDTO("Rechazada", true, errores, model, null, null, null);
 
                 return Ok(responseVacunaAplicadaDTO);
             }
@@ -415,6 +512,40 @@ namespace VacunacionApi.Controllers
             return entidadVacunaDosisExistente;
         }
 
+        private async Task<Jurisdiccion> GetJurisdiccion(string jurisdiccion)
+        {
+            Jurisdiccion jurisdiccionExistente = null;
+
+            try
+            {
+                jurisdiccionExistente = await _context.Jurisdiccion
+                    .Where(j => j.Descripcion == jurisdiccion).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return jurisdiccionExistente;
+        }
+
+        private async Task<Lote> GetLote(int idLote)
+        {
+            Lote loteExistente = null;
+
+            try
+            {
+                loteExistente = await _context.Lote
+                    .Where(l => l.Id == idLote).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return loteExistente;
+        }
+
         private async Task<Vacuna> GetVacuna(int idVacuna)
         {
             Vacuna vacunaExistente = null;
@@ -432,6 +563,23 @@ namespace VacunacionApi.Controllers
             return vacunaExistente;
         }
 
+        private async Task<VacunaDesarrollada> GetVacunaDesarrollada(int idVacunaDesarrollada)
+        {
+            VacunaDesarrollada vacunaDesarrolladaExistente = null;
+
+            try
+            {
+                vacunaDesarrolladaExistente = await _context.VacunaDesarrollada
+                    .Where(vac => vac.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return vacunaDesarrolladaExistente;
+        }
+
         private async Task<Dosis> GetDosis(int idDosis)
         {
             Dosis dosisExistente = null;
@@ -447,6 +595,23 @@ namespace VacunacionApi.Controllers
             }
 
             return dosisExistente;
+        }
+
+        private async Task<Regla> GetRegla(int idRegla)
+        {
+            Regla reglaExistente = null;
+
+            try
+            {
+                reglaExistente = await _context.Regla
+                    .Where(r => r.Id == idRegla).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return reglaExistente;
         }
 
         private async Task<VacunaDesarrolladaDTO> GetVacunaDesarrolladaAplicacion(Vacuna vacuna, string emailVacunador)
