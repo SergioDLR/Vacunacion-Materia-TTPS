@@ -99,10 +99,14 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
         .catch((error) => {
           console.log(error);
         })
-        .finally(() => setEstaCargando(false));
+        .finally(() => {
+          setOpenPadre(false);
+          setEstaCargando(false);
+        });
     } catch (e) {
       alert.error(`${e}`);
       setEstaCargando(false);
+      setOpenPadre(false);
     }
   };
   return (
