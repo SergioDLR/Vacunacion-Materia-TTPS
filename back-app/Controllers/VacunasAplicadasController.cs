@@ -118,6 +118,79 @@ namespace VacunacionApi.Controllers
             }
         }
 
+        // GET: api/VacunasAplicadas/GetVacunasAplicadas?emailOperadorNacional=juan@gmail.com?idJurisdiccion=2
+        [HttpGet]
+        [Route("GetVacunasAplicadas")]
+        public async Task<ActionResult<IEnumerable<ResponseListaVacunasAplicadasDTO>>> GetVacunasAplicadas(string emailOperadorNacional = null, int idJurisdiccion = 0)
+        {
+            try
+            {
+                ResponseListaVacunasAplicadasDTO responseListaVacunasAplicadas = new ResponseListaVacunasAplicadasDTO();
+
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+                List<VacunaAplicadaDTO> vacunasAplicadasDTO = new List<VacunaAplicadaDTO>();
+                bool existenciaErrores = true;
+                string transaccion = "Rechazada";
+
+                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+
+                //obtengo la lista
+                List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
+
+                if (vacunasAplicadas.Count == 0)
+                {
+                    errores.Add("No existen vacunados en la base de datos");
+                }
+
+                if(idJurisdiccion == 0)
+                {
+                    errores.Add("No se especifica jurisdiccion. Envie el id de la jurisdiccion deseada");
+                }
+
+                //obtengo la jurisdiccion enviada por parametro
+                Jurisdiccion jurisdiccion = await getDescripcionJurisdiccion(idJurisdiccion);
+
+                if(jurisdiccion == null)
+                {
+                    errores.Add(String.Format("La jurisdiccion con identificador {0} no existe en el sistema", idJurisdiccion));
+                }
+
+                if (errores.Count == 0)
+                {
+                    existenciaErrores = false;
+                    transaccion = "Aceptada";
+
+                    foreach (VacunaAplicada item in vacunasAplicadas)
+                    {
+                        Lote lote = await getLote(item.IdLote);
+                        VacunaDesarrollada vacunaDesarrollada = await getVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                        Vacuna vacuna = await getVacuna(vacunaDesarrollada.IdVacuna);
+                        MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                        Dosis dosis = await getDosis(item.IdDosis);
+
+                        if(idJurisdiccion == item.IdJurisdiccion)
+                        {
+                            VacunaAplicadaDTO vacunaAplicadaDTO = new VacunaAplicadaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
+                            vacunasAplicadasDTO.Add(vacunaAplicadaDTO);
+                        }
+                    }
+                }
+
+                responseListaVacunasAplicadas.EstadoTransaccion = transaccion;
+                responseListaVacunasAplicadas.Errores = errores;
+                responseListaVacunasAplicadas.ExistenciaErrores = existenciaErrores;
+                responseListaVacunasAplicadas.EmailUsuario = emailOperadorNacional;
+                responseListaVacunasAplicadas.ListaVacunasAplicadasDTO = vacunasAplicadasDTO;
+
+                return Ok(responseListaVacunasAplicadas);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
         // GET: api/VacunasAplicadas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<VacunaAplicada>> GetVacunaAplicada(int id)
