@@ -140,7 +140,7 @@ namespace VacunacionApi.Controllers
                     vacunaAplicada.IdLote = model.IdLote;
                     vacunaAplicada.PersonalSalud = model.PersonalSalud;
                     vacunaAplicada.SexoBiologico = model.SexoBiologico;
-                    distribucion.Aplicadas -= 1;
+                    distribucion.Aplicadas += 1;
 
                     _context.VacunaAplicada.Add(vacunaAplicada);
                     _context.Entry(distribucion).State = EntityState.Modified;
