@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,11 +23,173 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/VacunasAplicadas
+        // GET: api/VacunasAplicadas/GetAll?emailUsuario=juan@gmail.com
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VacunaAplicada>>> GetVacunaAplicada()
+        [Route("GetAll")]
+        public async Task<ActionResult<IEnumerable<ResponseListaVacunasAplicadasDTO>>> GetAll(string emailUsuario = null)
         {
-            return await _context.VacunaAplicada.ToListAsync();
+            try
+            {
+                ResponseListaVacunasAplicadasDTO responseListaVacunasAplicadas = new ResponseListaVacunasAplicadasDTO();
+
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+                List<VacunaAplicadaConsultaDTO> vacunasAplicadasDTO = new List<VacunaAplicadaConsultaDTO>();
+                bool existenciaErrores = true;
+                string transaccion = "Rechazada";
+                Rol rolUsuario = null;
+
+                Usuario usuarioExistente = await CuentaUsuarioExists(emailUsuario);
+                if (usuarioExistente == null)
+                {
+                    errores.Add(String.Format("El usuario {0} no existe en el sistema", emailUsuario));
+                }
+                else
+                {
+                    rolUsuario = await GetRol(usuarioExistente.IdRol);                
+                }
+
+                //obtengo la lista
+                List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
+
+                if(vacunasAplicadas.Count == 0)
+                {
+                    errores.Add("No existen vacunados en la base de datos");
+                }
+
+                if (rolUsuario != null)
+                {
+                    if (rolUsuario.Descripcion == "Administrador" | rolUsuario.Descripcion == "Vacunador")
+                    {
+                        errores.Add(String.Format("El rol {0} no tiene permisos para visualizar esta sección", rolUsuario.Descripcion));
+                    }
+                }
+
+                if (errores.Count == 0)
+                {
+                    transaccion = "Aceptada";
+                    existenciaErrores = false;
+                                        
+                    if (rolUsuario.Descripcion == "Analista Provincial")
+                    {
+                        foreach(VacunaAplicada item in vacunasAplicadas)
+                        {
+                            Jurisdiccion jurisdiccion = await getDescripcionJurisdiccion(item.IdJurisdiccion);
+                            Lote lote = await getLote(item.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = await getVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                            Vacuna vacuna = await getVacuna(vacunaDesarrollada.IdVacuna);
+                            MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                            Dosis dosis = await getDosis(item.IdDosis);
+
+                            if (jurisdiccion.Id == usuarioExistente.IdJurisdiccion)
+                            {
+                                VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
+                                vacunasAplicadasDTO.Add(vacunaAplicadaDTO);    
+                            }   
+                        }
+                    }
+                    if (rolUsuario.Descripcion == "Operador Nacional")
+                    {
+                        foreach (VacunaAplicada item in vacunasAplicadas)
+                        {
+                            Jurisdiccion jurisdiccion = await getDescripcionJurisdiccion(item.IdJurisdiccion);
+                            Lote lote = await getLote(item.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = await getVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                            Vacuna vacuna = await getVacuna(vacunaDesarrollada.IdVacuna);
+                            MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                            Dosis dosis = await getDosis(item.IdDosis);
+                            
+                            VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
+                            vacunasAplicadasDTO.Add(vacunaAplicadaDTO);
+                        }
+                    }
+                }
+
+                responseListaVacunasAplicadas.EstadoTransaccion = transaccion;
+                responseListaVacunasAplicadas.Errores = errores;
+                responseListaVacunasAplicadas.ExistenciaErrores = existenciaErrores;
+                responseListaVacunasAplicadas.EmailUsuario = emailUsuario;
+                responseListaVacunasAplicadas.ListaVacunasAplicadasDTO = vacunasAplicadasDTO;
+
+                return Ok(responseListaVacunasAplicadas);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
+        // GET: api/VacunasAplicadas/GetVacunasAplicadas?emailOperadorNacional=juan@gmail.com?idJurisdiccion=2
+        [HttpGet]
+        [Route("GetVacunasAplicadas")]
+        public async Task<ActionResult<IEnumerable<ResponseListaVacunasAplicadasDTO>>> GetVacunasAplicadas(string emailOperadorNacional = null, int idJurisdiccion = 0)
+        {
+            try
+            {
+                ResponseListaVacunasAplicadasDTO responseListaVacunasAplicadas = new ResponseListaVacunasAplicadasDTO();
+
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+                List<VacunaAplicadaConsultaDTO> vacunasAplicadasDTO = new List<VacunaAplicadaConsultaDTO>();
+                bool existenciaErrores = true;
+                string transaccion = "Rechazada";
+
+                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+
+                //obtengo la lista
+                List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
+
+                if (vacunasAplicadas.Count == 0)
+                {
+                    errores.Add("No existen vacunados en la base de datos");
+                }
+
+                if(idJurisdiccion == 0)
+                {
+                    errores.Add("No se especifica jurisdiccion. Envie el id de la jurisdiccion deseada");
+                }
+
+                //obtengo la jurisdiccion enviada por parametro
+                Jurisdiccion jurisdiccion = await getDescripcionJurisdiccion(idJurisdiccion);
+
+                if(jurisdiccion == null)
+                {
+                    errores.Add(String.Format("La jurisdiccion con identificador {0} no existe en el sistema", idJurisdiccion));
+                }
+
+                if (errores.Count == 0)
+                {
+                    existenciaErrores = false;
+                    transaccion = "Aceptada";
+
+                    foreach (VacunaAplicada item in vacunasAplicadas)
+                    {
+                        Lote lote = await getLote(item.IdLote);
+                        VacunaDesarrollada vacunaDesarrollada = await getVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                        Vacuna vacuna = await getVacuna(vacunaDesarrollada.IdVacuna);
+                        MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                        Dosis dosis = await getDosis(item.IdDosis);
+
+                        if(idJurisdiccion == item.IdJurisdiccion)
+                        {
+                            VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
+                            vacunasAplicadasDTO.Add(vacunaAplicadaDTO);
+                        }
+                    }
+                }
+
+                responseListaVacunasAplicadas.EstadoTransaccion = transaccion;
+                responseListaVacunasAplicadas.Errores = errores;
+                responseListaVacunasAplicadas.ExistenciaErrores = existenciaErrores;
+                responseListaVacunasAplicadas.EmailUsuario = emailOperadorNacional;
+                responseListaVacunasAplicadas.ListaVacunasAplicadasDTO = vacunasAplicadasDTO;
+
+                return Ok(responseListaVacunasAplicadas);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/VacunasAplicadas/5
@@ -423,6 +586,65 @@ namespace VacunacionApi.Controllers
             return _context.VacunaAplicada.Any(e => e.Id == id);
         }
 
+        private async Task<bool> TieneRolOperadorNacional(Usuario usuario)
+        {
+            try
+            {
+                Rol rolOperadorNacional = await _context.Rol
+                    .Where(rol => rol.Descripcion == "Operador Nacional").FirstOrDefaultAsync();
+
+                if (rolOperadorNacional.Id == usuario.IdRol)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+
+            }
+            return false;
+        }
+
+        private async Task<Usuario> CuentaUsuarioExists(string email)
+        {
+            Usuario cuentaExistente = null;
+            try
+            {
+                cuentaExistente = await _context.Usuario
+                    .Where(user => user.Email == email).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return cuentaExistente;
+        }
+
+        private async Task<List<string>> VerificarCredencialesOperadorNacional(string emailOperadorNacional, List<string> errores)
+        {
+            try
+            {
+                Usuario usuarioSolicitante = await CuentaUsuarioExists(emailOperadorNacional);
+                if (usuarioSolicitante != null)
+                {
+                    if (!await TieneRolOperadorNacional(usuarioSolicitante))
+                    {
+                        errores.Add(String.Format("El usuario {0} no tiene el rol de operador nacional", emailOperadorNacional));
+                    }
+                }
+                else
+                {
+                    errores.Add(string.Format("El usuario {0} no existe en el sistema", emailOperadorNacional));
+                }
+            }
+            catch
+            {
+
+            }
+
+            return errores;
+        }
+
         private async Task<Usuario> GetUsuario(string email)
         {
             try
@@ -451,6 +673,110 @@ namespace VacunacionApi.Controllers
             }
 
             return null;
+        }
+
+        private async Task<Rol> GetRol(int idRol)
+        {
+            Rol rolExistente = null;
+
+            try
+            {
+                rolExistente = await _context.Rol
+                    .Where(rol => rol.Id == idRol).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return rolExistente;
+        }
+
+        private async Task<Jurisdiccion> getDescripcionJurisdiccion(int idJurisdiccion)
+        {
+            Jurisdiccion jurisdiccionExistente = null;
+
+            try
+            {
+                jurisdiccionExistente = await _context.Jurisdiccion.Where(jurisdiccion => jurisdiccion.Id == idJurisdiccion).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return jurisdiccionExistente;
+        }
+        private async Task<Lote> getLote(int idLote)
+        {
+            Lote loteExistente = null;
+
+            try
+            {
+                loteExistente = await _context.Lote.Where(lote => lote.Id == idLote).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return loteExistente;
+        }
+
+        private async Task<VacunaDesarrollada> getVacunaDesarrollada(int idVacunaDesarrollada)
+        {
+            VacunaDesarrollada vacunaDesarrolladaExistente = null;
+
+            try
+            {
+                vacunaDesarrolladaExistente = await _context.VacunaDesarrollada.Where(vd => vd.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return vacunaDesarrolladaExistente;
+        }
+        private async Task<Dosis> getDosis(int idDosis)
+        {
+            Dosis dosisExistente = null;
+
+            try
+            {
+                dosisExistente = await _context.Dosis.Where(d => d.Id == idDosis).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return dosisExistente;
+        }
+
+        private async Task<Vacuna> getVacuna(int idVacuna)
+        {
+            Vacuna vacunaExistente = null;
+
+            try
+            {
+                vacunaExistente = await _context.Vacuna.Where(v => v.Id == idVacuna).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return vacunaExistente;
+        }
+        private async Task<MarcaComercial> getMarcaComercial(int idMarcaComercial)
+        {
+            MarcaComercial marcaComercialExistente = null;
+
+            try
+            {
+                marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == idMarcaComercial).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return marcaComercialExistente;
         }
 
         private async Task<bool> TieneRolVacunador(Usuario usuario)
