@@ -9,7 +9,7 @@ import AdminWraper from "../Nav/AdminWraper";
 import OperadorWraper from "../OperadorNacional/OperadorWraper";
 import AnalistaWraper from "../AnalistaProvincial/AnalistaWraper";
 import MarcasComercialesContainer from "../OperadorNacional/MarcasComerciales/MarcasComercialesContainer";
-import HomeOperador from "../OperadorNacional/home";
+import HomeOperador from "../OperadorNacional/Home";
 import AplicarVacuna from "../Vacunador/AplicarVacuna";
 import VacunadorWraper from "../Vacunador/VacunadorWrapper";
 import Vacunados from "../AnalistaProvincial/VacunadosInfo/Vacunados";
