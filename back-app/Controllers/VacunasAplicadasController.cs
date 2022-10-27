@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -74,12 +76,12 @@ namespace VacunacionApi.Controllers
                     {
                         foreach(VacunaAplicada item in vacunasAplicadas)
                         {
-                            Jurisdiccion jurisdiccion = await getDescripcionJurisdiccion(item.IdJurisdiccion);
-                            Lote lote = await getLote(item.IdLote);
-                            VacunaDesarrollada vacunaDesarrollada = await getVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                            Vacuna vacuna = await getVacuna(vacunaDesarrollada.IdVacuna);
-                            MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
-                            Dosis dosis = await getDosis(item.IdDosis);
+                            Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(item.IdJurisdiccion);
+                            Lote lote = await GetLote(item.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                            Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
+                            MarcaComercial marcaComercial = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                            Dosis dosis = await GetDosis(item.IdDosis);
 
                             if (jurisdiccion.Id == usuarioExistente.IdJurisdiccion)
                             {
@@ -92,12 +94,12 @@ namespace VacunacionApi.Controllers
                     {
                         foreach (VacunaAplicada item in vacunasAplicadas)
                         {
-                            Jurisdiccion jurisdiccion = await getDescripcionJurisdiccion(item.IdJurisdiccion);
-                            Lote lote = await getLote(item.IdLote);
-                            VacunaDesarrollada vacunaDesarrollada = await getVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                            Vacuna vacuna = await getVacuna(vacunaDesarrollada.IdVacuna);
-                            MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
-                            Dosis dosis = await getDosis(item.IdDosis);
+                            Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(item.IdJurisdiccion);
+                            Lote lote = await GetLote(item.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                            Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
+                            MarcaComercial marcaComercial = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                            Dosis dosis = await GetDosis(item.IdDosis);
                             
                             VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
                             vacunasAplicadasDTO.Add(vacunaAplicadaDTO);
@@ -146,15 +148,15 @@ namespace VacunacionApi.Controllers
 
                 if(idJurisdiccion == 0)
                 {
-                    errores.Add("No se especifica jurisdiccion. Envie el id de la jurisdiccion deseada");
+                    errores.Add("No se especifica jurisdicción. Envíe el id de la jurisdicción deseada");
                 }
 
                 //obtengo la jurisdiccion enviada por parametro
-                Jurisdiccion jurisdiccion = await getDescripcionJurisdiccion(idJurisdiccion);
+                Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(idJurisdiccion);
 
                 if(jurisdiccion == null)
                 {
-                    errores.Add(String.Format("La jurisdiccion con identificador {0} no existe en el sistema", idJurisdiccion));
+                    errores.Add(String.Format("La jurisdicción con identificador {0} no existe en el sistema", idJurisdiccion));
                 }
 
                 if (errores.Count == 0)
@@ -164,11 +166,11 @@ namespace VacunacionApi.Controllers
 
                     foreach (VacunaAplicada item in vacunasAplicadas)
                     {
-                        Lote lote = await getLote(item.IdLote);
-                        VacunaDesarrollada vacunaDesarrollada = await getVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                        Vacuna vacuna = await getVacuna(vacunaDesarrollada.IdVacuna);
-                        MarcaComercial marcaComercial = await getMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
-                        Dosis dosis = await getDosis(item.IdDosis);
+                        Lote lote = await GetLote(item.IdLote);
+                        VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                        Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
+                        MarcaComercial marcaComercial = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                        Dosis dosis = await GetDosis(item.IdDosis);
 
                         if(idJurisdiccion == item.IdJurisdiccion)
                         {
@@ -247,6 +249,9 @@ namespace VacunacionApi.Controllers
             {
                 ResponseCrearVacunaAplicadaDTO responseCrearVacunaAplicadaDTO = null;
                 List<string> errores = new List<string>();
+
+                if(!await ExisteUsuarioRenaper(model.Dni))
+                    errores.Add(string.Format("El dni ingresado {0} no está registrado en Renaper", model.Dni));
 
                 Distribucion distribucion = await _context.Distribucion.Where(d => d.IdLote == model.IdLote).FirstOrDefaultAsync();
                 if (distribucion == null)
@@ -334,6 +339,9 @@ namespace VacunacionApi.Controllers
                 List<string> errores = new List<string>();
 
                 errores = await VerificarCredencialesUsuarioVacunador(model.EmailVacunador, errores);
+
+                if (!await ExisteUsuarioRenaper(model.Dni))
+                    errores.Add(string.Format("El dni ingresado {0} no está registrado en Renaper", model.Dni));
 
                 Vacuna vacunaExistente = await GetVacuna(model.IdVacuna);
                 if (vacunaExistente == null)
@@ -581,6 +589,41 @@ namespace VacunacionApi.Controllers
 
 
         //Métodos privados de ayuda
+        private async Task<bool> ExisteUsuarioRenaper(int dni)
+        {
+            bool existe = true;
+
+            try
+            {
+                var renaperUrl = "https://api.claudioraverta.com/personas/" + dni;
+                
+                using (var httpClient = new HttpClient())
+                {
+                    var respuesta = await httpClient.GetAsync(renaperUrl);
+
+                    if (respuesta.StatusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        existe = false;
+                    }
+                    else
+                    {
+                        var respuestaString = await respuesta.Content.ReadAsStringAsync();
+                        UsuarioRenaperDTO usuario = JsonSerializer.Deserialize<UsuarioRenaperDTO>(respuestaString,
+                            new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+
+                        if (usuario == null || usuario.DNI != dni)
+                            existe = false;
+                    }
+                }
+            }
+            catch
+            {
+                
+            }
+
+            return existe;
+        }
+
         private bool VacunaAplicadaExists(int id)
         {
             return _context.VacunaAplicada.Any(e => e.Id == id);
@@ -692,7 +735,7 @@ namespace VacunacionApi.Controllers
             return rolExistente;
         }
 
-        private async Task<Jurisdiccion> getDescripcionJurisdiccion(int idJurisdiccion)
+        private async Task<Jurisdiccion> GetDescripcionJurisdiccion(int idJurisdiccion)
         {
             Jurisdiccion jurisdiccionExistente = null;
 
@@ -706,35 +749,7 @@ namespace VacunacionApi.Controllers
             }
             return jurisdiccionExistente;
         }
-        private async Task<Lote> getLote(int idLote)
-        {
-            Lote loteExistente = null;
-
-            try
-            {
-                loteExistente = await _context.Lote.Where(lote => lote.Id == idLote).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return loteExistente;
-        }
-
-        private async Task<VacunaDesarrollada> getVacunaDesarrollada(int idVacunaDesarrollada)
-        {
-            VacunaDesarrollada vacunaDesarrolladaExistente = null;
-
-            try
-            {
-                vacunaDesarrolladaExistente = await _context.VacunaDesarrollada.Where(vd => vd.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return vacunaDesarrolladaExistente;
-        }
+      
         private async Task<Dosis> getDosis(int idDosis)
         {
             Dosis dosisExistente = null;
@@ -750,21 +765,7 @@ namespace VacunacionApi.Controllers
             return dosisExistente;
         }
 
-        private async Task<Vacuna> getVacuna(int idVacuna)
-        {
-            Vacuna vacunaExistente = null;
-
-            try
-            {
-                vacunaExistente = await _context.Vacuna.Where(v => v.Id == idVacuna).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return vacunaExistente;
-        }
-        private async Task<MarcaComercial> getMarcaComercial(int idMarcaComercial)
+        private async Task<MarcaComercial> GetMarcaComercial(int idMarcaComercial)
         {
             MarcaComercial marcaComercialExistente = null;
 
