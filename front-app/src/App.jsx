@@ -1,6 +1,7 @@
 import RoutesDefinition from "@/components/Navigation/RoutesDefinition";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import UserContextProvider from "./components/Context/UserContext";
+import "/public/main.css";
 const theme = createTheme({
   typography: {
     fontFamily: [

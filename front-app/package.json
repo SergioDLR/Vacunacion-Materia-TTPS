@@ -19,7 +19,9 @@
     "react-alert": "^7.0.3",
     "react-alert-template-basic": "^1.0.2",
     "react-alert-template-mui": "^1.0.7",
+    "react-csv": "^2.2.2",
     "react-dom": "^18.2.0",
+    "react-html-table-to-excel": "^2.0.0",
     "react-router-dom": "^6.4.1"
   },
   "devDependencies": {
