@@ -74,7 +74,7 @@ namespace VacunacionApi.Controllers
                                             {
                                                 CompraDTO compraDTO = new CompraDTO(compra.Id, compra.IdLote, lote.FechaVencimiento, lote.IdVacunaDesarrollada,
                                                     vacuna.Descripcion + " " + marcaComercial.Descripcion, compra.IdEstadoCompra, estadoCompra.Descripcion, compra.CantidadVacunas,
-                                                    compra.Codigo, compra.FechaCompra, compra.FechaEntrega, compra.Distribuidas, compra.Vencidas);
+                                                    compra.Codigo, compra.FechaCompra, compra.FechaEntrega, compra.Distribuidas, compra.Vencidas, compra.CantidadVacunas * vd.PrecioVacuna);
 
                                                 listaCompras.Add(compraDTO);
                                             }
@@ -252,7 +252,7 @@ namespace VacunacionApi.Controllers
                 errores = await VerificarCredencialesUsuarioOperadorNacional(model.EmailOperadorNacional, errores);
                               
                 if (errores.Count > 0)
-                    responseCompraDTO = new ResponseCompraDTO("Rechazada", true, errores, new CompraDTO(0, 0, null, model.IdVacunaDesarrollada, null, 0, null, model.CantidadVacunas, 0, null, null, 0, 0));
+                    responseCompraDTO = new ResponseCompraDTO("Rechazada", true, errores, new CompraDTO(0, 0, null, model.IdVacunaDesarrollada, null, 0, null, model.CantidadVacunas, 0, null, null, 0, 0, 0));
                 else
                 {
                     Random randomCodigoCompra = new Random();
@@ -282,8 +282,9 @@ namespace VacunacionApi.Controllers
                     _context.Compra.Add(compra);
                     await _context.SaveChangesAsync();
 
-                    CompraDTO compraDTO = new CompraDTO(compra.Id, compra.IdLote, lote.FechaVencimiento, lote.IdVacunaDesarrollada, vacuna.Descripcion + " " + marcaComercial.Descripcion,
-                        compra.IdEstadoCompra, estadoCompra.Descripcion, compra.CantidadVacunas, compra.Codigo, compra.FechaCompra, compra.FechaEntrega, compra.Distribuidas, compra.Vencidas);
+                    CompraDTO compraDTO = new CompraDTO(compra.Id, compra.IdLote, lote.FechaVencimiento, lote.IdVacunaDesarrollada, 
+                        vacuna.Descripcion + " " + marcaComercial.Descripcion, compra.IdEstadoCompra, estadoCompra.Descripcion, compra.CantidadVacunas, 
+                        compra.Codigo, compra.FechaCompra, compra.FechaEntrega, compra.Distribuidas, compra.Vencidas, compra.CantidadVacunas * vacunaDesarrolladaExistente.PrecioVacuna);
 
                     responseCompraDTO = new ResponseCompraDTO("Aceptada", false, errores, compraDTO);
                 }

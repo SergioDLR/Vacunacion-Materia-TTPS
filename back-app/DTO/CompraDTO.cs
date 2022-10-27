@@ -8,7 +8,7 @@ namespace VacunacionApi.DTO
     public class CompraDTO
     {
         public CompraDTO(int id, int idLote, DateTime? fechaVencimientoLote, int idVacunaDesarrollada, string descripcionVacunaDesarrollada, int idEstadoCompra,
-            string descripcionEstadoCompra, int cantidadVacunas, int codigo, DateTime? fechaCompra, DateTime? fechaEntrega, int distribuidas, int vencidas)
+            string descripcionEstadoCompra, int cantidadVacunas, int codigo, DateTime? fechaCompra, DateTime? fechaEntrega, int distribuidas, int vencidas, double precioTotal)
         {
             Id = id;
             IdLote = idLote;
@@ -23,6 +23,7 @@ namespace VacunacionApi.DTO
             FechaEntrega = fechaEntrega;
             Distribuidas = distribuidas;
             Vencidas = vencidas;
+            PrecioTotal = precioTotal;
         }
 
         public int Id { get; set; }
@@ -39,5 +40,6 @@ namespace VacunacionApi.DTO
 
         public int Distribuidas { get; set; }
         public int Vencidas { get; set; }
+        public double PrecioTotal { get; set; }
     }
 }
