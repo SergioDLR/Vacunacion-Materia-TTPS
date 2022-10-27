@@ -5,19 +5,24 @@ import allUrls from "@/services/backend_url";
 import VacunadosTable from "./VacunadosTable";
 import { Container } from "@mui/system";
 import CustomLoader from "@/components/utils/CustomLoader";
-
+import { useAlert } from "react-alert";
 const Vacunados = () => {
   const { userSesion } = useContext(UserContext);
   const [vacunados, setVacunados] = useState([]);
   const [estaCargando, setEstaCargando] = useState(true);
+  const alert = useAlert();
   useEffect(() => {
-    axios
-      .get(`${allUrls.vacunasAplidas}?emailUsuario=${userSesion.email}`)
-      .then((response) => {
-        setEstaCargando(false);
-        setVacunados(response?.data?.listaVacunasAplicadasDTO);
-      })
-      .catch(console.log("Ocurrio un error"));
+    try {
+      axios
+        .get(`${allUrls.vacunasAplidas}?emailUsuario=${userSesion.email}`)
+        .then((response) => {
+          setEstaCargando(false);
+          setVacunados(response?.data?.listaVacunasAplicadasDTO);
+        })
+        .catch((e) => console.log(e));
+    } catch (e) {
+      alert.error(`Ocurrio un error del lado del servidor`);
+    }
   }, []);
   return (
     <Container>

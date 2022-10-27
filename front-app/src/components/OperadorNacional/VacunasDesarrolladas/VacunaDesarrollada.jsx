@@ -6,11 +6,12 @@ import CustomButton from "@/components/utils/CustomButtom";
 import axios from "axios";
 import { UserContext } from "@/components/Context/UserContext";
 import allUrls from "@/services/backend_url";
+import priceParcer from "@/components/utils/pricerParser";
+import numberParser from "@/components/utils/numberParser";
 import { useAlert } from "react-alert";
 const VacunaDesarrollada = ({ vacuna, cargarVacunasDesarrolladas, eliminada = false }) => {
   const [open, setOpen] = useState(false);
   const alert = useAlert();
-  console.log(vacuna);
   const { userSesion } = useContext(UserContext);
   const handleDelete = () => {
     axios
@@ -32,8 +33,8 @@ const VacunaDesarrollada = ({ vacuna, cargarVacunasDesarrolladas, eliminada = fa
     <TableRow sx={eliminada ? { background: "#FF735E" } : {}}>
       <TableCell>{vacuna.descripcionVacuna}</TableCell>
       <TableCell align="right">{vacuna.descripcionMarcaComercial}</TableCell>
-      <TableCell align="right">{vacuna.diasDemoraEntrega}</TableCell>
-      <TableCell align="right">{vacuna.precioVacuna} $</TableCell>
+      <TableCell align="right">{numberParser(vacuna.diasDemoraEntrega)}</TableCell>
+      <TableCell align="right">{priceParcer(vacuna.precioVacuna)}</TableCell>
 
       <TableCell align="right">
         {!eliminada && (

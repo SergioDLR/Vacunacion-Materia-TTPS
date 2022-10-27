@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import Home from "../Home";
 import Login from "../Login/Login";
-import HomeAdmin from "../Admin/HomeAdmin";
 import UserListContainer from "../Users/UserListContainer";
 import VacunasListContainer from "../OperadorNacional/vacunas/VacunasListContainer";
 import VacunasDesarrolladasContainer from "../OperadorNacional/VacunasDesarrolladas/VacunasDesarrolladasContainer";
@@ -11,10 +10,10 @@ import OperadorWraper from "../OperadorNacional/OperadorWraper";
 import AnalistaWraper from "../AnalistaProvincial/AnalistaWraper";
 import MarcasComercialesContainer from "../OperadorNacional/MarcasComerciales/MarcasComercialesContainer";
 import HomeOperador from "../OperadorNacional/home";
-import HomeAnalista from "../AnalistaProvincial/home";
 import AplicarVacuna from "../Vacunador/AplicarVacuna";
 import VacunadorWraper from "../Vacunador/VacunadorWrapper";
 import Vacunados from "../AnalistaProvincial/VacunadosInfo/Vacunados";
+import CompraContainer from "../OperadorNacional/Compras/CompraContainer";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -26,7 +25,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={1}>
             <AdminWraper>
-              <HomeAdmin />
+              <HomeOperador mensaje={"administrador"} />
             </AdminWraper>
           </ProtectedRoute>
         }
@@ -46,7 +45,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={3}>
             <OperadorWraper>
-              <HomeOperador />
+              <HomeOperador mensaje={"operador nacional"} />
             </OperadorWraper>
           </ProtectedRoute>
         }
@@ -87,7 +86,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={2}>
             <AnalistaWraper>
-              <HomeAnalista />
+              <HomeOperador mensaje={"analista"} />
             </AnalistaWraper>
           </ProtectedRoute>
         }
@@ -117,7 +116,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={4}>
             <VacunadorWraper>
-              <HomeOperador />
+              <HomeOperador mensaje={"vacunador"} />
             </VacunadorWraper>
           </ProtectedRoute>
         }
@@ -138,6 +137,16 @@ const RoutesDefinition = () => {
           <ProtectedRoute role={3}>
             <OperadorWraper>
               <Vacunados />
+            </OperadorWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/operador/compras"
+        element={
+          <ProtectedRoute role={3}>
+            <OperadorWraper>
+              <CompraContainer />
             </OperadorWraper>
           </ProtectedRoute>
         }

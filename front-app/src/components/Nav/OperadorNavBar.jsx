@@ -77,6 +77,21 @@ const OperadorNavBar = () => {
               Vacunados
             </CustomButton>
           </NavLink>
+          <NavLink
+            to={"/operador/compras"}
+            style={({ isActive }) =>
+              isActive
+                ? activeStyle
+                : {
+                    textDecoration: "none",
+                    marginRight: 2,
+                  }
+            }
+          >
+            <CustomButton textColor="white" color="info" variant="contained">
+              Compras
+            </CustomButton>
+          </NavLink>
           <CustomButton
             textColor="white"
             sx={{ marginLeft: "auto" }}
@@ -88,7 +103,6 @@ const OperadorNavBar = () => {
           </CustomButton>
         </Toolbar>
       </AppBar>
-
       <Toolbar />
     </>
   );

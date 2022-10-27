@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { cargarVacunas } from "@/services/getVacunas";
 import { useAlert } from "react-alert";
 import allUrls from "@/services/backend_url";
-import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, ListItemText, ListItem, List, Divider, Paper } from "@mui/material";
 import SelectDosis from "./SelectDosis";
 import CustomLoader from "../utils/CustomLoader";
 import CustomButton from "../utils/CustomButtom";
@@ -10,6 +10,7 @@ import CustomModal from "../utils/Modal";
 import { UserContext } from "../Context/UserContext";
 import { Box } from "@mui/material";
 import axios from "axios";
+import numberParser from "../utils/numberParser";
 const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
   const alert = useAlert();
   const [vacunasCreadas, setVacunasCreadas] = useState([]);
@@ -113,7 +114,44 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
     <>
       {estaCargando && <CustomLoader />}
       <form onSubmit={handleSubmit}>
-        Dni: {persona.DNI} - Nombre: {persona.nombre}
+        <Paper sx={{ padding: 1 }}>
+          <List component="nav" aria-label="mailbox folders">
+            <ListItem>
+              <ListItemText primary={`Nombre: ${persona.nombre}`} />
+            </ListItem>
+            <Divider variant={"fullWidth"} />
+            <ListItem divider>
+              <ListItemText primary={`Apellido: ${persona.apellido}`} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary={`DNI: ${numberParser(persona.DNI)}`} />
+            </ListItem>
+            <Divider variant={"fullWidth"} />
+            <ListItem>
+              <ListItemText primary={`jurisdiccion: ${persona.jurisdiccion}`} />
+            </ListItem>
+            <Divider variant={"fullWidth"} />
+            {persona?.embarazada && (
+              <>
+                <ListItem>
+                  <ListItemText primary={`Esta embarazada`} />
+                </ListItem>
+                <Divider variant={"fullWidth"} />
+              </>
+            )}
+            {persona?.personal_salud && (
+              <>
+                <ListItem>
+                  <ListItemText primary={`Es personal de salud`} />
+                </ListItem>
+                <Divider variant={"fullWidth"} />
+              </>
+            )}
+            <ListItem>
+              <ListItemText primary={`Nacimiento:  ${persona.fecha_hora_nacimiento}`} />
+            </ListItem>
+          </List>
+        </Paper>
         <FormControl sx={{ marginTop: 1 }} fullWidth>
           <InputLabel id="Tipo-de-vacuna">Vacunas:</InputLabel>
           <Select

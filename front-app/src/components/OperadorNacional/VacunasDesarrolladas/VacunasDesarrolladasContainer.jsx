@@ -9,8 +9,10 @@ import { useAlert } from "react-alert";
 import CustomLoader from "@/components/utils/CustomLoader";
 import axios from "axios";
 import CustomButton from "@/components/utils/CustomButtom";
+
 const VacunasDesarrolladasContainer = () => {
   const [open, setOpen] = useState(false);
+  const [openCompra, setOpenCompra] = useState(false);
   const [mostrarEliminadas, setMostrarEliminadas] = useState(false);
   const [vacunasDesarrolladas, setVacunasDesarrolladas] = useState([]);
   const [vacunasDesarrolladasEliminadas, setVacunasDesarrolladasEliminadas] = useState([]);
@@ -57,9 +59,6 @@ const VacunasDesarrolladasContainer = () => {
       {!estaCargando ? (
         <>
           <Box sx={{ marginTop: 2, marginBottom: 2 }}>
-            <CustomButton sx={{ marginRight: 1 }} color={"info"} textColor={"#2E7994"} variant={"outlined"}>
-              Comprar
-            </CustomButton>
             <CustomButton sx={{ marginRight: 1 }} textColor={"#2E7994"} color={"info"} variant={"outlined"}>
               Distribuir
             </CustomButton>

@@ -22,5 +22,7 @@ const allUrls = {
   consultarVacunacion: `${urlBase}/VacunasAplicadas/ConsultarVacunacion`,
   crearVacunacion: `${urlBase}/VacunasAplicadas/CrearVacunacion`,
   vacunasAplidas: `${urlBase}/VacunasAplicadas/GetAll`,
+  crearCompra: `${urlBase}/Compras/RegistrarCompra`,
+  visualizarCompra: `${urlBase}/Compras/GetAll`,
 };
 export default allUrls;
