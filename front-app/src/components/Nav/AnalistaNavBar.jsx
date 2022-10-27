@@ -6,7 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { Button } from "@mui/material";
 import { Link } from "react-router-dom";
 import { UserContext } from "../Context/UserContext";
-
+import CustomButton from "../utils/CustomButtom";
 const AnalistaNavBar = () => {
   const { cerrarSesion } = React.useContext(UserContext);
   return (
@@ -15,15 +15,25 @@ const AnalistaNavBar = () => {
       <AppBar sx={{ backgroundColor: "#37BBED", boxShadow: "none" }}>
         <Toolbar>
           <Link to={"/analista/vacunados"} style={{ textDecoration: "none" }}>
-            <Button variant="contained">Vacunados</Button>
+            <CustomButton variant="contained" color="info" textColor="white">
+              Vacunados
+            </CustomButton>
           </Link>
           <Link to={"/analista/vacunas"} style={{ textDecoration: "none" }}>
-            <Button variant="contained">Vacunas</Button>
+            <CustomButton variant="contained" color="info" textColor="white">
+              stock
+            </CustomButton>
           </Link>
 
-          <Button sx={{ backgroundColor: "red", marginLeft: 1 }} onClick={cerrarSesion} variant="contained">
+          <CustomButton
+            textColor="white"
+            sx={{ marginLeft: "auto" }}
+            color="error"
+            variant="contained"
+            onClick={cerrarSesion}
+          >
             Cerrar sesion
-          </Button>
+          </CustomButton>
         </Toolbar>
       </AppBar>
       <Toolbar />
