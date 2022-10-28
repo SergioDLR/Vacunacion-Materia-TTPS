@@ -6,6 +6,8 @@
         public string DescripcionJurisdiccion { get; set; }
         public StockDTO StockJurisdiccion { get; set; }
 
+        public StockJurisdiccionDTO() { }
+
         public StockJurisdiccionDTO(int idJurisdiccion, string descripcionJurisdiccion, StockDTO stockJurisdiccion)
         {
             IdJurisdiccion = idJurisdiccion;

@@ -11,6 +11,8 @@ namespace VacunacionApi.DTO
         public int TotalVacunaDesarrolladaVencida { get; set; }
         public int TotalVacunaDesarrolladaDisponible { get; set; }
 
+        public TipoVacunaStockDTO() { }
+
         public TipoVacunaStockDTO(int id, string descripcionTipoVacuna, List<VacunaDesarrolladaStockDTO> listaVacunasDesarrolladas, int totalVacunaDesarrollada, int totalVacunaDesarrolladaVencida, int totalVacunaDesarrolladaDisponible)
         {
             Id = id;
