@@ -34,6 +34,8 @@ namespace VacunacionApi.Controllers
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(1, "Hepatitis B (HB)"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(2, "BCG"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(3, "Rotavirus"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(4, "Neumococo Conjugada"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(5, "Quíntuple Pentavalente"));
             }
             catch
             {
@@ -630,6 +632,12 @@ namespace VacunacionApi.Controllers
                     case "Rotavirus":
                         listaDosis = vacunaService.ArmarListaDosisDTORotavirus();
                         break;
+                    case "Neumococo Conjugada":
+                        listaDosis = vacunaService.ArmarListaDosisNeumococoConjugada();
+                        break;
+                    case "Quíntuple Pentavalente":
+                        listaDosis = vacunaService.ArmarListaDosisQuintuplePentavalente();
+                        break;
                     default:
                         break;
                 }
@@ -652,9 +660,9 @@ namespace VacunacionApi.Controllers
                 {
                     new VacunaCalendarioAnualPandemiaDTO(1, "Hepatitis B (HB)", ArmarListaDosisDTO("Hepatitis B (HB)")),
                     new VacunaCalendarioAnualPandemiaDTO(2, "BCG", ArmarListaDosisDTO("BCG")),
-                    new VacunaCalendarioAnualPandemiaDTO(3, "Rotavirus", ArmarListaDosisDTO("Rotavirus"))
-                    //new VacunaCalendarioDTO(4, "Neumococo Conjugada"),
-                    //new VacunaCalendarioDTO(5, "Quíntuple Pentavalente"),
+                    new VacunaCalendarioAnualPandemiaDTO(3, "Rotavirus", ArmarListaDosisDTO("Rotavirus")),
+                    new VacunaCalendarioAnualPandemiaDTO(4, "Neumococo Conjugada", ArmarListaDosisDTO("Neumococo Conjugada")),
+                    new VacunaCalendarioAnualPandemiaDTO(5, "Quíntuple Pentavalente", ArmarListaDosisDTO("Quíntuple Pentavalente"))
                     //new VacunaCalendarioDTO(6, "Salk IPV"),
                     //new VacunaCalendarioDTO(7, "Meningocócica Conjugada"),
                     //new VacunaCalendarioDTO(8, "Antigripal"),

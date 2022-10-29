@@ -101,5 +101,84 @@ namespace VacunacionApi.Services
 
             return listaDosis;
         }
+
+        public List<DosisDTO> ArmarListaDosisNeumococoConjugada()
+        {
+            List<DosisDTO> listaDosis = new List<DosisDTO>();
+
+            try
+            {
+                //Primera dosis
+                List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
+                ReglaDTO regla1 = new ReglaDTO(0, "Neumococo Conjugada - Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false);
+                listaReglas1.Add(regla1);
+                DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Neumococo Conjugada - Primera Dosis", listaReglas1);
+
+                //Segunda dosis
+                List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
+                ReglaDTO regla2 = new ReglaDTO(0, "Neumococo Conjugada - Aplicar desde los 4 meses del nacimiento hasta los 12 meses", null, 120, 365, "0", false, false);
+                listaReglas2.Add(regla2);
+                DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Neumococo Conjugada - Segunda Dosis", listaReglas2);
+
+                //Refuerzo
+                List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
+                ReglaDTO regla3 = new ReglaDTO(0, "Neumococo Conjugada - Aplicar desde los 12 meses del nacimiento", null, 365, 0, "0", false, false);
+                listaReglas3.Add(regla3);
+                DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Neumococo Conjugada - Refuerzo", listaReglas3);
+
+                listaDosis.Add(dosisDTO1);
+                listaDosis.Add(dosisDTO2);
+                listaDosis.Add(dosisDTO3);
+            }
+            catch
+            {
+
+            }
+
+            return listaDosis;
+        }
+
+        public List<DosisDTO> ArmarListaDosisQuintuplePentavalente()
+        {
+            List<DosisDTO> listaDosis = new List<DosisDTO>();
+
+            try
+            {
+                //Primera dosis
+                List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
+                ReglaDTO regla1 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false);
+                listaReglas1.Add(regla1);
+                DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Quíntuple Pentavalente - Primera Dosis", listaReglas1);
+
+                //Segunda dosis
+                List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
+                ReglaDTO regla2 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, "0", false, false);
+                listaReglas2.Add(regla2);
+                DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Quíntuple Pentavalente - Segunda Dosis", listaReglas2);
+
+                //Refuerzo
+                List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
+                ReglaDTO regla3 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar desde los 6 meses del nacimiento hasta los 15 meses", null, 180, 450, "0", false, false);
+                listaReglas3.Add(regla3);
+                DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Quíntuple Pentavalente - Tercera Dosis", listaReglas3);
+
+                //Refuerzo
+                List<ReglaDTO> listaReglas4 = new List<ReglaDTO>();
+                ReglaDTO regla4 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar entre los 15 y 18 meses de nacimiento", null, 450, 540, "0", false, false);
+                listaReglas4.Add(regla4);
+                DosisDTO dosisDTO4 = new DosisDTO(0, 3, "Quíntuple Pentavalente - Refuerzo", listaReglas4);
+
+                listaDosis.Add(dosisDTO1);
+                listaDosis.Add(dosisDTO2);
+                listaDosis.Add(dosisDTO3);
+                listaDosis.Add(dosisDTO4);
+            }
+            catch
+            {
+
+            }
+
+            return listaDosis;
+        }
     }
 }
