@@ -74,7 +74,58 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        //Falta CHEQUEAR EN POSTMAN
+        // GET: api/Distribuciones/GetStockOperadorNacionalAllVacunas?emailOperadorNacional=maria@gmail.com
+        [HttpGet]
+        [Route("GetStockOperadorNacionalAllVacunas")]
+        public async Task<ActionResult<List<VacunaStockDTO>>> GetStockOperadorNacionalAllVacunas(string emailOperadorNacional)
+        {
+            try
+            {
+                List<VacunaStockDTO> vacunasStock = new List<VacunaStockDTO>();
+
+                if (emailOperadorNacional != null && (await TieneRolOperadorNacional(await GetUsuario(emailOperadorNacional))))
+                {
+                    List<Compra> compras = await _context.Compra
+                       .Where(l => l.IdLoteNavigation.Disponible == true
+                           && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
+                       .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
+                       .ToListAsync();
+
+                    foreach (Compra com in compras)
+                    {
+                        Lote lote = await _context.Lote.Where(l => l.Id == com.IdLote).FirstOrDefaultAsync();
+
+                        List<Distribucion> distribucionesLote = await _context.Distribucion
+                            .Where(d => d.IdLote == lote.Id).ToListAsync();
+
+                        int cantidadTotalDistribuidas = 0;
+                        int disponibles = 0;
+
+                        foreach (Distribucion distribucion in distribucionesLote)
+                        {
+                            cantidadTotalDistribuidas += distribucion.CantidadVacunas;
+                        }
+
+                        disponibles = com.CantidadVacunas - cantidadTotalDistribuidas;
+
+                        VacunaDesarrollada vd = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                        MarcaComercial mc = await GetMarcaComercial(vd.IdMarcaComercial);
+                        Vacuna vac = await GetVacuna(vd.IdVacuna);
+
+                        VacunaStockDTO vs = new VacunaStockDTO(vac.Id, vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);
+
+                        vacunasStock.Add(vs);
+                    }
+                }
+
+                return Ok(vacunasStock);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
         // GET: api/Distribuciones/GetStockAnalista?emailAnalistaProvincial=juanAnalista@gmail.com
         [HttpGet]
         [Route("GetStockAnalista")]
@@ -102,7 +153,7 @@ namespace VacunacionApi.Controllers
                         .ToListAsync();
 
                     List<TipoVacuna> tiposVacuna = await _context.TipoVacuna.ToListAsync();
-                    List<VacunaDesarrollada> vacunasDesarrolladas = await _context.VacunaDesarrollada.ToListAsync();
+                    List<VacunaDesarrollada> vacunasDesarrolladas = null;
                     List<TipoVacunaStockDTO> tiposVacunasStockDTO = new List<TipoVacunaStockDTO>();
 
                     int total = 0;
@@ -119,8 +170,23 @@ namespace VacunacionApi.Controllers
                         List<VacunaDesarrolladaStockDTO> vacunasDesarrolladasStockDTO = new List<VacunaDesarrolladaStockDTO>();
                         //------
 
+                        List<Vacuna> vacunasTipo = await _context.Vacuna.Where(v => v.IdTipoVacuna == tipoVacuna.Id).ToListAsync();
+                        List<VacunaDesarrollada> vacunasDesarrolladasTipo = new List<VacunaDesarrollada>();
+
+                        foreach (Vacuna vac in vacunasTipo)
+                        {
+                            VacunaDesarrollada vdesa = await _context.VacunaDesarrollada.Where(v => v.IdVacuna == vac.Id).FirstAsync();
+                            vacunasDesarrolladasTipo.Add(vdesa);
+                        }
+
+                        vacunasDesarrolladas = vacunasDesarrolladasTipo;
+
                         foreach (VacunaDesarrollada vd in vacunasDesarrolladas)
                         {
+                            int totalLotes = 0;
+                            int totalLotesVencido = 0;
+                            int totalLotesDisponible = 0;
+
                             List<Distribucion> distribucionesVacunaDesarrollada = await _context.Distribucion
                                 .Where(d => d.IdLoteNavigation.IdVacunaDesarrollada == vd.Id
                                     && d.IdJurisdiccion == usuario.IdJurisdiccion
@@ -143,11 +209,7 @@ namespace VacunacionApi.Controllers
                                         .OrderBy(l => l.IdVacunaDesarrollada)
                                         .ToListAsync();
                                 }
-
-                                int totalLotes = 0;
-                                int totalLotesVencido = 0;
-                                int totalLotesDisponible = 0;
-
+                                                                
                                 //------
                                 List<LoteStockDTO> lotesDTO = new List<LoteStockDTO>();
                                 //------
@@ -165,11 +227,7 @@ namespace VacunacionApi.Controllers
                                     lotesDTO.Add(loteStockDTO);
                                     //------
                                 }
-
-                                totalVacunaDesarrollada += totalLotes;
-                                totalVacunaDesarrolladaVencido += totalLotesVencido;
-                                totalVacunaDesarrolladaDisponible += totalLotesDisponible;
-
+                                                              
                                 //----
                                 MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == vd.IdMarcaComercial).FirstOrDefaultAsync();
                                 Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == vd.IdVacuna).FirstOrDefaultAsync();
@@ -178,16 +236,22 @@ namespace VacunacionApi.Controllers
                                 VacunaDesarrolladaStockDTO vacunaDesarrolladaStockDTO = new VacunaDesarrolladaStockDTO(vd.Id, vd.IdVacuna, vd.IdMarcaComercial, descripcionVacunaMarca, lotesDTO, totalLotes, totalLotesVencido, totalLotesDisponible);
                                 vacunasDesarrolladasStockDTO.Add(vacunaDesarrolladaStockDTO);
                                 //----
+
+                                totalVacunaDesarrollada += totalLotes;
+                                totalVacunaDesarrolladaVencido += totalLotesVencido;
+                                totalVacunaDesarrolladaDisponible += totalLotesDisponible;
                             }
-                            total += totalVacunaDesarrollada;
-                            totalVencido += totalVacunaDesarrollada;
-                            totalDisponible += totalVacunaDesarrolladaDisponible;
+                            
 
                             //----
                             TipoVacunaStockDTO tipoVacunaStockDTO = new TipoVacunaStockDTO(tipoVacuna.Id, tipoVacuna.Descripcion, vacunasDesarrolladasStockDTO, totalVacunaDesarrollada, totalVacunaDesarrolladaVencido, totalVacunaDesarrolladaDisponible);
                             tiposVacunasStockDTO.Add(tipoVacunaStockDTO);
                             //----
                         }
+                                             
+                        total += totalVacunaDesarrollada;
+                        totalVencido += totalVacunaDesarrolladaVencido;
+                        totalDisponible += totalVacunaDesarrolladaDisponible;
                     }
 
                     //----
@@ -219,8 +283,7 @@ namespace VacunacionApi.Controllers
         }
 
 
-
-        // GET: api/Distribuciones/GetStockOperador?emailOperadorNacional=juanOperador@gmail.com
+        // GET: api/Distribuciones/GetStockOperador?emailOperadorNacional=maria@gmail.com
         [HttpGet]
         [Route("GetStockOperador")]
         public async Task<ActionResult<IEnumerable<ResponseStockNacionalDTO>>> GetStockOperador(string emailOperadorNacional = null)
@@ -1015,7 +1078,7 @@ namespace VacunacionApi.Controllers
                         //----
                     }
                     total += totalVacunaDesarrollada;
-                    totalVencido += totalVacunaDesarrollada;
+                    totalVencido += totalVacunaDesarrolladaVencido;
                     totalDisponible += totalVacunaDesarrolladaDisponible;
 
                     //----
