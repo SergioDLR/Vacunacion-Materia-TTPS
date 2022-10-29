@@ -60,7 +60,7 @@ namespace VacunacionApi.Controllers
                         MarcaComercial mc = await GetMarcaComercial(vd.IdMarcaComercial);
                         Vacuna vac = await GetVacuna(idVacuna);
 
-                        VacunaStockDTO vs = new VacunaStockDTO(vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);
+                        VacunaStockDTO vs = new VacunaStockDTO(vac.Id, vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);
 
                         vacunasStock.Add(vs);
                     }
