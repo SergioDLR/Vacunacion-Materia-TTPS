@@ -13,7 +13,7 @@ const NavBar = () => {
         <Toolbar>
           <Link to={"/login"} style={{ textDecoration: "none" }}>
             <CustomButton variant="contained" color="success" textColor="white">
-              Iniciar sesion
+              Iniciar sesión
             </CustomButton>
           </Link>
         </Toolbar>

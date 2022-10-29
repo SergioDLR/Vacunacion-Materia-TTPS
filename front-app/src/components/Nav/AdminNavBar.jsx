@@ -27,7 +27,7 @@ const AdminNavBar = () => {
             variant="contained"
             onClick={cerrarSesion}
           >
-            Cerrar sesion
+            Cerrar sesión
           </CustomButton>
         </Toolbar>
       </AppBar>

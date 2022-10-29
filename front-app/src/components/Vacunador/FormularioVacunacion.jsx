@@ -128,7 +128,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
             </ListItem>
             <Divider variant={"fullWidth"} />
             <ListItem>
-              <ListItemText primary={`jurisdiccion: ${persona.jurisdiccion}`} />
+              <ListItemText primary={`jurisdicción: ${persona.jurisdiccion}`} />
             </ListItem>
             <Divider variant={"fullWidth"} />
             {persona?.embarazada && (

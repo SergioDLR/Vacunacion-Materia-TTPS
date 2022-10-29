@@ -17,7 +17,7 @@ const VacunaDesarrolladaTabla = ({
               Marca comercial
             </TableCell>
             <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
-              Dias demora
+              Días demora
             </TableCell>
             <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
               Precio

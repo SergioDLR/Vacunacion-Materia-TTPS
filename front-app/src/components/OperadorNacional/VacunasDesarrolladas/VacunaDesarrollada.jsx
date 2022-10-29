@@ -50,7 +50,7 @@ const VacunaDesarrollada = ({ vacuna, cargarVacunasDesarrolladas, eliminada = fa
             setOpen={setOpen}
           >
             <form>
-              <h4>¿Esta seguro que desea eliminar la vacuna?</h4>
+              <h4>¿Está seguro que desea eliminar la vacuna?</h4>
               <CustomButton variant={"contained"} color={"error"} onClick={() => setOpen(false)}>
                 Cancelar
               </CustomButton>

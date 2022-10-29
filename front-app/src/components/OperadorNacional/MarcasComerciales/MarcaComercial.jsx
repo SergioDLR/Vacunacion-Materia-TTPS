@@ -47,11 +47,11 @@ const MarcaComercial = ({ marcaComercial, cargarMarcasComerciales }) => {
       <TableCell>{marcaComercial.descripcion}</TableCell>
       <TableCell align="right">
         <CustomModal mostrarBotonSubmit={true} title={"Editar"} open={open} setOpen={setOpen}>
-          <h2>Descripcion actual: {marcaComercial.descripcion} </h2>
+          <h2>Descripción actual: {marcaComercial.descripcion} </h2>
           <form onSubmit={handleSubmit}>
             <TextField
               id="field-marca"
-              label="Nueva descripcion:"
+              label="Nueva descripción:"
               value={nuevaDescripcion}
               variant="outlined"
               fullWidth

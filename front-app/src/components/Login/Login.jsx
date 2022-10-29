@@ -56,7 +56,7 @@ const Login = () => {
                 sx={{ display: "block" }}
                 id="email-field"
                 fullWidth
-                label="Direccion de correo"
+                label="Dirección de correo"
                 variant="filled"
                 type="email"
                 required

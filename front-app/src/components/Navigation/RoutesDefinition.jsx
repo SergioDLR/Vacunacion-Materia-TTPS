@@ -14,6 +14,7 @@ import AplicarVacuna from "../Vacunador/AplicarVacuna";
 import VacunadorWraper from "../Vacunador/VacunadorWrapper";
 import Vacunados from "../AnalistaProvincial/VacunadosInfo/Vacunados";
 import CompraContainer from "../OperadorNacional/Compras/CompraContainer";
+import DistribucionesContainer from "../OperadorNacional/Distribuciones/DistribucionesContainer";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -147,6 +148,16 @@ const RoutesDefinition = () => {
           <ProtectedRoute role={3}>
             <OperadorWraper>
               <CompraContainer />
+            </OperadorWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/operador/distribuciones"
+        element={
+          <ProtectedRoute role={3}>
+            <OperadorWraper>
+              <DistribucionesContainer />
             </OperadorWraper>
           </ProtectedRoute>
         }

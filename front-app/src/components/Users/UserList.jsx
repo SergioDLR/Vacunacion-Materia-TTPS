@@ -24,7 +24,7 @@ const UserList = ({ users = [], getUsers }) => {
           <TableRow>
             <TableCell sx={{ color: "white", fontWeight: 600 }}>Nombre</TableCell>
             <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
-              Jurisdiccion
+              Jurisdicción
             </TableCell>
             <TableCell align="right" sx={{ color: "white", fontWeight: 600 }}>
               Rol

@@ -32,10 +32,10 @@ const VacunadosTable = ({ vacunados }) => {
                 Apellido
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
-                Fecha vacunacion
+                Fecha vacunación
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
-                Jurisdiccion
+                Jurisdicción
               </TableCell>
               <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
                 Vacuna

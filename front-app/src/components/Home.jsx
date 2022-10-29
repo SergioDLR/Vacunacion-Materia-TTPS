@@ -17,7 +17,7 @@ const Home = () => {
       >
         <Box sx={{ height: "100%", width: "100%", position: "absolute", background: "rgba(0,0,0,.5)" }}></Box>
         <Box sx={{ position: "absolute", color: "white", top: "10%", left: "40%", transformOrigin: "center" }}>
-          <h2 style={{ textAlign: "center" }}>Sistema de vacunacion nacional</h2>
+          <h2 style={{ textAlign: "center" }}>Sistema de vacunación nacional</h2>
         </Box>
       </Box>
     </>

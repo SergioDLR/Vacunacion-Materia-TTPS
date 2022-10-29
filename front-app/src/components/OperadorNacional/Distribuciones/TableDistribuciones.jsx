@@ -1,29 +1,32 @@
-import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper } from "@mui/material";
-import Vacuna from "./Vacuna";
-const TablaVacunas = ({ vacunas }) => {
+import { TableContainer, TableRow, TableCell, TableBody, Table, Paper, TableHead } from "@mui/material";
+import Distribucion from "./Distribucion";
+const TableDistribuciones = ({ distribuciones }) => {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} size="small">
         <TableHead sx={{ backgroundColor: "#2E7994" }}>
           <TableRow>
-            <TableCell sx={{ color: "white", fontWeight: 600 }}>Tipo vacuna</TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }}>Jurisdicción</TableCell>
             <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
-              Descripción
+              Lote
             </TableCell>
             <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
-              Tipo pandemia
+              Fecha de entrega
             </TableCell>
             <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
-              Cantidad de dosis
+              Cantidad de vacunas
             </TableCell>
             <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
-              Reglas
+              Aplicadas
+            </TableCell>
+            <TableCell sx={{ color: "white", fontWeight: 600 }} align="right">
+              Vencidas
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {vacunas.map((element, index) => (
-            <Vacuna vacuna={element} key={index} />
+          {distribuciones.map((element, index) => (
+            <Distribucion distribucion={element} key={index} />
           ))}
         </TableBody>
       </Table>
@@ -31,4 +34,4 @@ const TablaVacunas = ({ vacunas }) => {
   );
 };
 
-export default TablaVacunas;
+export default TableDistribuciones;

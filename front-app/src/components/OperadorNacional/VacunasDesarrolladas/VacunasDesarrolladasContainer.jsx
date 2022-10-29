@@ -59,9 +59,6 @@ const VacunasDesarrolladasContainer = () => {
       {!estaCargando ? (
         <>
           <Box sx={{ marginTop: 2, marginBottom: 2 }}>
-            <CustomButton sx={{ marginRight: 1 }} textColor={"#2E7994"} color={"info"} variant={"outlined"}>
-              Distribuir
-            </CustomButton>
             <CustomModal title="Cargar vacuna desarrollada" color={"info"} open={open} setOpen={setOpen}>
               <RegistrarVacunaDesarrollada setOpen={setOpen} cargarVacunasDesarrolladas={cargarVacunasDesarrolladas} />
             </CustomModal>
