@@ -33,81 +33,86 @@ namespace VacunacionApi.Controllers
 
             try
             {
-                EstadoCompra estadoCompraRecibida = await _context.EstadoCompra.Where(e => e.Descripcion == "Recibida").FirstOrDefaultAsync();
-                EstadoCompra estadoCompraNoRecibida = await _context.EstadoCompra.Where(e => e.Descripcion == "No Recibida").FirstOrDefaultAsync();
-                DateTime fechaHoy = DateTime.Now;
-                int anioHoy = fechaHoy.Year;
-                int mesHoy = fechaHoy.Month;
-                int diaHoy = fechaHoy.Day;
+                Usuario usu = await GetUsuario(emailOperadorNacional);
 
-                //Recepciones
-                List<Compra> comprasNoRecibidas = await _context.Compra
-                   .Where(l => l.IdLoteNavigation.Disponible == false
-                       && l.Distribuidas == 0
-                       && l.IdEstadoCompra == estadoCompraNoRecibida.Id
-                       && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
-                   .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
-                   .ToListAsync();
-
-                foreach (Compra compra in comprasNoRecibidas)
+                if (usu != null && await (TieneRolOperadorNacional(usu)))
                 {
-                    int anioFechaEntregaCompra = compra.FechaEntrega.Year;
-                    int mesFechaEntregaCompra = compra.FechaEntrega.Month;
-                    int diaFechaEntregaCompra = compra.FechaEntrega.Day;
+                    EstadoCompra estadoCompraRecibida = await _context.EstadoCompra.Where(e => e.Descripcion == "Recibida").FirstOrDefaultAsync();
+                    EstadoCompra estadoCompraNoRecibida = await _context.EstadoCompra.Where(e => e.Descripcion == "No Recibida").FirstOrDefaultAsync();
+                    DateTime fechaHoy = DateTime.Now;
+                    int anioHoy = fechaHoy.Year;
+                    int mesHoy = fechaHoy.Month;
+                    int diaHoy = fechaHoy.Day;
 
-                    if (anioHoy == anioFechaEntregaCompra && mesHoy == mesFechaEntregaCompra && diaHoy == diaFechaEntregaCompra)
+                    //Recepciones
+                    List<Compra> comprasNoRecibidas = await _context.Compra
+                       .Where(l => l.IdLoteNavigation.Disponible == false
+                           && l.Distribuidas == 0
+                           && l.IdEstadoCompra == estadoCompraNoRecibida.Id
+                           && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
+                       .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
+                       .ToListAsync();
+
+                    foreach (Compra compra in comprasNoRecibidas)
                     {
-                        Lote loteCompra = await _context.Lote.Where(l => l.Id == compra.IdLote).FirstOrDefaultAsync();
+                        int anioFechaEntregaCompra = compra.FechaEntrega.Year;
+                        int mesFechaEntregaCompra = compra.FechaEntrega.Month;
+                        int diaFechaEntregaCompra = compra.FechaEntrega.Day;
 
-                        compra.IdEstadoCompra = estadoCompraRecibida.Id;
-                        _context.Entry(compra).State = EntityState.Modified;
-                        loteCompra.Disponible = true;
-                        _context.Entry(loteCompra).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
-
-                        CompraCronDTO compraCronDTO = new CompraCronDTO(compra.Id, loteCompra.Id, compra.FechaCompra,
-                            compra.FechaEntrega, compra.CantidadVacunas, compra.IdEstadoCompra, estadoCompraRecibida.Descripcion);
-
-                        comprasRecibidasHoy.Add(compraCronDTO);
-                    }
-                }
-
-                //Vencimientos
-                List<Lote> lotes = await _context.Lote.ToListAsync();
-
-                foreach (Lote lote in lotes)
-                {
-                    int anioFechaVencimientoLote = lote.FechaVencimiento.Year;
-                    int mesFechaVencimientoLote = lote.FechaVencimiento.Month;
-                    int diaFechaVencimientoLote = lote.FechaVencimiento.Day;
-
-                    if (anioHoy == anioFechaVencimientoLote && mesHoy == mesFechaVencimientoLote && diaHoy == diaFechaVencimientoLote)
-                    {
-                        Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Id).FirstOrDefaultAsync();
-
-                        lote.Disponible = false;
-                        _context.Entry(lote).State = EntityState.Modified;
-
-                        List<Distribucion> distribucionesLote = await _context.Distribucion
-                            .Where(d => d.IdLote == lote.Id).ToListAsync();
-
-                        foreach (Distribucion distribucion in distribucionesLote)
+                        if (anioHoy == anioFechaEntregaCompra && mesHoy == mesFechaEntregaCompra && diaHoy == diaFechaEntregaCompra)
                         {
-                            distribucion.Vencidas = distribucion.CantidadVacunas - distribucion.Aplicadas;
-                            _context.Entry(distribucion).State = EntityState.Modified;
+                            Lote loteCompra = await _context.Lote.Where(l => l.Id == compra.IdLote).FirstOrDefaultAsync();
+
+                            compra.IdEstadoCompra = estadoCompraRecibida.Id;
+                            _context.Entry(compra).State = EntityState.Modified;
+                            loteCompra.Disponible = true;
+                            _context.Entry(loteCompra).State = EntityState.Modified;
+                            await _context.SaveChangesAsync();
+
+                            CompraCronDTO compraCronDTO = new CompraCronDTO(compra.Id, loteCompra.Id, compra.FechaCompra,
+                                compra.FechaEntrega, compra.CantidadVacunas, compra.IdEstadoCompra, estadoCompraRecibida.Descripcion);
+
+                            comprasRecibidasHoy.Add(compraCronDTO);
                         }
+                    }
 
-                        compra.Vencidas = compra.CantidadVacunas - compra.Distribuidas;
-                        _context.Entry(compra).State = EntityState.Modified;
+                    //Vencimientos
+                    List<Lote> lotes = await _context.Lote.ToListAsync();
 
-                        await _context.SaveChangesAsync();
+                    foreach (Lote lote in lotes)
+                    {
+                        int anioFechaVencimientoLote = lote.FechaVencimiento.Year;
+                        int mesFechaVencimientoLote = lote.FechaVencimiento.Month;
+                        int diaFechaVencimientoLote = lote.FechaVencimiento.Day;
 
-                        VacunaDesarrollada vd = await _context.VacunaDesarrollada.Where(v => v.Id == lote.IdVacunaDesarrollada).FirstOrDefaultAsync();
-                        Vacuna vac = await _context.Vacuna.Where(v => v.Id == vd.IdVacuna).FirstOrDefaultAsync();
+                        if (anioHoy == anioFechaVencimientoLote && mesHoy == mesFechaVencimientoLote && diaHoy == diaFechaVencimientoLote)
+                        {
+                            Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Id).FirstOrDefaultAsync();
 
-                        LoteCronDTO loteCronDTO = new LoteCronDTO(lote.Id, lote.FechaVencimiento, vac.Id, vac.Descripcion, compra.CantidadVacunas);
+                            lote.Disponible = false;
+                            _context.Entry(lote).State = EntityState.Modified;
 
-                        lotesVencidosHoy.Add(loteCronDTO);
+                            List<Distribucion> distribucionesLote = await _context.Distribucion
+                                .Where(d => d.IdLote == lote.Id).ToListAsync();
+
+                            foreach (Distribucion distribucion in distribucionesLote)
+                            {
+                                distribucion.Vencidas = distribucion.CantidadVacunas - distribucion.Aplicadas;
+                                _context.Entry(distribucion).State = EntityState.Modified;
+                            }
+
+                            compra.Vencidas = compra.CantidadVacunas - compra.Distribuidas;
+                            _context.Entry(compra).State = EntityState.Modified;
+
+                            await _context.SaveChangesAsync();
+
+                            VacunaDesarrollada vd = await _context.VacunaDesarrollada.Where(v => v.Id == lote.IdVacunaDesarrollada).FirstOrDefaultAsync();
+                            Vacuna vac = await _context.Vacuna.Where(v => v.Id == vd.IdVacuna).FirstOrDefaultAsync();
+
+                            LoteCronDTO loteCronDTO = new LoteCronDTO(lote.Id, lote.FechaVencimiento, vac.Id, vac.Descripcion, compra.CantidadVacunas);
+
+                            lotesVencidosHoy.Add(loteCronDTO);
+                        }
                     }
                 }
 

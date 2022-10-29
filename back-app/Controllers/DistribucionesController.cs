@@ -126,58 +126,6 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        // GET: api/Distribuciones/GetStockOperadorNacionalAllVacunas?emailOperadorNacional=maria@gmail.com
-        [HttpGet]
-        [Route("GetStockOperadorNacionalAllVacunas")]
-        public async Task<ActionResult<List<VacunaStockDTO>>> GetStockOperadorNacionalAllVacunas(string emailOperadorNacional)
-        {
-            try
-            {
-                List<VacunaStockDTO> vacunasStock = new List<VacunaStockDTO>();
-
-                if (emailOperadorNacional != null && (await TieneRolOperadorNacional(await GetUsuario(emailOperadorNacional))))
-                {
-                    List<Compra> compras = await _context.Compra
-                       .Where(l => l.IdLoteNavigation.Disponible == true
-                           && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
-                       .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
-                       .ToListAsync();
-
-                    foreach (Compra com in compras)
-                    {
-                        Lote lote = await _context.Lote.Where(l => l.Id == com.IdLote).FirstOrDefaultAsync();
-
-                        List<Distribucion> distribucionesLote = await _context.Distribucion
-                            .Where(d => d.IdLote == lote.Id).ToListAsync();
-
-                        int cantidadTotalDistribuidas = 0;
-                        int disponibles = 0;
-
-                        foreach (Distribucion distribucion in distribucionesLote)
-                        {
-                            cantidadTotalDistribuidas += distribucion.CantidadVacunas;
-                        }
-
-                        disponibles = com.CantidadVacunas - cantidadTotalDistribuidas;
-
-                        VacunaDesarrollada vd = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                        MarcaComercial mc = await GetMarcaComercial(vd.IdMarcaComercial);
-                        Vacuna vac = await GetVacuna(vd.IdVacuna);
-
-                        VacunaStockDTO vs = new VacunaStockDTO(vac.Id, vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);
-
-                        vacunasStock.Add(vs);
-                    }
-                }
-
-                return Ok(vacunasStock);
-            }
-            catch (Exception error)
-            {
-                return BadRequest(error.Message);
-            }
-        }
-
         // GET: api/Distribuciones/GetStockAnalista?emailAnalistaProvincial=juanAnalista@gmail.com
         [HttpGet]
         [Route("GetStockAnalista")]
