@@ -5,14 +5,14 @@ import axios from "axios";
 import allUrls from "@/services/backend_url";
 import { Table, TableContainer, TableHead, TableRow, Paper, TableCell, TableBody } from "@mui/material";
 import CustomLoader from "@/components/utils/CustomLoader";
-const StockContainer = ({ title, url }) => {
+const StockContainer = ({ title, url, param = "emailOperadorNacional" }) => {
   const { userSesion } = useContext(UserContext);
   const [stock, setStock] = useState([]);
   const [estaCargando, setEstaCargando] = useState(true);
 
   useEffect(() => {
     axios
-      .get(`${url}?emailOperadorNacional=${userSesion.email}`)
+      .get(`${url}?${param}=${userSesion.email}`)
       .then((response) => {
         setStock(response.data);
       })

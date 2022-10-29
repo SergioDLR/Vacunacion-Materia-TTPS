@@ -99,7 +99,11 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={2}>
             <AnalistaWraper>
-              <StockContainer title={"Stock para vacunación"} url={allUrls.visualizarStockAnalista} />
+              <StockContainer
+                title={"Stock para vacunación"}
+                url={allUrls.visualizarStockAnalista}
+                param={"emailAnalistaProvincial"}
+              />
             </AnalistaWraper>
           </ProtectedRoute>
         }
