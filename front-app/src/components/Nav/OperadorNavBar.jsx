@@ -2,7 +2,7 @@ import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Button } from "@mui/material";
+import { Button, Drawer } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import { UserContext } from "../Context/UserContext";
 import CustomButton from "../utils/CustomButtom";
@@ -15,7 +15,8 @@ const OperadorNavBar = () => {
   return (
     <>
       <CssBaseline />
-      <AppBar sx={{ backgroundColor: "#37BBED", boxShadow: "none" }}>
+
+      <AppBar sx={{ backgroundColor: "#37BBED", boxShadow: "none", overflow: "auto" }}>
         <Toolbar>
           <NavLink
             style={({ isActive }) =>
@@ -28,7 +29,7 @@ const OperadorNavBar = () => {
             }
             to={"/operador/vacunas"}
           >
-            <CustomButton textColor="white" color="info" variant="contained">
+            <CustomButton textColor="white" color="info" variant="contained" sx={{ minWidth: "max-content" }}>
               Vacunas
             </CustomButton>
           </NavLink>
@@ -43,7 +44,7 @@ const OperadorNavBar = () => {
             }
             to={"/operador/vacunasdesarrolladas"}
           >
-            <CustomButton textColor="white" color="info" variant="contained">
+            <CustomButton textColor="white" color="info" variant="contained" sx={{ minWidth: "max-content" }}>
               Vacunas desarrolladas
             </CustomButton>
           </NavLink>
@@ -58,7 +59,7 @@ const OperadorNavBar = () => {
                   }
             }
           >
-            <CustomButton textColor="white" color="info" variant="contained">
+            <CustomButton textColor="white" color="info" variant="contained" sx={{ minWidth: "max-content" }}>
               Marcas comerciales
             </CustomButton>
           </NavLink>
@@ -73,7 +74,7 @@ const OperadorNavBar = () => {
                   }
             }
           >
-            <CustomButton textColor="white" color="info" variant="contained">
+            <CustomButton textColor="white" color="info" variant="contained" sx={{ minWidth: "max-content" }}>
               Vacunados
             </CustomButton>
           </NavLink>
@@ -88,7 +89,7 @@ const OperadorNavBar = () => {
                   }
             }
           >
-            <CustomButton textColor="white" color="info" variant="contained">
+            <CustomButton textColor="white" color="info" variant="contained" sx={{ minWidth: "max-content" }}>
               Compras
             </CustomButton>
           </NavLink>
@@ -103,13 +104,28 @@ const OperadorNavBar = () => {
                   }
             }
           >
-            <CustomButton textColor="white" color="info" variant="contained">
+            <CustomButton textColor="white" color="info" variant="contained" sx={{ minWidth: "max-content" }}>
               Distribuciones
+            </CustomButton>
+          </NavLink>
+          <NavLink
+            to={"/operador/stock"}
+            style={({ isActive }) =>
+              isActive
+                ? activeStyle
+                : {
+                    textDecoration: "none",
+                    marginRight: 2,
+                  }
+            }
+          >
+            <CustomButton textColor="white" color="info" variant="contained">
+              Stock
             </CustomButton>
           </NavLink>
           <CustomButton
             textColor="white"
-            sx={{ marginLeft: "auto" }}
+            sx={{ marginLeft: "auto", minWidth: "max-content" }}
             color="error"
             variant="contained"
             onClick={cerrarSesion}
@@ -118,6 +134,7 @@ const OperadorNavBar = () => {
           </CustomButton>
         </Toolbar>
       </AppBar>
+
       <Toolbar />
     </>
   );

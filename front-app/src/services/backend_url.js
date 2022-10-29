@@ -27,5 +27,7 @@ const allUrls = {
   visualizarDistribuciones: `${urlBase}/Distribuciones/GetAll`,
   consultarDistribucion: `${urlBase}/Distribuciones/ConsultarDistribucion`,
   crearDistribucion: `${urlBase}/Distribuciones/RegistrarDistribucion`,
+  visualizarStock: `${urlBase}/Distribuciones/GetStockOperadorNacionalAllVacunas`,
+  cron: `${urlBase}/Vacunas/EjecutarCron`,
 };
 export default allUrls;

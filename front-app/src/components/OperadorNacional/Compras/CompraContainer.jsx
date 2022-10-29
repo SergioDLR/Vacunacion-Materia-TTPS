@@ -47,9 +47,25 @@ const CompraContainer = () => {
       alert.error(`Ocurrio un error del lado del servidor`);
     }
   };
+  const cronEjecucion = () => {
+    axios.get(`${allUrls.cron}?emailOperadorNacional=${userSesion.email}`).then((response) => {
+      cargarCompras();
+      alert.success("Se actualizaron las compras y los lotes vencidos");
+    });
+  };
   return (
     <Container>
+      <CustomButton
+        variant={"outlined"}
+        color="success"
+        textColor={"green"}
+        sx={{ marginTop: 2 }}
+        onClick={cronEjecucion}
+      >
+        Ejecutra cron
+      </CustomButton>
       {estaCargando && <CustomLoader />}
+
       <CustomModal title={"comprar"} displayButton={false} open={open} setOpen={setOpen}>
         <FormCompra setOpen={setOpen} alert={alert} cargarCompras={cargarCompras} />
         <CustomButton
