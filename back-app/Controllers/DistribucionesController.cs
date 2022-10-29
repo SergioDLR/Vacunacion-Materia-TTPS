@@ -21,11 +21,54 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
-        // GET: api/Distribuciones
+        // GET: api/Distribuciones/GetAll?emailOperadorNacional&idJurisdiccion=1
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Distribucion>>> GetDistribucion()
+        [Route("GetAll")]
+        public async Task<ActionResult<ResponseListaDistribucionesDTO>> GetAll(string emailOperadorNacional = null, int idJurisdiccion = 0)
         {
-            return await _context.Distribucion.ToListAsync();
+            try 
+            {
+                ResponseListaDistribucionesDTO responseListaDistribucionesDTO = new ResponseListaDistribucionesDTO();
+                List<DistribucionDTO> listaDistribuciones = new List<DistribucionDTO>();
+                List<string> errores = new List<string>();
+
+                if (emailOperadorNacional == null)
+                {
+                    errores.Add("No se especificó el email operador nacional");
+                }
+                else
+                    errores = await VerificarCredencialesUsuarioOperadorNacional(emailOperadorNacional, errores);
+
+                if (errores.Count > 0)
+                    responseListaDistribucionesDTO = new ResponseListaDistribucionesDTO("Rechazada", true, errores, listaDistribuciones);
+                else
+                {
+                    List<Distribucion> distribuciones = new List<Distribucion>();
+
+                    if (idJurisdiccion != 0)
+                        distribuciones = await _context.Distribucion.Where(d => d.IdJurisdiccion == idJurisdiccion).ToListAsync();
+                    else
+                        distribuciones = await _context.Distribucion.ToListAsync();
+
+                    foreach (Distribucion distribucion in distribuciones)
+                    {
+                        Jurisdiccion juris = await GetJurisdiccion(distribucion.IdJurisdiccion);
+
+                        DistribucionDTO distribucionDTO = new DistribucionDTO(distribucion.Id, distribucion.Codigo, distribucion.IdJurisdiccion, juris.Descripcion,
+                            distribucion.IdLote, distribucion.FechaEntrega, distribucion.CantidadVacunas, distribucion.Aplicadas, distribucion.Vencidas);
+
+                        listaDistribuciones.Add(distribucionDTO);
+                    }
+
+                    responseListaDistribucionesDTO = new ResponseListaDistribucionesDTO("Aceptada", false, errores, listaDistribuciones);
+                }
+
+                return Ok(responseListaDistribucionesDTO);
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
         }
 
         // GET: api/Distribuciones/5
