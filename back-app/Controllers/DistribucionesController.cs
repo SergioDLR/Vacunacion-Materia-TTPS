@@ -218,26 +218,29 @@ namespace VacunacionApi.Controllers
 
                         entrega.CantidadVacunas = otorgadas;
 
-                        Random randomCodigoDistribucion = new Random();
-                        int codigoDistribucion = randomCodigoDistribucion.Next(1, 100000000);
-
-                        while (await GetDistribucionExistente(codigoDistribucion) != null)
+                        if (entrega.CantidadVacunas != 0)
                         {
-                            codigoDistribucion = randomCodigoDistribucion.Next(1, 100000000);
+                            Random randomCodigoDistribucion = new Random();
+                            int codigoDistribucion = randomCodigoDistribucion.Next(1, 100000000);
+
+                            while (await GetDistribucionExistente(codigoDistribucion) != null)
+                            {
+                                codigoDistribucion = randomCodigoDistribucion.Next(1, 100000000);
+                            }
+
+                            Distribucion distribucion = new Distribucion(codigoDistribucion, model.IdJurisdiccion,
+                                entrega.IdLote, DateTime.Now, entrega.CantidadVacunas, 0, 0);
+
+                            _context.Distribucion.Add(distribucion);
+                            await _context.SaveChangesAsync();
+
+                            Jurisdiccion juris = await GetJurisdiccion(distribucion.IdJurisdiccion);
+
+                            DistribucionDTO distribucionDTO = new DistribucionDTO(distribucion.Id, distribucion.Codigo, distribucion.IdJurisdiccion,
+                                juris.Descripcion, distribucion.IdLote, distribucion.FechaEntrega, distribucion.CantidadVacunas, 0, 0);
+
+                            listaDistribuciones.Add(distribucionDTO);
                         }
-
-                        Distribucion distribucion = new Distribucion(codigoDistribucion, model.IdJurisdiccion, 
-                            entrega.IdLote, DateTime.Now, entrega.CantidadVacunas, 0, 0);
-
-                        _context.Distribucion.Add(distribucion);
-                        await _context.SaveChangesAsync();
-
-                        Jurisdiccion juris = await GetJurisdiccion(distribucion.IdJurisdiccion);
-
-                        DistribucionDTO distribucionDTO = new DistribucionDTO(distribucion.Id, distribucion.Codigo, distribucion.IdJurisdiccion, 
-                            juris.Descripcion, distribucion.IdLote, distribucion.FechaEntrega, distribucion.CantidadVacunas, 0, 0);
-
-                        listaDistribuciones.Add(distribucionDTO);
                     }
 
                     responseRegistrarDistribucionDTO = new ResponseRegistrarDistribucionDTO("Aceptada", false, errores,
