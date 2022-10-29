@@ -10,6 +10,8 @@ namespace VacunacionApi.DTO
         public List<StockJurisdiccionDTO> StockJurisdicciones { get; set; }
         public string EmailOperadorNacional { get; set; }
 
+        public ResponseStockNacionalDTO() { } 
+
         public ResponseStockNacionalDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string emailOperadorNacional, int totalNacion, int totalNacionVencido, int totalNacionDisponible, List<StockJurisdiccionDTO> stockJurisdicciones)
         {
             EstadoTransaccion = estadoTransaccion;

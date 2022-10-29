@@ -21,6 +21,61 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
+        // GET: api/Distribuciones/GetStockOperadorNacionalByVacuna?emailOperadorNacional=maria@gmail.com&idVacuna=1
+        [HttpGet]
+        [Route("GetStockOperadorNacionalByVacuna")]
+        public async Task<ActionResult<List<VacunaStockDTO>>> GetStockOperadorNacionalByVacuna(string emailOperadorNacional = null, int idVacuna = 0)
+        {
+            try
+            {
+                List<VacunaStockDTO> vacunasStock = new List<VacunaStockDTO>();
+
+                if (emailOperadorNacional != null && (await TieneRolOperadorNacional(await GetUsuario(emailOperadorNacional))) && idVacuna != 0)
+                {
+                    List<Compra> compras = await _context.Compra
+                       .Where(l => l.IdLoteNavigation.Disponible == true
+                           && l.IdLoteNavigation.IdVacunaDesarrolladaNavigation.IdVacuna == idVacuna
+                           && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
+                       .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
+                       .ToListAsync();
+
+                    foreach (Compra com in compras)
+                    {
+                        Lote lote = await _context.Lote.Where(l => l.Id == com.IdLote).FirstOrDefaultAsync();
+
+                        List<Distribucion> distribucionesLote = await _context.Distribucion
+                            .Where(d => d.IdLote == lote.Id).ToListAsync();
+
+                        int cantidadTotalDistribuidas = 0;
+                        int disponibles = 0;
+
+                        foreach (Distribucion distribucion in distribucionesLote)
+                        {
+                            cantidadTotalDistribuidas += distribucion.CantidadVacunas;
+                        }
+
+                        disponibles = com.CantidadVacunas - cantidadTotalDistribuidas;
+
+                        VacunaDesarrollada vd = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                        MarcaComercial mc = await GetMarcaComercial(vd.IdMarcaComercial);
+                        Vacuna vac = await GetVacuna(idVacuna);
+
+                        VacunaStockDTO vs = new VacunaStockDTO(vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);
+
+                        vacunasStock.Add(vs);
+                    }
+                }
+
+                return Ok(vacunasStock);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
+        
+        //Falta CHEQUEAR EN POSTMAN
         // GET: api/Distribuciones/GetStockAnalista?emailAnalistaProvincial=juanAnalista@gmail.com
         [HttpGet]
         [Route("GetStockAnalista")]
@@ -163,6 +218,7 @@ namespace VacunacionApi.Controllers
                 return BadRequest(error.Message);
             }
         }
+
 
         // GET: api/Distribuciones/5
         [HttpGet("{id}")]
@@ -408,6 +464,57 @@ namespace VacunacionApi.Controllers
             }
 
             return rolExistente;
+        }
+
+        private async Task<VacunaDesarrollada> GetVacunaDesarrollada(int idVacunaDesarrollada)
+        {
+            VacunaDesarrollada vacunaDesarrolladaExistente = null;
+
+            try
+            {
+                vacunaDesarrolladaExistente = await _context.VacunaDesarrollada
+                    .Where(vac => vac.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return vacunaDesarrolladaExistente;
+        }
+
+        private async Task<MarcaComercial> GetMarcaComercial(int idMarcaComercial)
+        {
+            MarcaComercial marcaComercialExistente = null;
+
+            try
+            {
+                marcaComercialExistente = await _context.MarcaComercial
+                    .Where(mc => mc.Id == idMarcaComercial).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return marcaComercialExistente;
+        }
+
+        private async Task<Vacuna> GetVacuna(int idVacuna)
+        {
+            Vacuna vacunaExistente = null;
+
+            try
+            {
+                vacunaExistente = await _context.Vacuna
+                    .Where(vac => vac.Id == idVacuna).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+
+            return vacunaExistente;
         }
     }
 
