@@ -126,207 +126,45 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        // GET: api/Distribuciones/GetStockAnalista?emailAnalistaProvincial=juanAnalista@gmail.com
+        // GET: api/Distribuciones/GetStockAnalistaProvincialAllVacunas?emailAnalistaProvincial=analista@gmail.com
         [HttpGet]
-        [Route("GetStockAnalista")]
-        public async Task<ActionResult<IEnumerable<ResponseStockAnalistaProvincialDTO>>> GetStockAnalista(string emailAnalistaProvincial = null)
+        [Route("GetStockAnalistaProvincialAllVacunas")]
+        public async Task<ActionResult<List<VacunaStockAnalistaProvincialDTO>>> GetStockAnalistaProvincialAllVacunas(string emailAnalistaProvincial = null)
         {
             try
             {
-                ResponseStockAnalistaProvincialDTO responseStockAnalistaProvincial = new ResponseStockAnalistaProvincialDTO();
+                List<VacunaStockAnalistaProvincialDTO> vacunasAnalistaStockDTO = new List<VacunaStockAnalistaProvincialDTO>();
+                Usuario usuarioAnalista = await GetUsuario(emailAnalistaProvincial);
 
-                //lista vacia para los errores
-                List<string> errores = new List<string>();
-
-                errores = await VerificarCredencialesAnalistaProvincial(emailAnalistaProvincial, errores);
-
-                if (errores.Count == 0)
+                if (emailAnalistaProvincial != null && (await TieneRolAnalistaProvincial(await GetUsuario(emailAnalistaProvincial))))
                 {
-                    Usuario usuario = await GetUsuario(emailAnalistaProvincial);
+                    List<Compra> compras = await _context.Compra
+                       .Where(l => l.IdLoteNavigation.Disponible == true
+                           && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
+                       .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
+                       .ToListAsync();
 
-                    //me quedo con la jurisdiccion del usuario
-                    Jurisdiccion jurisdiccionUsuario = await _context.Jurisdiccion.Where(jurisdiccion => jurisdiccion.Id == usuario.IdJurisdiccion).FirstOrDefaultAsync();
+                    List<Distribucion> distribuciones = await _context.Distribucion
+                        .Where(d => d.IdJurisdiccion == usuarioAnalista.IdJurisdiccion
+                            && d.Vencidas == 0).ToListAsync();
 
-                    //me quedo con las distribuciones de la jurisdicción del usuario
-                    List<Distribucion> listaDistribuciones = await _context.Distribucion
-                        .Where(d => d.IdJurisdiccion == usuario.IdJurisdiccion)
-                        .ToListAsync();
-
-                    List<TipoVacuna> tiposVacuna = await _context.TipoVacuna.ToListAsync();
-                    List<VacunaDesarrollada> vacunasDesarrolladas = null;
-                    List<TipoVacunaStockDTO> tiposVacunasStockDTO = new List<TipoVacunaStockDTO>();
-
-                    int total = 0;
-                    int totalVencido = 0;
-                    int totalDisponible = 0;
-
-                    foreach (TipoVacuna tipoVacuna in tiposVacuna)
+                    foreach(Distribucion dist in distribuciones)
                     {
-                        int totalVacunaDesarrollada = 0;
-                        int totalVacunaDesarrolladaVencido = 0;
-                        int totalVacunaDesarrolladaDisponible = 0;
+                        int disponibles = dist.CantidadVacunas - dist.Aplicadas;
 
-                        //------
-                        List<VacunaDesarrolladaStockDTO> vacunasDesarrolladasStockDTO = new List<VacunaDesarrolladaStockDTO>();
-                        //------
+                        Lote loteDist = await _context.Lote.Where(l => l.Id == dist.IdLote).FirstAsync();
 
-                        List<Vacuna> vacunasTipo = await _context.Vacuna.Where(v => v.IdTipoVacuna == tipoVacuna.Id).ToListAsync();
-                        List<VacunaDesarrollada> vacunasDesarrolladasTipo = new List<VacunaDesarrollada>();
+                        VacunaDesarrollada vd = await GetVacunaDesarrollada(loteDist.IdVacunaDesarrollada);
+                        MarcaComercial mc = await GetMarcaComercial(vd.IdMarcaComercial);
+                        Vacuna vac = await GetVacuna(vd.IdVacuna);
 
-                        foreach (Vacuna vac in vacunasTipo)
-                        {
-                            VacunaDesarrollada vdesa = await _context.VacunaDesarrollada.Where(v => v.IdVacuna == vac.Id).FirstAsync();
-                            vacunasDesarrolladasTipo.Add(vdesa);
-                        }
+                        VacunaStockAnalistaProvincialDTO vs = new VacunaStockAnalistaProvincialDTO(loteDist.Id, loteDist.FechaVencimiento, vac.Id, vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);
 
-                        vacunasDesarrolladas = vacunasDesarrolladasTipo;
-
-                        foreach (VacunaDesarrollada vd in vacunasDesarrolladas)
-                        {
-                            int totalLotes = 0;
-                            int totalLotesVencido = 0;
-                            int totalLotesDisponible = 0;
-
-                            List<Distribucion> distribucionesVacunaDesarrollada = await _context.Distribucion
-                                .Where(d => d.IdLoteNavigation.IdVacunaDesarrollada == vd.Id
-                                    && d.IdJurisdiccion == usuario.IdJurisdiccion
-                                    && d.IdLoteNavigation.IdVacunaDesarrolladaNavigation.IdVacunaNavigation.IdTipoVacuna == tipoVacuna.Id)
-                                .ToListAsync();
-
-                            if (distribucionesVacunaDesarrollada.Count == 0)
-                            {
-                                TipoVacunaStockDTO tipoVacunaStockVacioDTO = new TipoVacunaStockDTO(tipoVacuna.Id, tipoVacuna.Descripcion,
-                                    new List<VacunaDesarrolladaStockDTO>(), totalVacunaDesarrollada, totalVacunaDesarrolladaVencido, totalVacunaDesarrolladaDisponible);
-                                tiposVacunasStockDTO.Add(tipoVacunaStockVacioDTO);
-                            }
-                            else
-                            {
-                                List<Lote> lotes = null;
-
-                                foreach (Distribucion distribucion in distribucionesVacunaDesarrollada)
-                                {
-                                    lotes = await _context.Lote.Where(l => l.Id == distribucion.IdLote)
-                                        .OrderBy(l => l.IdVacunaDesarrollada)
-                                        .ToListAsync();
-                                }
-                                                                
-                                //------
-                                List<LoteStockDTO> lotesDTO = new List<LoteStockDTO>();
-                                //------
-
-                                foreach (Lote lote in lotes)
-                                {
-                                    Distribucion distribucion = await _context.Distribucion.Where(d => d.IdLote == lote.Id).FirstOrDefaultAsync();
-
-                                    int cantidadRestanteLote = (distribucion.CantidadVacunas - distribucion.Aplicadas);
-                                    totalLotes += distribucion.CantidadVacunas;
-                                    totalLotesVencido += distribucion.Vencidas;
-                                    totalLotesDisponible += cantidadRestanteLote - distribucion.Vencidas;
-                                    LoteStockDTO loteStockDTO = new LoteStockDTO(lote.Id, distribucion.CantidadVacunas, lote.Disponible, lote.FechaVencimiento, cantidadRestanteLote);
-                                    //------
-                                    lotesDTO.Add(loteStockDTO);
-                                    //------
-                                }
-                                                              
-                                //----
-                                MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == vd.IdMarcaComercial).FirstOrDefaultAsync();
-                                Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == vd.IdVacuna).FirstOrDefaultAsync();
-                                string descripcionVacunaMarca = vacuna.Descripcion + " " + marcaComercialExistente.Descripcion;
-
-                                VacunaDesarrolladaStockDTO vacunaDesarrolladaStockDTO = new VacunaDesarrolladaStockDTO(vd.Id, vd.IdVacuna, vd.IdMarcaComercial, descripcionVacunaMarca, lotesDTO, totalLotes, totalLotesVencido, totalLotesDisponible);
-                                vacunasDesarrolladasStockDTO.Add(vacunaDesarrolladaStockDTO);
-                                //----
-
-                                totalVacunaDesarrollada += totalLotes;
-                                totalVacunaDesarrolladaVencido += totalLotesVencido;
-                                totalVacunaDesarrolladaDisponible += totalLotesDisponible;
-                            }
-                            
-
-                            //----
-                            TipoVacunaStockDTO tipoVacunaStockDTO = new TipoVacunaStockDTO(tipoVacuna.Id, tipoVacuna.Descripcion, vacunasDesarrolladasStockDTO, totalVacunaDesarrollada, totalVacunaDesarrolladaVencido, totalVacunaDesarrolladaDisponible);
-                            tiposVacunasStockDTO.Add(tipoVacunaStockDTO);
-                            //----
-                        }
-                                             
-                        total += totalVacunaDesarrollada;
-                        totalVencido += totalVacunaDesarrolladaVencido;
-                        totalDisponible += totalVacunaDesarrolladaDisponible;
+                        vacunasAnalistaStockDTO.Add(vs);
                     }
-
-                    //----
-                    StockDTO stockDTO = new StockDTO(tiposVacunasStockDTO, total, totalVencido, totalDisponible);
-                    StockJurisdiccionDTO stockJurisdiccionDTO = new StockJurisdiccionDTO(jurisdiccionUsuario.Id, jurisdiccionUsuario.Descripcion, stockDTO);
-                    //----
-
-                    responseStockAnalistaProvincial.EmailAnalistaProvincial = emailAnalistaProvincial;
-                    responseStockAnalistaProvincial.EstadoTransaccion = "Aceptada";
-                    responseStockAnalistaProvincial.Errores = errores;
-                    responseStockAnalistaProvincial.ExistenciaErrores = false;
-                    responseStockAnalistaProvincial.StockJurisdiccion = stockJurisdiccionDTO;
                 }
-                else
-                {
-                    //response errores
-                    responseStockAnalistaProvincial.EmailAnalistaProvincial = emailAnalistaProvincial;
-                    responseStockAnalistaProvincial.EstadoTransaccion = "Rechazada";
-                    responseStockAnalistaProvincial.Errores = errores;
-                    responseStockAnalistaProvincial.ExistenciaErrores = true;
-                    responseStockAnalistaProvincial.StockJurisdiccion = new StockJurisdiccionDTO();
-                }
-                return Ok(responseStockAnalistaProvincial);
-            }
-            catch (Exception error)
-            {
-                return BadRequest(error.Message);
-            }
-        }
 
-
-        // GET: api/Distribuciones/GetStockOperador?emailOperadorNacional=maria@gmail.com
-        [HttpGet]
-        [Route("GetStockOperador")]
-        public async Task<ActionResult<IEnumerable<ResponseStockNacionalDTO>>> GetStockOperador(string emailOperadorNacional = null)
-        {
-            try
-            {
-                ResponseStockNacionalDTO responseStockNacionalDTO = new ResponseStockNacionalDTO();
-
-                //lista vacia para los errores
-                List<string> errores = new List<string>();
-
-                errores = await VerificarCredencialesUsuarioOperadorNacional(emailOperadorNacional, errores);
-
-                List<StockJurisdiccionDTO> listaStockJurisdiccionesDTO = new List<StockJurisdiccionDTO>();
-                
-                if (errores.Count == 0)
-                {
-                    Usuario usuario = await GetUsuario(emailOperadorNacional);
-
-                    List<Jurisdiccion> listaJurisdicciones = await _context.Jurisdiccion.ToListAsync(); 
-                    
-                    foreach(Jurisdiccion jurisdiccion in listaJurisdicciones)
-                    {
-                        StockJurisdiccionDTO stockJurisdiccionDTO = await GetStockJurisdiccionDTO(jurisdiccion);
-                        listaStockJurisdiccionesDTO.Add(stockJurisdiccionDTO);    
-                    }
-
-                    responseStockNacionalDTO.EmailOperadorNacional = emailOperadorNacional;
-                    responseStockNacionalDTO.EstadoTransaccion = "Aceptada";
-                    responseStockNacionalDTO.Errores = errores;
-                    responseStockNacionalDTO.ExistenciaErrores = false;
-                    responseStockNacionalDTO.StockJurisdicciones = listaStockJurisdiccionesDTO;
-                }
-                else
-                {
-                    //response errores
-                    responseStockNacionalDTO.EmailOperadorNacional = emailOperadorNacional;
-                    responseStockNacionalDTO.EstadoTransaccion = "Rechazada";
-                    responseStockNacionalDTO.Errores = errores;
-                    responseStockNacionalDTO.ExistenciaErrores = true;
-                    responseStockNacionalDTO.StockJurisdicciones = listaStockJurisdiccionesDTO;
-                }
-                return Ok(responseStockNacionalDTO);
+                return Ok(vacunasAnalistaStockDTO);
             }
             catch (Exception error)
             {
@@ -987,112 +825,6 @@ namespace VacunacionApi.Controllers
             }
 
             return errores;
-        }
-
-        private async Task<StockJurisdiccionDTO> GetStockJurisdiccionDTO(Jurisdiccion jurisdiccion)
-        {
-            //me quedo con la jurisdiccion del usuario
-            //Jurisdiccion jurisdiccionUsuario = await _context.Jurisdiccion.Where(jurisdiccion => jurisdiccion.Id == usuario.IdJurisdiccion).FirstOrDefaultAsync();
-
-            //me quedo con las distribuciones de la jurisdicción del usuario
-            List<Distribucion> listaDistribuciones = await _context.Distribucion
-                .Where(d => d.IdJurisdiccion == jurisdiccion.Id)
-                .ToListAsync();
-
-            List<TipoVacuna> tiposVacuna = await _context.TipoVacuna.ToListAsync();
-            List<VacunaDesarrollada> vacunasDesarrolladas = await _context.VacunaDesarrollada.ToListAsync();
-            List<TipoVacunaStockDTO> tiposVacunasStockDTO = new List<TipoVacunaStockDTO>();
-
-            int total = 0;
-            int totalVencido = 0;
-            int totalDisponible = 0;
-
-            foreach (TipoVacuna tipoVacuna in tiposVacuna)
-            {
-                int totalVacunaDesarrollada = 0;
-                int totalVacunaDesarrolladaVencido = 0;
-                int totalVacunaDesarrolladaDisponible = 0;
-
-                //------
-                List<VacunaDesarrolladaStockDTO> vacunasDesarrolladasStockDTO = new List<VacunaDesarrolladaStockDTO>();
-                //------
-
-                foreach (VacunaDesarrollada vd in vacunasDesarrolladas)
-                {
-                    List<Distribucion> distribucionesVacunaDesarrollada = await _context.Distribucion
-                        .Where(d => d.IdLoteNavigation.IdVacunaDesarrollada == vd.Id
-                            && d.IdJurisdiccion == jurisdiccion.Id
-                            && d.IdLoteNavigation.IdVacunaDesarrolladaNavigation.IdVacunaNavigation.IdTipoVacuna == tipoVacuna.Id)
-                        .ToListAsync();
-
-                    if (distribucionesVacunaDesarrollada.Count == 0)
-                    {
-                        TipoVacunaStockDTO tipoVacunaStockVacioDTO = new TipoVacunaStockDTO(tipoVacuna.Id, tipoVacuna.Descripcion,
-                            new List<VacunaDesarrolladaStockDTO>(), totalVacunaDesarrollada, totalVacunaDesarrolladaVencido, totalVacunaDesarrolladaDisponible);
-                        tiposVacunasStockDTO.Add(tipoVacunaStockVacioDTO);
-                    }
-                    else
-                    {
-                        List<Lote> lotes = null;
-
-                        foreach (Distribucion distribucion in distribucionesVacunaDesarrollada)
-                        {
-                            lotes = await _context.Lote.Where(l => l.Id == distribucion.IdLote)
-                                .OrderBy(l => l.IdVacunaDesarrollada)
-                                .ToListAsync();
-                        }
-
-                        int totalLotes = 0;
-                        int totalLotesVencido = 0;
-                        int totalLotesDisponible = 0;
-
-                        //------
-                        List<LoteStockDTO> lotesDTO = new List<LoteStockDTO>();
-                        //------
-
-                        foreach (Lote lote in lotes)
-                        {
-                            Distribucion distribucion = await _context.Distribucion.Where(d => d.IdLote == lote.Id).FirstOrDefaultAsync();
-
-                            int cantidadRestanteLote = (distribucion.CantidadVacunas - distribucion.Aplicadas);
-                            totalLotes += distribucion.CantidadVacunas;
-                            totalLotesVencido += distribucion.Vencidas;
-                            totalLotesDisponible += cantidadRestanteLote - distribucion.Vencidas;
-                            LoteStockDTO loteStockDTO = new LoteStockDTO(lote.Id, distribucion.CantidadVacunas, lote.Disponible, lote.FechaVencimiento, cantidadRestanteLote);
-                            //------
-                            lotesDTO.Add(loteStockDTO);
-                            //------
-                        }
-
-                        totalVacunaDesarrollada += totalLotes;
-                        totalVacunaDesarrolladaVencido += totalLotesVencido;
-                        totalVacunaDesarrolladaDisponible += totalLotesDisponible;
-
-                        //----
-                        MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == vd.IdMarcaComercial).FirstOrDefaultAsync();
-                        Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == vd.IdVacuna).FirstOrDefaultAsync();
-                        string descripcionVacunaMarca = vacuna.Descripcion + " " + marcaComercialExistente.Descripcion;
-
-                        VacunaDesarrolladaStockDTO vacunaDesarrolladaStockDTO = new VacunaDesarrolladaStockDTO(vd.Id, vd.IdVacuna, vd.IdMarcaComercial, descripcionVacunaMarca, lotesDTO, totalLotes, totalLotesVencido, totalLotesDisponible);
-                        vacunasDesarrolladasStockDTO.Add(vacunaDesarrolladaStockDTO);
-                        //----
-                    }
-                    total += totalVacunaDesarrollada;
-                    totalVencido += totalVacunaDesarrolladaVencido;
-                    totalDisponible += totalVacunaDesarrolladaDisponible;
-
-                    //----
-                    TipoVacunaStockDTO tipoVacunaStockDTO = new TipoVacunaStockDTO(tipoVacuna.Id, tipoVacuna.Descripcion, vacunasDesarrolladasStockDTO, totalVacunaDesarrollada, totalVacunaDesarrolladaVencido, totalVacunaDesarrolladaDisponible);
-                    tiposVacunasStockDTO.Add(tipoVacunaStockDTO);
-                    //----
-                }
-            }
-            //----
-            StockDTO stockDTO = new StockDTO(tiposVacunasStockDTO, total, totalVencido, totalDisponible);
-            StockJurisdiccionDTO stockJurisdiccionDTO = new StockJurisdiccionDTO(jurisdiccion.Id, jurisdiccion.Descripcion, stockDTO);
-            //----
-
-            return stockJurisdiccionDTO;
         }
     }
 }
