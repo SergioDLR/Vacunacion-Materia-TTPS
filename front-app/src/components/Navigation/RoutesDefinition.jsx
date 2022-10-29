@@ -16,6 +16,7 @@ import Vacunados from "../AnalistaProvincial/VacunadosInfo/Vacunados";
 import CompraContainer from "../OperadorNacional/Compras/CompraContainer";
 import DistribucionesContainer from "../OperadorNacional/Distribuciones/DistribucionesContainer";
 import StockContainer from "../OperadorNacional/Stock/StockContainer";
+import allUrls from "@/services/backend_url";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -98,7 +99,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={2}>
             <AnalistaWraper>
-              <h1>Pagina de vacunas</h1>
+              <StockContainer title={"Stock para vacunación"} url={allUrls.visualizarStockAnalista} />
             </AnalistaWraper>
           </ProtectedRoute>
         }
@@ -168,7 +169,7 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={3}>
             <OperadorWraper>
-              <StockContainer />
+              <StockContainer title={"Stock para distribución"} url={allUrls.visualizarStock} />
             </OperadorWraper>
           </ProtectedRoute>
         }

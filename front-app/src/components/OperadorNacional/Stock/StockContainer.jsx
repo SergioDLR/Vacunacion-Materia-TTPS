@@ -5,14 +5,14 @@ import axios from "axios";
 import allUrls from "@/services/backend_url";
 import { Table, TableContainer, TableHead, TableRow, Paper, TableCell, TableBody } from "@mui/material";
 import CustomLoader from "@/components/utils/CustomLoader";
-const StockContainer = () => {
+const StockContainer = ({ title, url }) => {
   const { userSesion } = useContext(UserContext);
   const [stock, setStock] = useState([]);
   const [estaCargando, setEstaCargando] = useState(true);
 
   useEffect(() => {
     axios
-      .get(`${allUrls.visualizarStock}?emailOperadorNacional=${userSesion.email}`)
+      .get(`${url}?emailOperadorNacional=${userSesion.email}`)
       .then((response) => {
         setStock(response.data);
       })
@@ -22,6 +22,7 @@ const StockContainer = () => {
   return (
     <Container>
       {estaCargando && <CustomLoader />}
+      <h3>{title}</h3>
       <TableContainer component={Paper} sx={{ marginTop: 1 }}>
         <Table sx={{ minWidth: 650 }} size="small">
           <TableHead sx={{ backgroundColor: "#2E7994" }}>
