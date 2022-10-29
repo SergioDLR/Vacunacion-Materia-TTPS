@@ -21,6 +21,203 @@ namespace VacunacionApi.Controllers
             _context = context;
         }
 
+        // GET: api/Distribuciones/GetStockOperadorNacionalByVacuna?emailOperadorNacional=maria@gmail.com&idVacuna=1
+        [HttpGet]
+        [Route("GetStockOperadorNacionalByVacuna")]
+        public async Task<ActionResult<List<VacunaStockDTO>>> GetStockOperadorNacionalByVacuna(string emailOperadorNacional = null, int idVacuna = 0)
+        {
+            try
+            {
+                List<VacunaStockDTO> vacunasStock = new List<VacunaStockDTO>();
+
+                if (emailOperadorNacional != null && (await TieneRolOperadorNacional(await GetUsuario(emailOperadorNacional))) && idVacuna != 0)
+                {
+                    List<Compra> compras = await _context.Compra
+                       .Where(l => l.IdLoteNavigation.Disponible == true
+                           && l.IdLoteNavigation.IdVacunaDesarrolladaNavigation.IdVacuna == idVacuna
+                           && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
+                       .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
+                       .ToListAsync();
+
+                    foreach (Compra com in compras)
+                    {
+                        Lote lote = await _context.Lote.Where(l => l.Id == com.IdLote).FirstOrDefaultAsync();
+
+                        List<Distribucion> distribucionesLote = await _context.Distribucion
+                            .Where(d => d.IdLote == lote.Id).ToListAsync();
+
+                        int cantidadTotalDistribuidas = 0;
+                        int disponibles = 0;
+
+                        foreach (Distribucion distribucion in distribucionesLote)
+                        {
+                            cantidadTotalDistribuidas += distribucion.CantidadVacunas;
+                        }
+
+                        disponibles = com.CantidadVacunas - cantidadTotalDistribuidas;
+
+                        VacunaDesarrollada vd = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                        MarcaComercial mc = await GetMarcaComercial(vd.IdMarcaComercial);
+                        Vacuna vac = await GetVacuna(idVacuna);
+
+                        VacunaStockDTO vs = new VacunaStockDTO(vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);
+
+                        vacunasStock.Add(vs);
+                    }
+                }
+
+                return Ok(vacunasStock);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
+        //Falta CHEQUEAR EN POSTMAN
+        // GET: api/Distribuciones/GetStockAnalista?emailAnalistaProvincial=juanAnalista@gmail.com
+        [HttpGet]
+        [Route("GetStockAnalista")]
+        public async Task<ActionResult<IEnumerable<ResponseStockAnalistaProvincialDTO>>> GetStockAnalista(string emailAnalistaProvincial = null)
+        {
+            try
+            {
+                ResponseStockAnalistaProvincialDTO responseStockAnalistaProvincial = new ResponseStockAnalistaProvincialDTO();
+
+                //lista vacia para los errores
+                List<string> errores = new List<string>();
+
+                errores = await VerificarCredencialesAnalistaProvincial(emailAnalistaProvincial, errores);
+
+                if (errores.Count == 0)
+                {
+                    Usuario usuario = await GetUsuario(emailAnalistaProvincial);
+
+                    //me quedo con la jurisdiccion del usuario
+                    Jurisdiccion jurisdiccionUsuario = await _context.Jurisdiccion.Where(jurisdiccion => jurisdiccion.Id == usuario.IdJurisdiccion).FirstOrDefaultAsync();
+
+                    //me quedo con las distribuciones de la jurisdicción del usuario
+                    List<Distribucion> listaDistribuciones = await _context.Distribucion
+                        .Where(d => d.IdJurisdiccion == usuario.IdJurisdiccion)
+                        .ToListAsync();
+
+                    List<TipoVacuna> tiposVacuna = await _context.TipoVacuna.ToListAsync();
+                    List<VacunaDesarrollada> vacunasDesarrolladas = await _context.VacunaDesarrollada.ToListAsync();
+                    List<TipoVacunaStockDTO> tiposVacunasStockDTO = new List<TipoVacunaStockDTO>();
+
+                    int total = 0;
+                    int totalVencido = 0;
+                    int totalDisponible = 0;
+
+                    foreach (TipoVacuna tipoVacuna in tiposVacuna)
+                    {
+                        int totalVacunaDesarrollada = 0;
+                        int totalVacunaDesarrolladaVencido = 0;
+                        int totalVacunaDesarrolladaDisponible = 0;
+
+                        //------
+                        List<VacunaDesarrolladaStockDTO> vacunasDesarrolladasStockDTO = new List<VacunaDesarrolladaStockDTO>();
+                        //------
+
+                        foreach (VacunaDesarrollada vd in vacunasDesarrolladas)
+                        {
+                            List<Distribucion> distribucionesVacunaDesarrollada = await _context.Distribucion
+                                .Where(d => d.IdLoteNavigation.IdVacunaDesarrollada == vd.Id
+                                    && d.IdJurisdiccion == usuario.IdJurisdiccion
+                                    && d.IdLoteNavigation.IdVacunaDesarrolladaNavigation.IdVacunaNavigation.IdTipoVacuna == tipoVacuna.Id)
+                                .ToListAsync();
+
+                            if (distribucionesVacunaDesarrollada.Count == 0)
+                            {
+                                TipoVacunaStockDTO tipoVacunaStockVacioDTO = new TipoVacunaStockDTO(tipoVacuna.Id, tipoVacuna.Descripcion,
+                                    new List<VacunaDesarrolladaStockDTO>(), totalVacunaDesarrollada, totalVacunaDesarrolladaVencido, totalVacunaDesarrolladaDisponible);
+                                tiposVacunasStockDTO.Add(tipoVacunaStockVacioDTO);
+                            }
+                            else
+                            {
+                                List<Lote> lotes = null;
+
+                                foreach (Distribucion distribucion in distribucionesVacunaDesarrollada)
+                                {
+                                    lotes = await _context.Lote.Where(l => l.Id == distribucion.IdLote)
+                                        .OrderBy(l => l.IdVacunaDesarrollada)
+                                        .ToListAsync();
+                                }
+
+                                int totalLotes = 0;
+                                int totalLotesVencido = 0;
+                                int totalLotesDisponible = 0;
+
+                                //------
+                                List<LoteStockDTO> lotesDTO = new List<LoteStockDTO>();
+                                //------
+
+                                foreach (Lote lote in lotes)
+                                {
+                                    Distribucion distribucion = await _context.Distribucion.Where(d => d.IdLote == lote.Id).FirstOrDefaultAsync();
+
+                                    int cantidadRestanteLote = (distribucion.CantidadVacunas - distribucion.Aplicadas);
+                                    totalLotes += distribucion.CantidadVacunas;
+                                    totalLotesVencido += distribucion.Vencidas;
+                                    totalLotesDisponible += cantidadRestanteLote - distribucion.Vencidas;
+                                    LoteStockDTO loteStockDTO = new LoteStockDTO(lote.Id, distribucion.CantidadVacunas, lote.Disponible, lote.FechaVencimiento, cantidadRestanteLote);
+                                    //------
+                                    lotesDTO.Add(loteStockDTO);
+                                    //------
+                                }
+
+                                totalVacunaDesarrollada += totalLotes;
+                                totalVacunaDesarrolladaVencido += totalLotesVencido;
+                                totalVacunaDesarrolladaDisponible += totalLotesDisponible;
+
+                                //----
+                                MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == vd.IdMarcaComercial).FirstOrDefaultAsync();
+                                Vacuna vacuna = await _context.Vacuna.Where(v => v.Id == vd.IdVacuna).FirstOrDefaultAsync();
+                                string descripcionVacunaMarca = vacuna.Descripcion + " " + marcaComercialExistente.Descripcion;
+
+                                VacunaDesarrolladaStockDTO vacunaDesarrolladaStockDTO = new VacunaDesarrolladaStockDTO(vd.Id, vd.IdVacuna, vd.IdMarcaComercial, descripcionVacunaMarca, lotesDTO, totalLotes, totalLotesVencido, totalLotesDisponible);
+                                vacunasDesarrolladasStockDTO.Add(vacunaDesarrolladaStockDTO);
+                                //----
+                            }
+                            total += totalVacunaDesarrollada;
+                            totalVencido += totalVacunaDesarrollada;
+                            totalDisponible += totalVacunaDesarrolladaDisponible;
+
+                            //----
+                            TipoVacunaStockDTO tipoVacunaStockDTO = new TipoVacunaStockDTO(tipoVacuna.Id, tipoVacuna.Descripcion, vacunasDesarrolladasStockDTO, totalVacunaDesarrollada, totalVacunaDesarrolladaVencido, totalVacunaDesarrolladaDisponible);
+                            tiposVacunasStockDTO.Add(tipoVacunaStockDTO);
+                            //----
+                        }
+                    }
+
+                    //----
+                    StockDTO stockDTO = new StockDTO(tiposVacunasStockDTO, total, totalVencido, totalDisponible);
+                    StockJurisdiccionDTO stockJurisdiccionDTO = new StockJurisdiccionDTO(jurisdiccionUsuario.Id, jurisdiccionUsuario.Descripcion, stockDTO);
+                    //----
+
+                    responseStockAnalistaProvincial.EmailAnalistaProvincial = emailAnalistaProvincial;
+                    responseStockAnalistaProvincial.EstadoTransaccion = "Aceptada";
+                    responseStockAnalistaProvincial.Errores = errores;
+                    responseStockAnalistaProvincial.ExistenciaErrores = false;
+                    responseStockAnalistaProvincial.StockJurisdiccion = stockJurisdiccionDTO;
+                }
+                else
+                {
+                    //response errores
+                    responseStockAnalistaProvincial.EmailAnalistaProvincial = emailAnalistaProvincial;
+                    responseStockAnalistaProvincial.EstadoTransaccion = "Rechazada";
+                    responseStockAnalistaProvincial.Errores = errores;
+                    responseStockAnalistaProvincial.ExistenciaErrores = true;
+                    responseStockAnalistaProvincial.StockJurisdiccion = new StockJurisdiccionDTO();
+                }
+                return Ok(responseStockAnalistaProvincial);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
         // GET: api/Distribuciones/GetAll?emailOperadorNacional&idJurisdiccion=1
         [HttpGet]
         [Route("GetAll")]
@@ -615,5 +812,66 @@ namespace VacunacionApi.Controllers
 
             return distribucionExistente;
         }
+
+        private async Task<Usuario> CuentaUsuarioExists(string email)
+        {
+            Usuario cuentaExistente = null;
+            try
+            {
+                cuentaExistente = await _context.Usuario
+                    .Where(user => user.Email == email).FirstOrDefaultAsync();
+            }
+            catch
+            {
+
+            }
+            return cuentaExistente;
+        }
+
+        private async Task<bool> TieneRolAnalistaProvincial(Usuario usuario)
+        {
+            try
+            {
+                Rol rolAnalistaProvincial = await _context.Rol
+                    .Where(rol => rol.Descripcion == "Analista Provincial").FirstOrDefaultAsync();
+
+                if (rolAnalistaProvincial.Id == usuario.IdRol)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+
+            }
+            return false;
+        }
+
+
+        private async Task<List<string>> VerificarCredencialesAnalistaProvincial(string emailAnalistaProvincial, List<string> errores)
+        {
+            try
+            {
+                Usuario usuarioSolicitante = await CuentaUsuarioExists(emailAnalistaProvincial);
+                if (usuarioSolicitante != null)
+                {
+                    if (!await TieneRolAnalistaProvincial(usuarioSolicitante))
+                    {
+                        errores.Add(String.Format("El usuario {0} no tiene el rol de Analista Provincial", emailAnalistaProvincial));
+                    }
+                }
+                else
+                {
+                    errores.Add(string.Format("El usuario {0} no existe en el sistema", emailAnalistaProvincial));
+                }
+            }
+            catch
+            {
+
+            }
+
+            return errores;
+        }
+
     }
 }
