@@ -7,6 +7,17 @@ namespace VacunacionApi.Models
 {
     public partial class Distribucion
     {
+        public Distribucion(int codigo, int idJurisdiccion, int idLote, DateTime fechaEntrega, int cantidadVacunas, int aplicadas, int vencidas)
+        {
+            Codigo = codigo;
+            IdJurisdiccion = idJurisdiccion;
+            IdLote = idLote;
+            FechaEntrega = fechaEntrega;
+            CantidadVacunas = cantidadVacunas;
+            Aplicadas = aplicadas;
+            Vencidas = vencidas;
+        }
+
         [Key]
         public int Id { get; set; }
         public int Codigo { get; set; }

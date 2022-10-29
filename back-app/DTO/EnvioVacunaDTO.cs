@@ -16,7 +16,7 @@ namespace VacunacionApi.DTO
         public int? IdVacunaDesarrollada { get; set; }
 
         [Required(ErrorMessage = "El campo cantidad vacunas es obligatorio")]
-        [Range(1, 1000000, ErrorMessage = "El campo cantidad vacunas tiene un formato inválido")]
+        [Range(1, 100000000, ErrorMessage = "El campo cantidad vacunas tiene un formato inválido")]
         public int CantidadVacunas { get; set; }
     }
 }
