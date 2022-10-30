@@ -146,7 +146,12 @@ namespace VacunacionApi.Controllers
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(9, "Hepatitis A (HA)"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(10, "Varicela"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(11, "Triple Bacteriana (DTP)"));
-                
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(12, "Triple Bacteriana Acelular"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(13, "VPH"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(14, "Doble Bacteriana (DT)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(15, "Doble Viral (SR)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(16, "Fiebre Amarilla (FA)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(17, "Fiebre Hemorrágica Argentina (FHA)"));
             }
             catch
             {
@@ -767,6 +772,24 @@ namespace VacunacionApi.Controllers
                     case "Triple Bacteriana (DTP)":
                         listaDosis = vacunaService.ArmarListaDosisTripleBacterianaDTP();
                         break;
+                    case "Triple Bacteriana Acelular":
+                        listaDosis = vacunaService.ArmarListaDosisTripleBacterianaAcelular();
+                        break;
+                    case "VPH":
+                        listaDosis = vacunaService.ArmarListaDosisVPH();
+                        break;
+                    case "Doble Bacteriana (DT)":
+                        listaDosis = vacunaService.ArmarListaDosisDobleBacterianaDT();
+                        break;
+                    case "Doble Viral (SR)":
+                        listaDosis = vacunaService.ArmarListaDosisDobleViralSR();
+                        break;
+                    case "Fiebre Amarilla (FA)":
+                        listaDosis = vacunaService.ArmarListaDosisFiebreAmarillaFA();
+                        break;
+                    case "Fiebre Hemorrágica Argentina (FHA)":
+                        listaDosis = vacunaService.ArmarListaDosisFiebreHemorragicaArgentinaFHA();
+                        break;
                     default:
                         break;
                 }
@@ -798,12 +821,12 @@ namespace VacunacionApi.Controllers
                     new VacunaCalendarioAnualPandemiaDTO(9, "Hepatitis A (HA)", ArmarListaDosisDTO("Hepatitis A (HA)")),
                     new VacunaCalendarioAnualPandemiaDTO(10, "Varicela", ArmarListaDosisDTO("Varicela")),
                     new VacunaCalendarioAnualPandemiaDTO(11, "Triple Bacteriana (DTP)", ArmarListaDosisDTO("Triple Bacteriana (DTP)")),
-                    //new VacunaCalendarioDTO(13, "Triple Bacteriana Acelular (DTPA)"),
-                    //new VacunaCalendarioDTO(14, "VPH"),
-                    //new VacunaCalendarioDTO(15, "Doble Bacteriana (DT)"),
-                    //new VacunaCalendarioDTO(16, "Doble Viral (SR)"),
-                    //new VacunaCalendarioDTO(17, "Fiebre Amarilla (FA)"),
-                    //new VacunaCalendarioDTO(18, "Fiebre Hemorrágica Argentina (FHA)")
+                    new VacunaCalendarioAnualPandemiaDTO(12, "Triple Bacteriana Acelular", ArmarListaDosisDTO("Triple Bacteriana Acelular")),
+                    new VacunaCalendarioAnualPandemiaDTO(13, "VPH", ArmarListaDosisDTO("VPH")),
+                    new VacunaCalendarioAnualPandemiaDTO(14, "Doble Bacteriana (DT)", ArmarListaDosisDTO("Doble Bacteriana (DT)")),
+                    new VacunaCalendarioAnualPandemiaDTO(15, "Doble Viral (SR)", ArmarListaDosisDTO("Doble Viral (SR)")),
+                    new VacunaCalendarioAnualPandemiaDTO(16, "Fiebre Amarilla (FA)", ArmarListaDosisDTO("Fiebre Amarilla (FA)")),
+                    new VacunaCalendarioAnualPandemiaDTO(17, "Fiebre Hemorrágica Argentina (FHA)", ArmarListaDosisDTO("Fiebre Hemorrágica Argentina (FHA)"))
                 };
             }
             catch

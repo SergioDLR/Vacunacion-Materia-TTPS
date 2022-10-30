@@ -40,6 +40,18 @@ namespace VacunacionApi.Controllers
                 {
                     errores = await VerificarCredencialesUsuarioOperadorNacional(emailOperadorNacional, errores);
 
+                    if (idVacunaDesarrollada != 0)
+                    {
+                        VacunaDesarrollada vacuDesa = await _context.VacunaDesarrollada.Where(v => v.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
+                        if (vacuDesa != null)
+                        {
+                            if (vacuDesa.FechaHasta != null)
+                                errores.Add(string.Format("La vacuna desarrollada con identificador {0} está dada de baja", idVacunaDesarrollada));
+                        }
+                        else
+                            errores.Add(string.Format("La vacuna desarrollada con identificador {0} no está registrada en el sistema", idVacunaDesarrollada));
+                    }
+
                     if (errores.Count > 0)
                         responseListaComprasDTO = new ResponseListaComprasDTO("Rechazada", true, errores, listaCompras);
                     else
