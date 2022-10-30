@@ -172,6 +172,80 @@ namespace VacunacionApi.Controllers
             }
         }
 
+        //------------------------
+
+        // GET: api/Distribuciones/GetStockOperadorNacionalAllVacunasDisponibles?emailOperadorNacional=maria@gmail.com
+        [HttpGet]
+        [Route("GetStockOperadorNacionalAllVacunasDisponibles")]
+        public async Task<ActionResult<List<VacunaStockNacionDTO>>> GetStockOperadorNacionalAllVacunasDisponibles(string emailOperadorNacional = null)
+        {
+            try
+            {
+                List<VacunaStockOperadorNacionalDTO> vacunasStockOperadorNacionalDTO = new List<VacunaStockOperadorNacionalDTO>();
+                VacunaStockNacionDTO vacunaStockNacionDTO = new VacunaStockNacionDTO(); 
+                Usuario usuarioOperador = await GetUsuario(emailOperadorNacional);
+                int totalNacion = 0;
+
+                if (emailOperadorNacional != null && (await TieneRolOperadorNacional(await GetUsuario(emailOperadorNacional))))
+                {
+                    List<Compra> compras = await _context.Compra
+                       .Where(l => l.IdLoteNavigation.Disponible == true
+                           && l.IdLoteNavigation.FechaVencimiento > DateTime.Now)
+                       .OrderBy(l => l.IdLoteNavigation.FechaVencimiento)
+                       .ToListAsync();
+
+
+                    List<Jurisdiccion> jurisdicciones = await _context.Jurisdiccion.ToListAsync();
+
+            
+
+                    foreach (Jurisdiccion juris in jurisdicciones)
+                    {
+                        List<VacunaStockAnalistaProvincialDTO> vacunasAnalistaStockDTO = new List<VacunaStockAnalistaProvincialDTO>();
+                        int totalJurisdiccion = 0;
+                       
+                        //distribuciones de esa jurisdiccion
+                        List<Distribucion> distribuciones = await _context.Distribucion
+                            .Where(d => d.IdJurisdiccion == juris.Id && d.Vencidas == 0)
+                            .ToListAsync();
+
+                        if(distribuciones.Count == 0) {
+                            VacunaStockOperadorNacionalDTO vacunaStockOperadorNacionalDTO = new VacunaStockOperadorNacionalDTO(juris.Id, juris.Descripcion, vacunasAnalistaStockDTO, totalJurisdiccion);
+                            vacunasStockOperadorNacionalDTO.Add(vacunaStockOperadorNacionalDTO);    
+                        }
+                        else
+                        {
+                            foreach (Distribucion dist in distribuciones)
+                            {
+                                int disponibles = dist.CantidadVacunas - dist.Aplicadas;
+                                totalJurisdiccion += disponibles;
+                                
+                                Lote loteDist = await _context.Lote.Where(l => l.Id == dist.IdLote).FirstAsync();
+
+                                VacunaDesarrollada vd = await GetVacunaDesarrollada(loteDist.IdVacunaDesarrollada);
+                                MarcaComercial mc = await GetMarcaComercial(vd.IdMarcaComercial);
+                                Vacuna vac = await GetVacuna(vd.IdVacuna);
+
+                                VacunaStockAnalistaProvincialDTO vs = new VacunaStockAnalistaProvincialDTO(loteDist.Id, loteDist.FechaVencimiento, vac.Id, vd.Id, vac.Descripcion + " " + mc.Descripcion + " - Cantidad Disponible: " + disponibles);                                
+                                vacunasAnalistaStockDTO.Add(vs);
+                            }
+                            totalNacion += totalJurisdiccion;
+                            VacunaStockOperadorNacionalDTO vacunaStockOperadorNacionalDTO = new VacunaStockOperadorNacionalDTO(juris.Id, juris.Descripcion, vacunasAnalistaStockDTO, totalJurisdiccion);
+                            vacunasStockOperadorNacionalDTO.Add(vacunaStockOperadorNacionalDTO);
+                        }
+                    }
+                }
+                vacunaStockNacionDTO.VacunasStockOperadorNacionalDTO = vacunasStockOperadorNacionalDTO;
+                vacunaStockNacionDTO.TotalVacunasDisponibleNacion = totalNacion;
+                return Ok(vacunaStockNacionDTO);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+        //------------------------
+
         // GET: api/Distribuciones/GetAll?emailOperadorNacional&idJurisdiccion=1
         [HttpGet]
         [Route("GetAll")]
