@@ -140,6 +140,18 @@ namespace VacunacionApi.Controllers
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(3, "Rotavirus"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(4, "Neumococo Conjugada"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(5, "Quíntuple Pentavalente"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(6, "Salk IPV"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(7, "Meningocócica Conjugada"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(8, "Triple Viral (SRP)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(9, "Hepatitis A (HA)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(10, "Varicela"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(11, "Triple Bacteriana (DTP)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(12, "Triple Bacteriana Acelular"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(13, "VPH"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(14, "Doble Bacteriana (DT)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(15, "Doble Viral (SR)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(16, "Fiebre Amarilla (FA)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(17, "Fiebre Hemorrágica Argentina (FHA)"));
             }
             catch
             {
@@ -742,6 +754,42 @@ namespace VacunacionApi.Controllers
                     case "Quíntuple Pentavalente":
                         listaDosis = vacunaService.ArmarListaDosisQuintuplePentavalente();
                         break;
+                    case "Salk IPV":
+                        listaDosis = vacunaService.ArmarListaDosisSalkIPV();
+                        break;
+                    case "Meningocócica Conjugada":
+                        listaDosis = vacunaService.ArmarListaDosisMeningococicaConjugada();
+                        break;
+                    case "Triple Viral (SRP)":
+                        listaDosis = vacunaService.ArmarListaDosisTripleViralSRP();
+                        break;
+                    case "Hepatitis A (HA)":
+                        listaDosis = vacunaService.ArmarListaDosisHepatitisAHA();
+                        break;
+                    case "Varicela":
+                        listaDosis = vacunaService.ArmarListaDosisVaricela();
+                        break;
+                    case "Triple Bacteriana (DTP)":
+                        listaDosis = vacunaService.ArmarListaDosisTripleBacterianaDTP();
+                        break;
+                    case "Triple Bacteriana Acelular":
+                        listaDosis = vacunaService.ArmarListaDosisTripleBacterianaAcelular();
+                        break;
+                    case "VPH":
+                        listaDosis = vacunaService.ArmarListaDosisVPH();
+                        break;
+                    case "Doble Bacteriana (DT)":
+                        listaDosis = vacunaService.ArmarListaDosisDobleBacterianaDT();
+                        break;
+                    case "Doble Viral (SR)":
+                        listaDosis = vacunaService.ArmarListaDosisDobleViralSR();
+                        break;
+                    case "Fiebre Amarilla (FA)":
+                        listaDosis = vacunaService.ArmarListaDosisFiebreAmarillaFA();
+                        break;
+                    case "Fiebre Hemorrágica Argentina (FHA)":
+                        listaDosis = vacunaService.ArmarListaDosisFiebreHemorragicaArgentinaFHA();
+                        break;
                     default:
                         break;
                 }
@@ -766,20 +814,19 @@ namespace VacunacionApi.Controllers
                     new VacunaCalendarioAnualPandemiaDTO(2, "BCG", ArmarListaDosisDTO("BCG")),
                     new VacunaCalendarioAnualPandemiaDTO(3, "Rotavirus", ArmarListaDosisDTO("Rotavirus")),
                     new VacunaCalendarioAnualPandemiaDTO(4, "Neumococo Conjugada", ArmarListaDosisDTO("Neumococo Conjugada")),
-                    new VacunaCalendarioAnualPandemiaDTO(5, "Quíntuple Pentavalente", ArmarListaDosisDTO("Quíntuple Pentavalente"))
-                    //new VacunaCalendarioDTO(6, "Salk IPV"),
-                    //new VacunaCalendarioDTO(7, "Meningocócica Conjugada"),
-                    //new VacunaCalendarioDTO(8, "Antigripal"),
-                    //new VacunaCalendarioDTO(9, "Triple Viral (SRP)"),
-                    //new VacunaCalendarioDTO(10, "Hepatitis A (HA)"),
-                    //new VacunaCalendarioDTO(11, "Varicela"),
-                    //new VacunaCalendarioDTO(12, "Triple Bacteriana (DTP)"),
-                    //new VacunaCalendarioDTO(13, "Triple Bacteriana Acelular (DTPA)"),
-                    //new VacunaCalendarioDTO(14, "VPH"),
-                    //new VacunaCalendarioDTO(15, "Doble Bacteriana (DT)"),
-                    //new VacunaCalendarioDTO(16, "Doble Viral (SR)"),
-                    //new VacunaCalendarioDTO(17, "Fiebre Amarilla (FA)"),
-                    //new VacunaCalendarioDTO(18, "Fiebre Hemorrágica Argentina (FHA)")
+                    new VacunaCalendarioAnualPandemiaDTO(5, "Quíntuple Pentavalente", ArmarListaDosisDTO("Quíntuple Pentavalente")),
+                    new VacunaCalendarioAnualPandemiaDTO(6, "Salk IPV", ArmarListaDosisDTO("Salk IPV")),
+                    new VacunaCalendarioAnualPandemiaDTO(7, "Meningocócica Conjugada", ArmarListaDosisDTO("Meningocócica Conjugada")),
+                    new VacunaCalendarioAnualPandemiaDTO(8, "Triple Viral (SRP)", ArmarListaDosisDTO("Triple Viral (SRP)")),
+                    new VacunaCalendarioAnualPandemiaDTO(9, "Hepatitis A (HA)", ArmarListaDosisDTO("Hepatitis A (HA)")),
+                    new VacunaCalendarioAnualPandemiaDTO(10, "Varicela", ArmarListaDosisDTO("Varicela")),
+                    new VacunaCalendarioAnualPandemiaDTO(11, "Triple Bacteriana (DTP)", ArmarListaDosisDTO("Triple Bacteriana (DTP)")),
+                    new VacunaCalendarioAnualPandemiaDTO(12, "Triple Bacteriana Acelular", ArmarListaDosisDTO("Triple Bacteriana Acelular")),
+                    new VacunaCalendarioAnualPandemiaDTO(13, "VPH", ArmarListaDosisDTO("VPH")),
+                    new VacunaCalendarioAnualPandemiaDTO(14, "Doble Bacteriana (DT)", ArmarListaDosisDTO("Doble Bacteriana (DT)")),
+                    new VacunaCalendarioAnualPandemiaDTO(15, "Doble Viral (SR)", ArmarListaDosisDTO("Doble Viral (SR)")),
+                    new VacunaCalendarioAnualPandemiaDTO(16, "Fiebre Amarilla (FA)", ArmarListaDosisDTO("Fiebre Amarilla (FA)")),
+                    new VacunaCalendarioAnualPandemiaDTO(17, "Fiebre Hemorrágica Argentina (FHA)", ArmarListaDosisDTO("Fiebre Hemorrágica Argentina (FHA)"))
                 };
             }
             catch
