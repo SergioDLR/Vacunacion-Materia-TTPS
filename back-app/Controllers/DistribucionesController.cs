@@ -77,7 +77,7 @@ namespace VacunacionApi.Controllers
         // GET: api/Distribuciones/GetStockOperadorNacionalAllVacunas?emailOperadorNacional=maria@gmail.com
         [HttpGet]
         [Route("GetStockOperadorNacionalAllVacunas")]
-        public async Task<ActionResult<List<VacunaStockDTO>>> GetStockOperadorNacionalAllVacunas(string emailOperadorNacional)
+        public async Task<ActionResult<List<VacunaStockDTO>>> GetStockOperadorNacionalAllVacunas(string emailOperadorNacional = null)
         {
             try
             {
