@@ -173,7 +173,11 @@ const RoutesDefinition = () => {
         element={
           <ProtectedRoute role={3}>
             <OperadorWraper>
-              <StockContainer title={"Stock para distribución"} url={allUrls.visualizarStock} />
+              <StockContainer
+                title={"Stock para distribución"}
+                url={allUrls.visualizarStock}
+                url2={allUrls.visualizarStockPorProvincia}
+              />
             </OperadorWraper>
           </ProtectedRoute>
         }
