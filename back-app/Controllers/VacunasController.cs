@@ -140,6 +140,11 @@ namespace VacunacionApi.Controllers
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(3, "Rotavirus"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(4, "Neumococo Conjugada"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(5, "Quíntuple Pentavalente"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(6, "Salk IPV"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(7, "Meningocócica Conjugada"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(8, "Triple Viral (SRP)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(9, "Hepatitis A (HA)"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(10, "Varicela"));
             }
             catch
             {
@@ -742,6 +747,21 @@ namespace VacunacionApi.Controllers
                     case "Quíntuple Pentavalente":
                         listaDosis = vacunaService.ArmarListaDosisQuintuplePentavalente();
                         break;
+                    case "Salk IPV":
+                        listaDosis = vacunaService.ArmarListaDosisSalkIPV();
+                        break;
+                    case "Meningocócica Conjugada":
+                        listaDosis = vacunaService.ArmarListaDosisMeningococicaConjugada();
+                        break;
+                    case "Triple Viral (SRP)":
+                        listaDosis = vacunaService.ArmarListaDosisTripleViralSRP();
+                        break;
+                    case "Hepatitis A (HA)":
+                        listaDosis = vacunaService.ArmarListaDosisHepatitisAHA();
+                        break;
+                    case "Varicela":
+                        listaDosis = vacunaService.ArmarListaDosisVaricela();
+                        break;
                     default:
                         break;
                 }
@@ -766,13 +786,12 @@ namespace VacunacionApi.Controllers
                     new VacunaCalendarioAnualPandemiaDTO(2, "BCG", ArmarListaDosisDTO("BCG")),
                     new VacunaCalendarioAnualPandemiaDTO(3, "Rotavirus", ArmarListaDosisDTO("Rotavirus")),
                     new VacunaCalendarioAnualPandemiaDTO(4, "Neumococo Conjugada", ArmarListaDosisDTO("Neumococo Conjugada")),
-                    new VacunaCalendarioAnualPandemiaDTO(5, "Quíntuple Pentavalente", ArmarListaDosisDTO("Quíntuple Pentavalente"))
-                    //new VacunaCalendarioDTO(6, "Salk IPV"),
-                    //new VacunaCalendarioDTO(7, "Meningocócica Conjugada"),
-                    //new VacunaCalendarioDTO(8, "Antigripal"),
-                    //new VacunaCalendarioDTO(9, "Triple Viral (SRP)"),
-                    //new VacunaCalendarioDTO(10, "Hepatitis A (HA)"),
-                    //new VacunaCalendarioDTO(11, "Varicela"),
+                    new VacunaCalendarioAnualPandemiaDTO(5, "Quíntuple Pentavalente", ArmarListaDosisDTO("Quíntuple Pentavalente")),
+                    new VacunaCalendarioAnualPandemiaDTO(6, "Salk IPV", ArmarListaDosisDTO("Salk IPV")),
+                    new VacunaCalendarioAnualPandemiaDTO(7, "Meningocócica Conjugada", ArmarListaDosisDTO("Meningocócica Conjugada")),
+                    new VacunaCalendarioAnualPandemiaDTO(8, "Triple Viral (SRP)", ArmarListaDosisDTO("Triple Viral (SRP)")),
+                    new VacunaCalendarioAnualPandemiaDTO(9, "Hepatitis A (HA)", ArmarListaDosisDTO("Hepatitis A (HA)")),
+                    new VacunaCalendarioAnualPandemiaDTO(10, "Varicela", ArmarListaDosisDTO("Varicela")),
                     //new VacunaCalendarioDTO(12, "Triple Bacteriana (DTP)"),
                     //new VacunaCalendarioDTO(13, "Triple Bacteriana Acelular (DTPA)"),
                     //new VacunaCalendarioDTO(14, "VPH"),

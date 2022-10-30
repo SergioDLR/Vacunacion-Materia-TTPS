@@ -1007,6 +1007,24 @@ namespace VacunacionApi.Controllers
                     case "Neumococo Conjugada":
                         listaProximasDosis = ObtenerProximaDosisNeumococoConjugada(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
                         break;
+                    case "Quíntuple Pentavalente":
+                        listaProximasDosis = ObtenerProximaDosisQuintuplePentavalente(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
+                        break;
+                    case "Salk IPV":
+                        listaProximasDosis = ObtenerProximaDosisSalkIPV(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
+                        break;
+                    case "Meningocócica Conjugada":
+                        listaProximasDosis = ObtenerProximaDosisMeningococicaConjugada(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
+                        break;
+                    case "Triple Viral (SRP)":
+                        listaProximasDosis = ObtenerProximaDosisTripleViralSRP(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
+                        break;
+                    case "Hepatitis A (HA)":
+                        listaProximasDosis = ObtenerProximaDosisHepatitisAHA(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
+                        break;
+                    case "Varicela":
+                        listaProximasDosis = ObtenerProximaDosisVaricela(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
+                        break;
                     default:
                         break;
                 }
@@ -1408,6 +1426,465 @@ namespace VacunacionApi.Controllers
                         }
                     }
                     else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Refuerzo", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona está embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisSalkIPV(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+           
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 60)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                        alertasVacunacion.Add("La primera dosis debe aplicarse a partir de los 2 meses de vida");
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 60 && (DateTime.Now - fechaNacimiento).TotalDays < 120)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 120 && (DateTime.Now - fechaNacimiento).TotalDays < 180)
+                    {
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 180 && (DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                    {
+                        proximaDosis = string.Format("{0} - Tercera Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190)
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        alertasVacunacion.Add("La dosis refuerzo debe aplicarse hasta los 6 años de edad");
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Primera Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 120)
+                        {
+                            alertasVacunacion.Add("La segunda dosis debe aplicarse a partir de los 4 meses de vida");
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 120 && (DateTime.Now - fechaNacimiento).TotalDays < 180)
+                        {
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 180 && (DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                        {
+                            proximaDosis = string.Format("{0} - Tercera Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                            alertasVacunacion.Add("La dosis refuerzo debe aplicarse hasta los 6 años de edad");
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Segunda Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 180)
+                        {
+                            alertasVacunacion.Add("La tercera dosis debe aplicarse a partir de los 6 meses de vida");
+                            proximaDosis = string.Format("{0} - Tercera Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 180 && (DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                        {
+                            proximaDosis = string.Format("{0} - Tercera Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                            alertasVacunacion.Add("La dosis refuerzo debe aplicarse hasta los 6 años de edad");
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Tercera Dosis", descripcionVacuna))
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                        {
+                            alertasVacunacion.Add("La dosis refuerzo debe aplicarse a partir de los 5 años de edad");
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190)
+                        {
+                            alertasVacunacion.Add("La dosis refuerzo debe aplicarse hasta los 6 años de edad");
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Refuerzo", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona está embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisMeningococicaConjugada(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 90)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                        alertasVacunacion.Add("La primera dosis debe aplicarse a partir de los 3 meses de vida");
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 90 && (DateTime.Now - fechaNacimiento).TotalDays < 150)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 150 && (DateTime.Now - fechaNacimiento).TotalDays < 450)
+                    {
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 450 && (DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
+                    {
+                        proximaDosis = string.Format("{0} - Dosis Única", descripcionVacuna);
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Primera Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 150)
+                        {
+                            alertasVacunacion.Add("La segunda dosis debe aplicarse a partir de los 5 meses de vida");
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 150 && (DateTime.Now - fechaNacimiento).TotalDays < 450)
+                        {
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 450 && (DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
+                        {
+                            proximaDosis = string.Format("{0} - Dosis Única", descripcionVacuna);
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Segunda Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 450)
+                        {
+                            alertasVacunacion.Add("La dosis refuerzo debe aplicarse a partir de los 15 meses de vida");
+                            proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 450 && (DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
+                        {
+                            proximaDosis = string.Format("{0} - Dosis Única", descripcionVacuna);
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Refuerzo", descripcionVacuna))
+                    {
+                        proximaDosis = string.Format("{0} - Dosis Única", descripcionVacuna);
+
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                        {
+                            alertasVacunacion.Add("La dosis única debe aplicarse a partir de los 11 años de edad");
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Dosis Única", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona está embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisTripleViralSRP(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 365)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                        alertasVacunacion.Add("La primera dosis debe aplicarse a partir de los 12 meses de vida");
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 365 && (DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                    {
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190 && (DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                    {
+                        alertasVacunacion.Add("La dosis de refuerzo debe aplicarse a partir de los 11 años");
+                        proximaDosis = string.Format("{0} - Refuerzo Triple Viral + Doble Viral", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo Triple Viral + Doble Viral", descripcionVacuna);
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Primera Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                        {
+                            alertasVacunacion.Add("La segunda dosis debe aplicarse a partir de los 5 años");
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                        {
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190 && (DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                        {
+                            alertasVacunacion.Add("La dosis de refuerzo debe aplicarse a partir de los 11 años");
+                            proximaDosis = string.Format("{0} - Refuerzo Triple Viral + Doble Viral", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo Triple Viral + Doble Viral", descripcionVacuna);
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Segunda Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                        {
+                            
+                            proximaDosis = string.Format("{0} - Refuerzo Triple Viral + Doble Viral", descripcionVacuna);
+
+                            if (dosisAplicadas.Count == 2)
+                                alertasVacunacion.Add("La dosis de refuerzo debe aplicarse a partir de los 11 años. La persona recibió la primera y segunda dosis");
+                            else
+                                alertasVacunacion.Add("La dosis de refuerzo debe aplicarse a partir de los 11 años");
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
+                        {
+                            proximaDosis = string.Format("{0} - Refuerzo Triple Viral + Doble Viral", descripcionVacuna);
+
+                            if (dosisAplicadas.Count == 2)
+                                alertasVacunacion.Add("La persona recibió la primera y segunda dosis");
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Refuerzo Triple Viral + Doble Viral", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona está embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisHepatitisAHA(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 365)
+                    {
+                        proximaDosis = string.Format("{0} - Dosis Única", descripcionVacuna);
+                        alertasVacunacion.Add("La primera dosis debe aplicarse a partir de los 12 meses de vida");
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Dosis Única", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona está embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisVaricela(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 450)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                        alertasVacunacion.Add("La primera dosis debe aplicarse a partir de los 15 meses de vida");
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 450 && (DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                    {
+                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                    {
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                    }
+                    else if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190)
+                    {
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        alertasVacunacion.Add("La segunda dosis debe aplicarse hasta los 6 años");
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Primera Dosis", descripcionVacuna))
+                    {
+                        if ((DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                        {
+                            alertasVacunacion.Add("La segunda dosis debe aplicarse a partir de los 5 años");
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                        {
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                        }
+                        if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190)
+                        {
+                            proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
+                            alertasVacunacion.Add("La segunda dosis debe aplicarse hasta los 6 años");
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Segunda Dosis", descripcionVacuna))
                     {
                         alertasVacunacion.Add("Todas las dosis fueron aplicadas");
                         proximaDosis = null;
