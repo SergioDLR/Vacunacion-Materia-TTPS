@@ -1025,6 +1025,9 @@ namespace VacunacionApi.Controllers
                     case "Varicela":
                         listaProximasDosis = ObtenerProximaDosisVaricela(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
                         break;
+                    case "Triple Bacteriana (DTP)":
+                        listaProximasDosis = ObtenerProximaDosisTripleBacterianaDTP(fechaNacimiento, dosisAplicadas, descripcionVacuna, embarazada, personalSalud);
+                        break;
                     default:
                         break;
                 }
@@ -1885,6 +1888,146 @@ namespace VacunacionApi.Controllers
                         }
                     }
                     else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Segunda Dosis", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona está embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisTripleBacterianaDTP(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 1825)
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        alertasVacunacion.Add("La dosis refuerzo debe aplicarse a partir de los 5 años");
+                    }
+                    if ((DateTime.Now - fechaNacimiento).TotalDays >= 1825 && (DateTime.Now - fechaNacimiento).TotalDays < 2190)
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                    }
+                    if ((DateTime.Now - fechaNacimiento).TotalDays >= 2190)
+                    {
+                        proximaDosis = string.Format("{0} - Refuerzo", descripcionVacuna);
+                        alertasVacunacion.Add("La dosis refuerzo debe aplicarse hasta los 6 años");
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Refuerzo", descripcionVacuna))
+                    {
+                        alertasVacunacion.Add("Todas las dosis fueron aplicadas");
+                        proximaDosis = null;
+                    }
+                }
+
+                if (embarazada)
+                    alertasVacunacion.Add("La persona está embarazada");
+
+                if (personalSalud)
+                    alertasVacunacion.Add("La persona es personal de salud");
+
+                listaProximasDosis.Add(proximaDosis);
+                listaResultado.Add(listaProximasDosis);
+                listaResultado.Add(alertasVacunacion);
+            }
+            catch
+            {
+
+            }
+
+            return listaResultado;
+        }
+
+        public List<List<string>> ObtenerProximaDosisTripleBacterianaAcelular(DateTime fechaNacimiento, List<Dosis> dosisAplicadas, string descripcionVacuna, bool embarazada, bool personalSalud)
+        {
+            string proximaDosis = null;
+            List<string> listaProximasDosis = new List<string>();
+            List<string> alertasVacunacion = new List<string>();
+            List<List<string>> listaResultado = new List<List<string>>();
+
+            try
+            {
+                if (dosisAplicadas.Count == 0)
+                {
+                    if ((DateTime.Now - fechaNacimiento).TotalDays < 4015)
+                    {
+                        proximaDosis = string.Format("{0} - Dosis Única", descripcionVacuna);
+                        alertasVacunacion.Add("La dosis única debe aplicarse a partir de los 11 años");
+                    }
+                    else if (embarazada)
+                    {
+                        proximaDosis = string.Format("{0} - Dosis Embarazo", descripcionVacuna);
+                    }
+                    else if (personalSalud)
+                    {
+                        proximaDosis = string.Format("{0} - Dosis Personal Salud", descripcionVacuna);
+                    }
+                }
+                else
+                {
+                    Dosis ultimaDosisAplicada = dosisAplicadas.Last();
+
+                    if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Dosis Única", descripcionVacuna))
+                    {
+                        if (embarazada)
+                        {
+                            proximaDosis = string.Format("{0} - Dosis Embarazo", descripcionVacuna);
+                        }
+                        else if (personalSalud)
+                        {
+                            proximaDosis = string.Format("{0} - Dosis Personal Salud", descripcionVacuna);
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Dosis Embarazo", descripcionVacuna))
+                    {
+                        if (embarazada)
+                        {
+                            proximaDosis = string.Format("{0} - Dosis Embarazo", descripcionVacuna);
+                        }
+                        else if (personalSalud)
+                        {
+                            //bool cumple = true;
+                            //foreach (Dosis d in dosisAplicadas)
+                            //{
+                            //    if (d.Descripcion == string.Format("{0} - Dosis Personal Salud", descripcionVacuna))
+                            //        if (d.)
+                            //        {
+
+                            //        }
+                            //}
+                            proximaDosis = string.Format("{0} - Dosis Personal Salud", descripcionVacuna);
+                        }
+                    }
+                    else if (ultimaDosisAplicada.Descripcion == string.Format("{0} - Refuerzo", descripcionVacuna))
                     {
                         alertasVacunacion.Add("Todas las dosis fueron aplicadas");
                         proximaDosis = null;

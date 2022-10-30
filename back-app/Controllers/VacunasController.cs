@@ -145,6 +145,8 @@ namespace VacunacionApi.Controllers
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(8, "Triple Viral (SRP)"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(9, "Hepatitis A (HA)"));
                 descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(10, "Varicela"));
+                descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(11, "Triple Bacteriana (DTP)"));
+                
             }
             catch
             {
@@ -762,6 +764,9 @@ namespace VacunacionApi.Controllers
                     case "Varicela":
                         listaDosis = vacunaService.ArmarListaDosisVaricela();
                         break;
+                    case "Triple Bacteriana (DTP)":
+                        listaDosis = vacunaService.ArmarListaDosisTripleBacterianaDTP();
+                        break;
                     default:
                         break;
                 }
@@ -792,7 +797,7 @@ namespace VacunacionApi.Controllers
                     new VacunaCalendarioAnualPandemiaDTO(8, "Triple Viral (SRP)", ArmarListaDosisDTO("Triple Viral (SRP)")),
                     new VacunaCalendarioAnualPandemiaDTO(9, "Hepatitis A (HA)", ArmarListaDosisDTO("Hepatitis A (HA)")),
                     new VacunaCalendarioAnualPandemiaDTO(10, "Varicela", ArmarListaDosisDTO("Varicela")),
-                    //new VacunaCalendarioDTO(12, "Triple Bacteriana (DTP)"),
+                    new VacunaCalendarioAnualPandemiaDTO(11, "Triple Bacteriana (DTP)", ArmarListaDosisDTO("Triple Bacteriana (DTP)")),
                     //new VacunaCalendarioDTO(13, "Triple Bacteriana Acelular (DTPA)"),
                     //new VacunaCalendarioDTO(14, "VPH"),
                     //new VacunaCalendarioDTO(15, "Doble Bacteriana (DT)"),

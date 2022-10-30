@@ -353,5 +353,27 @@ namespace VacunacionApi.Services
 
             return listaDosis;
         }
+
+        public List<DosisDTO> ArmarListaDosisTripleBacterianaDTP()
+        {
+            List<DosisDTO> listaDosis = new List<DosisDTO>();
+
+            try
+            {
+                //Refuerzo
+                List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
+                ReglaDTO regla1 = new ReglaDTO(0, "Triple Bacteriana (DTP) - Aplicar entre los 5 y 6 años", null, 1825, 2160, null, false, false);
+                listaReglas1.Add(regla1);
+                DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Triple Bacteriana (DTP) - Refuerzo", listaReglas1);
+
+                listaDosis.Add(dosisDTO1);
+            }
+            catch
+            {
+
+            }
+
+            return listaDosis;
+        }
     }
 }
