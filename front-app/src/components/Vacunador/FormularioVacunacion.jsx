@@ -81,7 +81,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
           Embarazada: persona.embarazada,
           PersonalSalud: persona.personal_salud,
           FechaHoraNacimiento: dateParser(persona.fecha_hora_nacimiento),
-          IdVacuna: respuestaConsulta.vacunaDesarrolladaAplicacion.id,
+          IdVacuna: respuestaConsulta.vacunaDesarrolladaAplicacion.IdVacuna,
           IdDosis: respuestaConsulta.dosisCorrespondienteAplicacion.id,
           JurisdiccionResidencia: persona.jurisdiccion,
           idLote: respuestaConsulta.vacunaDesarrolladaAplicacion.idLote,
