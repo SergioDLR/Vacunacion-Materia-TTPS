@@ -81,7 +81,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
           Embarazada: persona.embarazada,
           PersonalSalud: persona.personal_salud,
           FechaHoraNacimiento: dateParser(persona.fecha_hora_nacimiento),
-          IdVacuna: respuestaConsulta.vacunaDesarrolladaAplicacion.id,
+          IdVacuna: respuestaConsulta.requestVacunaAplicada.idVacuna,
           IdDosis: respuestaConsulta.dosisCorrespondienteAplicacion.id,
           JurisdiccionResidencia: persona.jurisdiccion,
           idLote: respuestaConsulta.vacunaDesarrolladaAplicacion.idLote,
@@ -92,7 +92,6 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
         .then((response) => {
           if (response?.data?.estadoTransaccion === "Aceptada") {
             alert.success("La vacuna se aplico exitosamente");
-            alert.success(response?.data?.vacunaDesarrolladaAplicacion.descripcion);
           } else {
             alert.error(response?.data?.alertasVacunacion);
           }
