@@ -81,8 +81,8 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
           Embarazada: persona.embarazada,
           PersonalSalud: persona.personal_salud,
           FechaHoraNacimiento: dateParser(persona.fecha_hora_nacimiento),
-          IdVacuna: vacunaSeleccionada.id,
-          IdDosis: dosisSeleccionada.id,
+          IdVacuna: respuestaConsulta.vacunaDesarrolladaAplicacion.id,
+          IdDosis: respuestaConsulta.dosisCorrespondienteAplicacion.id,
           JurisdiccionResidencia: persona.jurisdiccion,
           idLote: respuestaConsulta.vacunaDesarrolladaAplicacion.idLote,
           IdVacunaDesarrollada: respuestaConsulta.vacunaDesarrolladaAplicacion.id,
@@ -94,7 +94,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
             alert.success("La vacuna se aplico exitosamente");
             alert.success(response?.data?.vacunaDesarrolladaAplicacion.descripcion);
           } else {
-            alert.error(response?.data?.errores);
+            alert.error(response?.data?.alertasVacunacion);
           }
         })
         .catch((error) => {
@@ -105,7 +105,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
           setEstaCargando(false);
         });
     } catch (e) {
-      alert.error(`Ya se aplico todas las dosis de esta vacuna`);
+      alert.error(`No hay stock para lo que se quiere aplicar`);
       setEstaCargando(false);
       setOpenPadre(false);
     }
@@ -199,13 +199,24 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
       <CustomModal displayButton={false} open={open} setOpen={setOpen}>
         {errores.length > 0 ? (
           <>
-            <h5>Se encontraron problemas:</h5>
-            {errores.map((error, index) => (
-              <p key={index}>{error}</p>
-            ))}
+            <h2>Se encontraron problemas:</h2>
+            <ul>
+              {errores.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
           </>
         ) : (
-          <h5>No hay problemas para aplicar la vacuna</h5>
+          <h2>No hay problemas para aplicar la vacuna</h2>
+        )}
+        {respuestaConsulta?.vacunaDesarrolladaAplicacion !== null && (
+          <h5>Se aplicara la vacuna: {respuestaConsulta?.vacunaDesarrolladaAplicacion?.descripcion}</h5>
+        )}
+        {respuestaConsulta?.vacunaDesarrolladaAplicacion !== null && (
+          <h5>Y la dosis: {respuestaConsulta?.dosisCorrespondienteAplicacion?.descripcion}</h5>
+        )}
+        {respuestaConsulta?.vacunaDesarrolladaAplicacion && errores.length < 1 === null && (
+          <h4>No hay stock disponible</h4>
         )}
         <CustomButton
           sx={{ marginTop: 1 }}
@@ -216,7 +227,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
         >
           Cancelar
         </CustomButton>
-        {respuestaConsulta?.vacunaDesarrolladaAplicacion?.idLote !== null && (
+        {respuestaConsulta?.vacunaDesarrolladaAplicacion !== null && (
           <CustomButton
             sx={{ marginTop: 1 }}
             variant={"outlined"}
