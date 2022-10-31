@@ -517,11 +517,11 @@ namespace VacunacionApi.Controllers
                         }
 
                         if (vacunasAplicadas.Count > 0)
-                            ordenReferenciaDosis = vacunasAplicadas.Count;
+                            ordenReferenciaDosis = dosisAplicadas.Count;
 
                         if (dosisAplicadas.Count != entidadesVD.Count)
                         {
-                            EntidadVacunaDosis evdSig = await _context.EntidadVacunaDosis.Where(evd => evd.Orden == ordenReferenciaDosis).FirstOrDefaultAsync();
+                            EntidadVacunaDosis evdSig = await _context.EntidadVacunaDosis.Where(evd => evd.Orden == ordenReferenciaDosis && evd.IdVacuna == model.IdVacuna).FirstOrDefaultAsync();
 
                             if (evdSig != null)
                             {
@@ -539,10 +539,21 @@ namespace VacunacionApi.Controllers
                                 DosisDTO dosisDTO = new DosisDTO(proximaDosis.Id, evdSig.Orden.Value,
                                     proximaDosis.Descripcion, new List<ReglaDTO> { reglaDTO });
 
-                                if (vacunasAplicadas.Count != 0)
+                                if (dosisAplicadas.Count != 0)
                                 {
-                                    VacunaAplicada ultimaAplicacion = vacunasAplicadas.Last();
-                                    if ((DateTime.Now - ultimaAplicacion.FechaVacunacion).TotalDays < regla.LapsoMinimoDias)
+                                    List<VacunaAplicada> aplicaciones = new List<VacunaAplicada>();
+
+                                    foreach (int identificador in identificadoresDosis)
+                                    {
+                                        VacunaAplicada aplicacion = await _context.VacunaAplicada.Where(v => v.IdDosis == identificador).FirstOrDefaultAsync();
+
+                                        if (aplicacion != null)
+                                            aplicaciones.Add(aplicacion);
+                                    }
+
+                                    aplicaciones = aplicaciones.OrderBy(v => v.FechaVacunacion).ToList();
+
+                                    if ((DateTime.Now - aplicaciones.Last().FechaVacunacion).TotalDays < regla.LapsoMinimoDias)
                                     {
                                         alertasVacunacion.Add(string.Format("No ha transcurrido el tiempo mínimo de {0} días desde la última dosis aplicada", regla.LapsoMinimoDias));
                                     }

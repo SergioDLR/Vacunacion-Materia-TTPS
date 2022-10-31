@@ -22,7 +22,7 @@ namespace VacunacionApi.DTO
 
         
         [Required(ErrorMessage = "El campo dias de demora es obligatorio")]
-        [Range(1, 10000, ErrorMessage = "El campo dias de demora tiene un formato inválido")]
+        [Range(0, 10000, ErrorMessage = "El campo dias de demora tiene un formato inválido")]
         public int DiasDemoraEntrega { get; set; }
 
 
