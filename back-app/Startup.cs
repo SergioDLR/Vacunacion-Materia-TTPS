@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VacunacionApi.Models;
+using VacunacionApi.ModelsDataWareHouse;
 
 namespace VacunacionApi
 {
@@ -36,6 +37,14 @@ namespace VacunacionApi
             services.AddDbContext<VacunasContext>(options =>
             {
                 options.UseSqlServer(connection);
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            });
+
+            //Conexión por defecto a la base de datos de DataWareHouse
+            var connectionDataWareHouse = Configuration.GetConnectionString("DataWareHouseConnection");
+            services.AddDbContext<DataWareHouseContext>(options =>
+            {
+                options.UseSqlServer(connectionDataWareHouse);
                 options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
             });
 
