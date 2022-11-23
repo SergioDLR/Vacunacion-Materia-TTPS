@@ -12,6 +12,13 @@ namespace VacunacionApi.ModelsDataWareHouse
     [Table("D_Tiempo")]
     public partial class DTiempo
     {
+        public DTiempo(int dia, int mes, int anio)
+        {
+            Dia = dia;
+            Mes = mes;
+            Anio = anio;
+        }
+
         public DTiempo()
         {
             HVacunados = new HashSet<HVacunados>();

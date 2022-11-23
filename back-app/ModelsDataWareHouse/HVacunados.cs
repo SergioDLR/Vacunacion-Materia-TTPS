@@ -12,6 +12,14 @@ namespace VacunacionApi.ModelsDataWareHouse
     [Table("H_Vacunados")]
     public partial class HVacunados
     {
+        public HVacunados(int idTiempo, int idLugar, int idVacuna, int idVacunado)
+        {
+            IdTiempo = idTiempo;
+            IdLugar = idLugar;
+            IdVacuna = idVacuna;
+            IdVacunado = idVacunado;
+        }
+
         [Key]
         public int Id { get; set; }
         [Column("Id_Tiempo")]

@@ -12,6 +12,12 @@ namespace VacunacionApi.ModelsDataWareHouse
     [Table("D_Lugar")]
     public partial class DLugar
     {
+        public DLugar(string provincia, string departamento)
+        {
+            Provincia = provincia;
+            Departamento = departamento;
+        }
+
         public DLugar()
         {
             HVacunados = new HashSet<HVacunados>();

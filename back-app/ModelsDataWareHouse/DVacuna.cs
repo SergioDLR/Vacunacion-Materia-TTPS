@@ -12,6 +12,14 @@ namespace VacunacionApi.ModelsDataWareHouse
     [Table("D_Vacuna")]
     public partial class DVacuna
     {
+        public DVacuna(string vacunaDesarrollada, string laboratorio, string tipoVacunaDesarrollada, int idLote)
+        {
+            VacunaDesarrollada = vacunaDesarrollada;
+            Laboratorio = laboratorio;
+            TipoVacunaDesarrollada = tipoVacunaDesarrollada;
+            IdLote = idLote;
+        }
+
         public DVacuna()
         {
             HVacunados = new HashSet<HVacunados>();

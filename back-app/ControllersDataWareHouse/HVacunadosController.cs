@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VacunacionApi.ModelsDataWareHouse;
+using VacunacionApi.Services;
 
 namespace VacunacionApi.ControllersDataWareHouse
 {
@@ -74,16 +75,22 @@ namespace VacunacionApi.ControllersDataWareHouse
             return NoContent();
         }
 
-        // POST: api/HVacunados
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        // POST: api/HVacunados/SaveHVacunadosDataWareHouse
         [HttpPost]
-        public async Task<ActionResult<HVacunados>> PostHVacunados(HVacunados hVacunados)
+        [Route("SaveHVacunadosDataWareHouse")]
+        public async Task<ActionResult<bool>> SaveHVacunadosDataWareHouse()
         {
-            _context.HVacunados.Add(hVacunados);
-            await _context.SaveChangesAsync();
+            try
+            {
+                DataWareHouseService service = new DataWareHouseService();
+                await service.CargarDataWareHouse(_context);
+            }
+            catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
 
-            return CreatedAtAction("GetHVacunados", new { id = hVacunados.Id }, hVacunados);
+            return true;
         }
 
         // DELETE: api/HVacunados/5

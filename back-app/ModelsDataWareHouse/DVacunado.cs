@@ -12,6 +12,15 @@ namespace VacunacionApi.ModelsDataWareHouse
     [Table("D_Vacunado")]
     public partial class DVacunado
     {
+        public DVacunado(int anio, int decadas, int veintenas, string sexoBiologico, int dni)
+        {
+            Anio = anio;
+            Decadas = decadas;
+            Veintenas = veintenas;
+            SexoBiologico = sexoBiologico;
+            Dni = dni;
+        }
+
         public DVacunado()
         {
             HVacunados = new HashSet<HVacunados>();
@@ -26,6 +35,7 @@ namespace VacunacionApi.ModelsDataWareHouse
         [Column("Sexo_Biologico")]
         [StringLength(50)]
         public string SexoBiologico { get; set; }
+        public int Dni { get; set; }
 
         [InverseProperty("IdVacunadoNavigation")]
         public virtual ICollection<HVacunados> HVacunados { get; set; }
