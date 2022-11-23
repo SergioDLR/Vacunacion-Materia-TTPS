@@ -14,7 +14,7 @@ namespace VacunacionApi.Services
             string path = @"D:\Libro1.csv";
             string[] lineas = File.ReadAllLines(path);
 
-            for(int i=1; i<=lineas.Count(); i++)
+            for(int i=1; i<=lineas.Count() - 1; i++)
             {
                 string[] lista = lineas[i].Split(",");
 
