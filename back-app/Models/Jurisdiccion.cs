@@ -9,6 +9,7 @@ namespace VacunacionApi.Models
     {
         public Jurisdiccion()
         {
+            Departamento = new HashSet<Departamento>();
             Distribucion = new HashSet<Distribucion>();
             Usuario = new HashSet<Usuario>();
             VacunaAplicada = new HashSet<VacunaAplicada>();
@@ -22,6 +23,8 @@ namespace VacunacionApi.Models
         [Column("Cantidad_Habitantes")]
         public int CantidadHabitantes { get; set; }
 
+        [InverseProperty("IdJurisdiccionNavigation")]
+        public virtual ICollection<Departamento> Departamento { get; set; }
         [InverseProperty("IdJurisdiccionNavigation")]
         public virtual ICollection<Distribucion> Distribucion { get; set; }
         [InverseProperty("IdJurisdiccionNavigation")]

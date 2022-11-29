@@ -8,6 +8,11 @@ namespace VacunacionApi.Models
     [Table("Vacuna_Aplicada")]
     public partial class VacunaAplicada
     {
+        public VacunaAplicada()
+        {
+            PendienteEnvioDw = new HashSet<PendienteEnvioDw>();
+        }
+
         [Key]
         public int Id { get; set; }
         [Column("Fecha_Vacunacion", TypeName = "date")]
@@ -29,7 +34,6 @@ namespace VacunacionApi.Models
         [Required]
         [StringLength(250)]
         public string Apellido { get; set; }
-        [Column("Embarazada")]
         public bool Embarazada { get; set; }
         [Column("Personal_Salud")]
         public bool PersonalSalud { get; set; }
@@ -37,8 +41,14 @@ namespace VacunacionApi.Models
         public DateTime FechaHoraNacimiento { get; set; }
         [Column("Id_Jurisdiccion_Residencia")]
         public int IdJurisdiccionResidencia { get; set; }
+        [Column("Id_Departamento")]
+        public int? IdDepartamento { get; set; }
+        [Column("Enviado_DW")]
+        public bool? EnviadoDw { get; set; }
 
-
+        [ForeignKey(nameof(IdDepartamento))]
+        [InverseProperty(nameof(Departamento.VacunaAplicada))]
+        public virtual Departamento IdDepartamentoNavigation { get; set; }
         [ForeignKey(nameof(IdDosis))]
         [InverseProperty(nameof(Dosis.VacunaAplicada))]
         public virtual Dosis IdDosisNavigation { get; set; }
@@ -48,5 +58,7 @@ namespace VacunacionApi.Models
         [ForeignKey(nameof(IdLote))]
         [InverseProperty(nameof(Lote.VacunaAplicada))]
         public virtual Lote IdLoteNavigation { get; set; }
+        [InverseProperty("IdVacunaAplicadaNavigation")]
+        public virtual ICollection<PendienteEnvioDw> PendienteEnvioDw { get; set; }
     }
 }
