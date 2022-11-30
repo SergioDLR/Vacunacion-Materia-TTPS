@@ -308,10 +308,18 @@ namespace VacunacionApi.Controllers
                     vacunaAplicada.IdLote = model.IdLote;
                     vacunaAplicada.PersonalSalud = model.PersonalSalud;
                     vacunaAplicada.SexoBiologico = model.SexoBiologico;
+                    vacunaAplicada.EnviadoDw = false;
+                    vacunaAplicada.IdDepartamento = 0;
                     distribucion.Aplicadas += 1;
 
                     _context.VacunaAplicada.Add(vacunaAplicada);
                     _context.Entry(distribucion).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+
+                    //Agregación a tabla PendienteEnvioDW
+                    PendienteEnvioDw pendienteEnvioDW = new PendienteEnvioDw();
+                    pendienteEnvioDW.IdVacunaAplicada = vacunaAplicada.Id;
+                    _context.PendienteEnvioDw.Add(pendienteEnvioDW);
                     await _context.SaveChangesAsync();
 
                     MarcaComercial mc = await _context.MarcaComercial.Where(m => m.Id == vacunaDesarrolladaExistente.IdMarcaComercial).FirstOrDefaultAsync();
@@ -323,6 +331,52 @@ namespace VacunacionApi.Controllers
                 return Ok(responseCrearVacunaAplicadaDTO);
             }
             catch(Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
+        // GET: api/VacunasAplicadas/etl?emailOperadorNacional=juan@gmail.com
+        [HttpGet]
+        [Route("etl")]
+        public async Task<ActionResult<bool>> Etl(string emailOperadorNacional = null)
+        {
+            try
+            {
+                ResponseEtlDTO responseEtlDTO;
+                List<string> errores = new List<string>();
+
+                if (emailOperadorNacional == null)
+                {
+                    errores.Add(string.Format("El email operador nacional es obligatorio"));
+                }
+                else
+                {
+                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(emailOperadorNacional, errores);
+                }
+
+                if (errores.Count > 0)
+                    responseEtlDTO = new ResponseEtlDTO("Rechazada", true, errores, emailOperadorNacional);
+                else
+                {
+                    List<PendienteEnvioDw> pendientesEnviosDW = await _context.PendienteEnvioDw.ToListAsync();
+
+                    foreach (PendienteEnvioDw pendiente in pendientesEnviosDW) 
+                    {
+                        VacunaAplicada vacunaAplicada = await _context.VacunaAplicada.Where(v => v.Id == pendiente.IdVacunaAplicada).FirstOrDefaultAsync();
+
+                        if (vacunaAplicada != null)
+                        { 
+                            
+                        }
+                    }
+
+                    responseEtlDTO = new ResponseEtlDTO("Aceptada", true, errores, emailOperadorNacional);
+                }
+
+                return Ok(responseEtlDTO);
+            }
+            catch (Exception error)
             {
                 return BadRequest(error.Message);
             }
@@ -2440,6 +2494,31 @@ namespace VacunacionApi.Controllers
             }
 
             return listaResultado;
+        }
+
+        private async Task<List<string>> VerificarCredencialesUsuarioOperadorNacionalVacunador(string emailOperadorNacional, List<string> errores)
+        {
+            try
+            {
+                Usuario usuarioSolicitante = await _context.Usuario.Where(u => u.Email == emailOperadorNacional).FirstOrDefaultAsync();
+                if (usuarioSolicitante == null)
+                    errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailOperadorNacional));
+                else
+                {
+                    Rol rol = await _context.Rol
+                        .Where(r => r.Id == usuarioSolicitante.IdRol
+                            && (r.Descripcion == "Operador Nacional" || r.Descripcion == "Vacunador"))
+                        .FirstOrDefaultAsync();
+                    if (rol == null)
+                        errores.Add(string.Format("El usuario {0} no tiene rol operador nacional o rol vacunador", emailOperadorNacional));
+                }
+            }
+            catch
+            {
+
+            }
+
+            return errores;
         }
     }
 }
