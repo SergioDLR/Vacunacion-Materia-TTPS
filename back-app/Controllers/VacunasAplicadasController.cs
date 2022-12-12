@@ -379,6 +379,8 @@ namespace VacunacionApi.Controllers
                             if (valido)
                             {
                                 _context.PendienteEnvioDw.Remove(pendiente);
+                                vacunaAplicada.EnviadoDw = true;
+                                _context.Entry(vacunaAplicada).State = EntityState.Modified;
                                 await _context.SaveChangesAsync();
                             }
                         }
