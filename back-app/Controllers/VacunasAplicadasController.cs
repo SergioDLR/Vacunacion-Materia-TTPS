@@ -249,8 +249,9 @@ namespace VacunacionApi.Controllers
             {
                 ResponseCrearVacunaAplicadaDTO responseCrearVacunaAplicadaDTO = null;
                 List<string> errores = new List<string>();
+                UsuarioRenaperDTO usuarioRenaper = await GetUsuarioRenaper(model.Dni);
 
-                if(!await ExisteUsuarioRenaper(model.Dni))
+                if (usuarioRenaper == null)
                     errores.Add(string.Format("El dni ingresado {0} no está registrado en Renaper", model.Dni));
 
                 Distribucion distribucion = await _context.Distribucion.Where(d => d.IdLote == model.IdLote).FirstOrDefaultAsync();
@@ -308,8 +309,8 @@ namespace VacunacionApi.Controllers
                     vacunaAplicada.IdLote = model.IdLote;
                     vacunaAplicada.PersonalSalud = model.PersonalSalud;
                     vacunaAplicada.SexoBiologico = model.SexoBiologico;
+                    vacunaAplicada.Departamento = usuarioRenaper.departamento;
                     vacunaAplicada.EnviadoDw = false;
-                    vacunaAplicada.IdDepartamento = 0;
                     distribucion.Aplicadas += 1;
 
                     _context.VacunaAplicada.Add(vacunaAplicada);
@@ -336,9 +337,9 @@ namespace VacunacionApi.Controllers
             }
         }
 
-        // GET: api/VacunasAplicadas/etl?emailOperadorNacional=juan@gmail.com
+        // GET: api/VacunasAplicadas/Etl?emailOperadorNacional=juan@gmail.com
         [HttpGet]
-        [Route("etl")]
+        [Route("Etl")]
         public async Task<ActionResult<bool>> Etl(string emailOperadorNacional = null)
         {
             try
@@ -366,8 +367,20 @@ namespace VacunacionApi.Controllers
                         VacunaAplicada vacunaAplicada = await _context.VacunaAplicada.Where(v => v.Id == pendiente.IdVacunaAplicada).FirstOrDefaultAsync();
 
                         if (vacunaAplicada != null)
-                        { 
-                            
+                        {
+                            DataWareHouseService serviceDW = new DataWareHouseService();
+                            Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(vacunaAplicada.IdJurisdiccionResidencia);
+                            Lote lote = await GetLote(vacunaAplicada.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
+                            MarcaComercial mc = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
+                            Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
+                            bool valido = await serviceDW.CargarDataWareHouse(vacunaAplicada, jurisdiccion.Descripcion, vacuna.Descripcion, mc.Descripcion, "No registra", lote.Id);
+
+                            if (valido)
+                            {
+                                _context.PendienteEnvioDw.Remove(pendiente);
+                                await _context.SaveChangesAsync();
+                            }
                         }
                     }
 
@@ -394,7 +407,7 @@ namespace VacunacionApi.Controllers
 
                 errores = await VerificarCredencialesUsuarioVacunador(model.EmailVacunador, errores);
 
-                if (!await ExisteUsuarioRenaper(model.Dni))
+                if (await GetUsuarioRenaper(model.Dni) == null)
                     errores.Add(string.Format("El dni ingresado {0} no está registrado en Renaper", model.Dni));
 
                 Vacuna vacunaExistente = await GetVacuna(model.IdVacuna);
@@ -654,9 +667,9 @@ namespace VacunacionApi.Controllers
 
 
         //Métodos privados de ayuda
-        private async Task<bool> ExisteUsuarioRenaper(int dni)
+        private async Task<UsuarioRenaperDTO> GetUsuarioRenaper(int dni)
         {
-            bool existe = true;
+            UsuarioRenaperDTO usuario = null;
 
             try
             {
@@ -666,18 +679,14 @@ namespace VacunacionApi.Controllers
                 {
                     var respuesta = await httpClient.GetAsync(renaperUrl);
 
-                    if (respuesta.StatusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        existe = false;
-                    }
-                    else
+                    if (respuesta.StatusCode == System.Net.HttpStatusCode.OK)
                     {
                         var respuestaString = await respuesta.Content.ReadAsStringAsync();
-                        UsuarioRenaperDTO usuario = JsonSerializer.Deserialize<UsuarioRenaperDTO>(respuestaString,
+                        usuario = JsonSerializer.Deserialize<UsuarioRenaperDTO>(respuestaString,
                             new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
                         if (usuario == null || usuario.DNI != dni)
-                            existe = false;
+                            usuario = null;
                     }
                 }
             }
@@ -686,7 +695,7 @@ namespace VacunacionApi.Controllers
                 
             }
 
-            return existe;
+            return usuario;
         }
 
         private bool VacunaAplicadaExists(int id)

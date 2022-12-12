@@ -11,7 +11,6 @@ namespace VacunacionApi.Models
         {
         }
 
-        public virtual DbSet<Departamento> Departamento { get; set; }
         public virtual DbSet<Compra> Compra { get; set; }
         public virtual DbSet<Distribucion> Distribucion { get; set; }
         public virtual DbSet<Dosis> Dosis { get; set; }
@@ -46,15 +45,6 @@ namespace VacunacionApi.Models
                     .HasForeignKey(d => d.IdLote)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Compra_Lote");
-            });
-
-            modelBuilder.Entity<Departamento>(entity =>
-            {
-                entity.HasOne(d => d.IdJurisdiccionNavigation)
-                    .WithMany(p => p.Departamento)
-                    .HasForeignKey(d => d.IdJurisdiccion)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Departamento_Jurisdiccion");
             });
 
             modelBuilder.Entity<Distribucion>(entity =>
@@ -150,11 +140,6 @@ namespace VacunacionApi.Models
 
             modelBuilder.Entity<VacunaAplicada>(entity =>
             {
-                entity.HasOne(d => d.IdDepartamentoNavigation)
-                    .WithMany(p => p.VacunaAplicada)
-                    .HasForeignKey(d => d.IdDepartamento)
-                    .HasConstraintName("FK_Vacuna_Aplicada_Departamento");
-
                 entity.HasOne(d => d.IdDosisNavigation)
                     .WithMany(p => p.VacunaAplicada)
                     .HasForeignKey(d => d.IdDosis)

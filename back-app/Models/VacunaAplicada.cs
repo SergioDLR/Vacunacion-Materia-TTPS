@@ -41,14 +41,11 @@ namespace VacunacionApi.Models
         public DateTime FechaHoraNacimiento { get; set; }
         [Column("Id_Jurisdiccion_Residencia")]
         public int IdJurisdiccionResidencia { get; set; }
-        [Column("Id_Departamento")]
-        public int? IdDepartamento { get; set; }
+        [Column("Departamento")]
+        public string Departamento { get; set; }
         [Column("Enviado_DW")]
         public bool? EnviadoDw { get; set; }
 
-        [ForeignKey(nameof(IdDepartamento))]
-        [InverseProperty(nameof(Departamento.VacunaAplicada))]
-        public virtual Departamento IdDepartamentoNavigation { get; set; }
         [ForeignKey(nameof(IdDosis))]
         [InverseProperty(nameof(Dosis.VacunaAplicada))]
         public virtual Dosis IdDosisNavigation { get; set; }

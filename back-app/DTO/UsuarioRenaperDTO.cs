@@ -14,5 +14,7 @@ namespace VacunacionApi.DTO
         public string jurisdiccion { get; set; }
         public bool embarazada { get; set; }
         public bool personal_salud { get; set; }
+        public string provincia { get; set; }
+        public string departamento { get; set; }
     }
 }
