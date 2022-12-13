@@ -737,23 +737,94 @@ namespace VacunacionApi.Controllers
 
             try
             {
+                var listaReglas = new List<ReglaDTO>();
+                var listaDescripcionesDosis = new List<string>();
+
                 switch (descripcionVacuna)
                 {
                     case "Hepatitis B (HB)":
-                        listaDosis = vacunaService.ArmarListaDosisDTOHepatitisBHB();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar antes de las 12 horas del nacimiento", null, 0, 0.5, null, false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 11 años", null, 4015, 0, null, false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar al mes de la primera dosis", null, 30, 180, "1", false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a los 6 meses de la primera dosis", null, 180, 0, "1", false, true),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis Nacimiento",
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                        };
+                        
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "BCG":
-                        listaDosis = vacunaService.ArmarListaDosisDTOBCG();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar antes de salir de la maternidad", null, 0, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Dosis Única Nacimiento",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+                        
                     case "Rotavirus":
-                        listaDosis = vacunaService.ArmarListaDosisDTORotavirus();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta las 14 semanas y 6 días", null, 60, 104, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Neumococo Conjugada":
-                        listaDosis = vacunaService.ArmarListaDosisNeumococoConjugada();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 12 meses", null, 120, 365, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 12 meses del nacimiento", null, 365, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Quíntuple Pentavalente":
-                        listaDosis = vacunaService.ArmarListaDosisQuintuplePentavalente();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 6 meses del nacimiento hasta los 15 meses", null, 180, 450, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 15 y 18 meses de nacimiento", null, 450, 540, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Salk IPV":
                         listaDosis = vacunaService.ArmarListaDosisSalkIPV();
                         break;
