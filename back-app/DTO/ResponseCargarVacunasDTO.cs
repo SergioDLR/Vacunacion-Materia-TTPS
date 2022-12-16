@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace VacunacionApi.DTO
 {
-    public class ResponseEtlDTO : ResponseCabeceraDTO
+    public class ResponseCargarVacunasDTO : ResponseCabeceraDTO
     {
-        public ResponseEtlDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string email)
+        public ResponseCargarVacunasDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string email)
         {
             EstadoTransaccion = estadoTransaccion;
             ExistenciaErrores = existenciaErrores;
