@@ -5,6 +5,8 @@ namespace VacunacionApi.DTO
 {
     public class ResponseUsuarioDTO : ResponseCabeceraDTO
     {
+        public ResponseUsuarioDTO() { }
+
         public ResponseUsuarioDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string emailAdministrador, UsuarioDTO usuarioDTO)
         {
             EstadoTransaccion = estadoTransaccion;

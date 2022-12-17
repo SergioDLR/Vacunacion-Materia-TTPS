@@ -11,6 +11,8 @@ namespace VacunacionApi.Models
         {
         }
 
+        public VacunasContext() { }
+
         public virtual DbSet<Compra> Compra { get; set; }
         public virtual DbSet<Distribucion> Distribucion { get; set; }
         public virtual DbSet<Dosis> Dosis { get; set; }
