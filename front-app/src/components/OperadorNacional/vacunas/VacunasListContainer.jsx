@@ -26,11 +26,8 @@ const VacunasListContainer = () => {
   return (
     <Container>
       <Box sx={{ marginTop: 2, marginBottom: 2 }}>
-        <CustomModal color={"info"} title={"Registrar vacuna"} open={open} setOpen={setOpen}>
-          <RegistrarVacunaContainer cargarTodasLasVacunas={cargarTodasLasVacunas} setOpen={setOpen} />
-        </CustomModal>
+        {estaCargando ? <CustomLoader /> : <TablaVacunas vacunas={vacunasCreadas} />}
       </Box>
-      {estaCargando ? <CustomLoader /> : <TablaVacunas vacunas={vacunasCreadas} />}
     </Container>
   );
 };

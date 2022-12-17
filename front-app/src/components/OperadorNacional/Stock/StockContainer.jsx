@@ -45,6 +45,27 @@ const StockContainer = ({ title, url, param = "emailOperadorNacional", url2 }) =
         .finally(() => setEstaCargando(false));
     }
   }, []);
+
+  const hanldeSelection = (element) => {
+    //TODO: Disclaimer: Este probablemenete sea el algoritmo mas horrendo que vas a ver en tu vida
+    const newArr = [];
+    element.listaVacunasStockDTOJurisdiccion.forEach((element) => {
+      let newEle = {
+        nombre: element.descripcion.split("-", 1).shift(),
+        cant: parseInt(element.descripcion.split(" ").pop()),
+        idVacuna: element.idVacuna,
+      };
+      const search = newArr.find((e) => e.idVacuna === element.idVacuna);
+      const searchIndex = newArr.findIndex((e) => e.idVacuna === element.idVacuna);
+      if (search) {
+        newArr[searchIndex].cant = newEle.cant + newArr[searchIndex].cant;
+      } else {
+        newArr.push(newEle);
+      }
+    });
+    setJurisdiccionSeleccionada(newArr);
+    setOpen(true);
+  };
   return (
     <Container>
       {estaCargando && <CustomLoader />}
@@ -89,10 +110,7 @@ const StockContainer = ({ title, url, param = "emailOperadorNacional", url2 }) =
                             variant={"outlined"}
                             color={"info"}
                             textColor={"#3ee8e5"}
-                            onClick={() => {
-                              setJurisdiccionSeleccionada(element.listaVacunasStockDTOJurisdiccion);
-                              setOpen(true);
-                            }}
+                            onClick={() => hanldeSelection(element)}
                           >
                             <SvgIcon>
                               <VisibilityIcon></VisibilityIcon>
@@ -108,7 +126,9 @@ const StockContainer = ({ title, url, param = "emailOperadorNacional", url2 }) =
             <CustomModal open={open} setOpen={setOpen} displayButton={false}>
               {jurisdiccionSeleccionada.map((element, index) => (
                 <div key={index}>
-                  <p>{element.descripcion}</p>
+                  <p>
+                    {element.nombre} - cantidad: {element.cant}
+                  </p>
                   <Divider></Divider>
                 </div>
               ))}

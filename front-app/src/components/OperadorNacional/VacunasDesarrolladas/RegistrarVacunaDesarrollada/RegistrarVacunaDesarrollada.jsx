@@ -83,24 +83,17 @@ const RegistrarVacunaDesarrollada = ({ setOpen, cargarVacunasDesarrolladas }) =>
         </Select>
       </FormControl>
       <FormControl sx={{ marginTop: 1 }} fullWidth>
-        <InputLabel id="Tipo-de-marca">Marcas comerciales:</InputLabel>
-        <Select
-          labelId="Tipo-de-marca"
-          id="Tipo-de-marca-select"
-          value={marcaSeleccionada}
-          label="Marcas comerciales:"
-          onChange={handleChangeMarca}
+        <TextField
+          sx={{ display: "block", marginTop: 1 }}
+          fullWidth
+          id="marca-field"
+          label="Marca comercial:"
+          variant="filled"
+          type="text"
           required
-        >
-          <MenuItem disabled value={0}>
-            Selecciona una marca comercial
-          </MenuItem>
-          {marcasComerciales.map((element, index) => (
-            <MenuItem key={index} value={element.id}>
-              {element.descripcion}
-            </MenuItem>
-          ))}
-        </Select>
+          onChange={handleChangeMarca}
+          inputProps={{ min: 0 }}
+        />
       </FormControl>
       <TextField
         sx={{ display: "block", marginTop: 1 }}
