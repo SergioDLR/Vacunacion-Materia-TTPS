@@ -16,7 +16,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
   const [vacunasCreadas, setVacunasCreadas] = useState([]);
   const [estaCargando, setEstaCargando] = useState(true);
   const [vacunaSeleccionada, setVacunaSeleccionada] = useState(0);
-  const [dosisSeleccionada, setDosisSeleccionada] = useState(0);
+  const [dosisSeleccionada, setDosisSeleccionada] = useState({ id: 1 });
   const [respuestaConsulta, setRespuestaConsulta] = useState({});
   const [open, setOpen] = useState(false);
   const [errores, setErrores] = useState([]);
@@ -27,7 +27,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
   }, []);
 
   const handleChangeVacuna = (evt) => {
-    setDosisSeleccionada(0);
+    setDosisSeleccionada({ id: 1 });
     setVacunaSeleccionada(evt.target.value);
   };
   const dateParser = (str) => {
@@ -48,7 +48,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
         PersonalSalud: persona.personal_salud,
         FechaHoraNacimiento: dateParser(persona.fecha_hora_nacimiento),
         IdVacuna: vacunaSeleccionada.id,
-        IdDosis: dosisSeleccionada.id,
+        IdDosis: vacunaSeleccionada.dosis[0].id,
         JurisdiccionResidencia: persona.jurisdiccion,
       })
       .then((response) => {
@@ -171,13 +171,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
             ))}
           </Select>
         </FormControl>
-        {vacunaSeleccionada != 0 && (
-          <SelectDosis
-            vacuna={vacunaSeleccionada}
-            dosisSeleccionada={dosisSeleccionada}
-            setDosisSeleccionada={setDosisSeleccionada}
-          />
-        )}
+
         <Box>
           <CustomButton
             sx={{ marginTop: 1 }}
@@ -188,7 +182,7 @@ const FormularioVacunacion = ({ persona, email, setOpenPadre }) => {
           >
             Cancelar
           </CustomButton>
-          {vacunaSeleccionada != 0 && dosisSeleccionada != 0 && (
+          {vacunaSeleccionada != 0 && (
             <CustomButton sx={{ marginTop: 1 }} type={"submit"} variant={"outlined"} color={"info"} textColor={"black"}>
               Consultar
             </CustomButton>
