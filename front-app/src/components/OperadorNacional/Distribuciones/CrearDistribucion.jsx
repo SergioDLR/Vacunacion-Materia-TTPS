@@ -24,8 +24,7 @@ const CrearDistribucion = ({ jurisdicciones, setOpenMain, cargarDistribuciones }
   const mapVacunes = () => {
     return carritoDeVacunas.map((element) => {
       return {
-        IdVacuna: element.Vacuna.idVacuna,
-        IdVacunaDesarrollada: element.Vacuna.id,
+        IdVacuna: element.Vacuna.id,
         CantidadVacunas: element.CantidadVacunas,
       };
     });

@@ -1,4 +1,4 @@
-export const urlBase = "https://vacunacionapigrupo3deploy.azurewebsites.net/api";
+export const urlBase = "https://localhost:5001/api";
 
 const allUrls = {
   user: `${urlBase}/Usuarios/`,
@@ -31,5 +31,6 @@ const allUrls = {
   visualizarStockAnalista: `${urlBase}/Distribuciones/GetStockAnalistaProvincialAllVacunas`,
   cron: `${urlBase}/Vacunas/EjecutarCron`,
   visualizarStockPorProvincia: `${urlBase}/Distribuciones/GetStockOperadorNacionalAllVacunasDisponibles`,
+  etl: `${urlBase}/VacunasAplicadas/Etl`,
 };
 export default allUrls;

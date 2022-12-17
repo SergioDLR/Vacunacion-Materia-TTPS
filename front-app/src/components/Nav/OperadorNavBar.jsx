@@ -48,21 +48,7 @@ const OperadorNavBar = () => {
               Vacunas desarrolladas
             </CustomButton>
           </NavLink>
-          <NavLink
-            to={"/operador/marcascomerciales"}
-            style={({ isActive }) =>
-              isActive
-                ? activeStyle
-                : {
-                    textDecoration: "none",
-                    marginRight: 2,
-                  }
-            }
-          >
-            <CustomButton textColor="white" color="info" variant="contained" sx={{ minWidth: "max-content" }}>
-              Marcas comerciales
-            </CustomButton>
-          </NavLink>
+
           <NavLink
             to={"/operador/vacunados"}
             style={({ isActive }) =>

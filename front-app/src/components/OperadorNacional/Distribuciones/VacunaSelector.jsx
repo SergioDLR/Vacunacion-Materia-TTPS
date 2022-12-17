@@ -2,7 +2,7 @@ import SelectVacunasDesarrolladas from "../Compras/RegistrarCompra/SelectVacunas
 import allUrls from "@/services/backend_url";
 import { TextField, Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import { useState, useEffect } from "react";
-import getVacunasDesarrolladas from "@/services/getVacunasDesarrolladas";
+import { cargarVacunas } from "@/services/getVacunas";
 import { useAlert } from "react-alert";
 
 import CustomButton from "@/components/utils/CustomButtom";
@@ -20,9 +20,9 @@ const VacunaSelector = ({ vacunasDisponibles, userSesion, handleClose, handleAdd
     handleClose();
   };
   useEffect(() => {
-    getVacunasDesarrolladas(allUrls.todasVacunasDesarrolladas, userSesion.email, setVacunas, alert, setEstaCargando);
+    cargarVacunas(setVacunas, allUrls.todasVacunas, userSesion.email, alert, () => setEstaCargando(false));
   }, []);
-
+  console.log(vacunas);
   const handleChangeVacuna = (evt) => {
     setVacunaSeleccionada(evt.target.value);
   };
@@ -43,7 +43,7 @@ const VacunaSelector = ({ vacunasDisponibles, userSesion, handleClose, handleAdd
           </MenuItem>
           {vacunas.map((element, index) => (
             <MenuItem key={index} value={element}>
-              {element?.descripcionMarcaComercial} - {element?.descripcionVacuna}
+              {element?.descripcion}
             </MenuItem>
           ))}
         </Select>
