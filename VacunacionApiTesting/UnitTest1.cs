@@ -6,69 +6,44 @@ using System.Text.Json;
 using VacunacionApi.Controllers;
 using VacunacionApi.DTO;
 using VacunacionApi.Models;
+using VacunacionApi.Testing;
 
 namespace VacunacionApiTesting
 {
-    public class UnitTest1 : ControllerBase
+    public class UnitTest1
     {
-        private readonly VacunasContext _context;
-        private readonly UsuariosController _usuariosController;
-        
-        private readonly RequestUsuarioDTO _usuarioDTO;
-        private readonly ResponseUsuarioDTO ResponseUsuarioDTO;
-        //private readonly VacunasContext _vacunasContext;    
-        private readonly ResponseListaUsuariosDTO _listaUsuariosDTO;    
-
-
-        public UnitTest1() {
-            
-            _usuariosController = new UsuariosController(_context);
-
-            _usuarioDTO = new RequestUsuarioDTO();
-            ResponseUsuarioDTO = new ResponseUsuarioDTO();
-            _listaUsuariosDTO = null;
-        }
 
         [Fact]
-        public async void Test1()
+        public void TestValidarEmailNuevoUsuario()
         {
-            //model del request
-            _usuarioDTO.EmailAdministrador = "fabi@gmail.com";
-            _usuarioDTO.Email = "operadorNacionalTest@hotmail.com";
-            _usuarioDTO.Password = "123456";
-            _usuarioDTO.IdJurisdiccion = 1;
-            _usuarioDTO.IdRol = 3;
+            //ingreso de nuevo usuario
+            var usuarioDTO = new UsuarioDTO(2, "operadorNacional3@gmail.com", "12345", 3, 24, "Nacion", "Operador Nacional");
 
+            //Arrange
+            var mailValidator = new UsuariosTest();
+            var emailAddress = usuarioDTO.Email;
 
-
-            await _usuariosController.CrearUsuario(_usuarioDTO);
-
-//            var result = await _usuariosController.CrearUsuario(_usuarioDTO);
-            var result2 = await _usuariosController.GetAll(_usuarioDTO.EmailAdministrador, 1, 3);
-            //Assert.IsType<OkObjectResult>(codigoHttp);
-
-
-            //Assert.Equal("fabi@gmail.com", "fabi@gmail.com");
-
-            //response
-            //ResponseUsuarioDTO.EmailAdministrador = "fabi@gmail.com";
-            //ResponseUsuarioDTO.ExistenciaErrores = false;
-            //ResponseUsuarioDTO.EstadoTransaccion = "Aceptada";
-            //ResponseUsuarioDTO.UsuarioDTO = new UsuarioDTO(0, _usuarioDTO.Email, _usuarioDTO.Password, _usuarioDTO.IdJurisdiccion, _usuarioDTO.IdRol, "Buenos Aires", "Operador Nacional");
-            //Assert.Equal("fabi@gmail.com", ResponseUsuarioDTO.EmailAdministrador);
+            //Act
+            bool isValid = mailValidator.isValidMail(emailAddress);
             
+            Assert.True(isValid);
+        }
 
-            //ResponseUsuarioDTO response = result.Value.Errores;
+        [Theory]
+        [InlineData("mariaAdministradora@gmail.com", true)]
+        [InlineData("fernandoAdministrador@gmail.com", true)]
+        [InlineData("operador@gmail.com", false)]
+        [InlineData("otroEmail@gmail.com", false)]
+        public void ValidarEmailAdministrador(string emailAddress, bool expected)
+        {
+            //Arrange
+            var mailValidator = new UsuariosTest();
 
-            //Assert.NotNull(result); 
+            //Act
+            bool isValid = mailValidator.isAdminEmail(emailAddress);
 
-            Assert.IsType<ResponseListaUsuariosDTO>(result2.Value);
-
-
-          
-            //Assert.True(result.IsCompletedSuccessfully);
-            //Assert.IsType<OkObjectResult>(result);
-            //Assert.False(condition: result.Value.ExistenciaErrores);
+            //Assert
+            Assert.Equal(isValid, expected);
         }
     }
 }
