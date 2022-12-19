@@ -138,8 +138,6 @@ namespace VacunacionApi.Services
             
             //OPERACIÓN DE GUARDADO
             await _context.SaveChangesAsync();
-
-            //H_VACUNADOS
            
             return true;
         }

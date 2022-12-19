@@ -30,7 +30,7 @@ namespace VacunacionApi.Controllers
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<Lote>>> GetAll()
         {
-            return await _context.Lote.Where(l => l.Id == 111 || l.Id == 222 || l.Id == 333 || l.Id == 444 || l.Id == 555 || l.Id == 666 || l.Id == 777 || l.Id == 888 || l.Id == 999) .ToListAsync();
+            return await _context.Lote.Where(l => l.Lotes == 111 || l.Lotes == 222 || l.Lotes == 333 || l.Lotes == 444 || l.Lotes == 555 || l.Lotes == 666 || l.Lotes == 777 || l.Lotes == 888 || l.Lotes == 999) .ToListAsync();
         }
 
         // POST: api/Lotes/VencerLote?email=juan@gmail.com&idLote=777
@@ -52,20 +52,23 @@ namespace VacunacionApi.Controllers
                 {
                     errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(email, errores);
                 }
-                                
+                if(idLote == 0)
+                    errores.Add(string.Format("El id de lote es incorrecto"));
+
+
                 if (errores.Count > 0)
                     response = new ResponseCargarVacunaDTO("Rechazada", true, errores, email);
                 else
                 {
-                    Lote lote = await _context.Lote.Where(l => l.Id == idLote).FirstOrDefaultAsync();
+                    Lote lote = await _context.Lote.Where(l => l.Lotes == idLote).FirstOrDefaultAsync();
                     lote.FechaVencimiento = DateTime.Now;
                     lote.Disponible = false;
                     _context.Entry(lote).State = EntityState.Modified;
 
-                    Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Id).FirstOrDefaultAsync();
+                    Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Lotes).FirstOrDefaultAsync();
 
                     List<Distribucion> distribucionesLote = await _context.Distribucion
-                        .Where(d => d.IdLote == lote.Id).ToListAsync();
+                        .Where(d => d.IdLote == lote.Lotes).ToListAsync();
 
                     foreach (Distribucion distribucion in distribucionesLote)
                     {
@@ -77,7 +80,7 @@ namespace VacunacionApi.Controllers
                     _context.Entry(compra).State = EntityState.Modified;
                     
                     await _context.SaveChangesAsync();
-                    await new DataWareHouseService().CargarVencidasDataWareHouse(_context2, lote.Id);
+                    await new DataWareHouseService().CargarVencidasDataWareHouse(_context2, lote.Lotes);
                     response = new ResponseCargarVacunaDTO("Aceptada", false, errores, email);
                 }
             }

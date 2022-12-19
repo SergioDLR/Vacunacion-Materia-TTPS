@@ -662,18 +662,18 @@ namespace VacunacionApi.Controllers
                         lote.Disponible = true;
                         _context.Lote.Add(lote);
                         await _context.SaveChangesAsync();
-                        lote.Id = l.Lote;
+                        lote.Lotes = l.Lote;
                         _context.Entry(lote).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
 
-                        Compra compra = new Compra(lote.Id, estadoCompra.Id, (l.JurisdiccionesADistribuir.Count*10000), codigoCompra, DateTime.Now);
+                        Compra compra = new Compra(lote.Lotes, estadoCompra.Id, (l.JurisdiccionesADistribuir.Count*10000), codigoCompra, DateTime.Now);
                         _context.Compra.Add(compra);
                         await _context.SaveChangesAsync();
 
                         //Alta de distribuciones
                         foreach (JurisdiccionVacunaAplicadaDTO juris in l.JurisdiccionesADistribuir)
                         {
-                            Distribucion distribucion = new Distribucion(codigoCompra, juris.IdJurisdiccion, lote.Id, DateTime.Now, 10000, juris.CantidadAplicadas, 0);
+                            Distribucion distribucion = new Distribucion(codigoCompra, juris.IdJurisdiccion, lote.Lotes, DateTime.Now, 10000, juris.CantidadAplicadas, 0);
                             _context.Distribucion.Add(distribucion);
                             await _context.SaveChangesAsync();
                         }
