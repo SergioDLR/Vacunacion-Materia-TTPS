@@ -9,10 +9,8 @@ using VacunacionApi.ModelsDataWareHouse;
 namespace VacunacionApi.Services
 {
     public class DataWareHouseService
-    {
-        private readonly DataWareHouseContext _context;
-               
-        public async Task<bool> CargarDataWareHouse(VacunaAplicada vacunaAplicada, string jurisdiccion, string vacuna, string laboratorio, string tipoVacunaDesarrollada, int idLote)
+    {               
+        public async Task<bool> CargarDataWareHouse(DataWareHouseContext _context, VacunaAplicada vacunaAplicada, string jurisdiccion, string vacuna, string laboratorio, string tipoVacunaDesarrollada, int idLote)
         {
             //D_TIEMPO
             DTiempo dTiempo = new DTiempo(vacunaAplicada.FechaVacunacion.Day, vacunaAplicada.FechaVacunacion.Month, vacunaAplicada.FechaVacunacion.Year);
