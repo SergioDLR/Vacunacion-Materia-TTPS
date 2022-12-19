@@ -16,9 +16,8 @@ namespace VacunacionApi.DTO
         public int IdVacuna { get; set; }
 
 
-        [Required(ErrorMessage = "El campo id marca comercial es obligatorio")]
-        [Range(1, 10000, ErrorMessage = "El campo id marca comercial tiene un formato inválido")]
-        public int IdMarcaComercial { get; set; }
+        [Required(ErrorMessage = "El campo marca comercial es obligatorio")]
+        public string MarcaComercial { get; set; }
 
         
         [Required(ErrorMessage = "El campo dias de demora es obligatorio")]
