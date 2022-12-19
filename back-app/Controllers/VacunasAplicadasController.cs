@@ -486,225 +486,225 @@ namespace VacunacionApi.Controllers
         //}
 
         // POST: api/VacunasAplicadas/CargarNuevosVacunadosApi
-        [HttpPost]
-        [Route("CargarNuevosVacunadosApi")]
-        public async Task<ActionResult<ResponseCargarVacunaDTO>> CargarNuevosVacunadosApi(RequestNuevasVacunacionesApiDTO model)
-        {
-            try
-            {
-                ResponseCargarVacunaDTO response;
-                List<string> errores = new List<string>();
+        //[HttpPost]
+        //[Route("CargarNuevosVacunadosApi")]
+        //public async Task<ActionResult<ResponseCargarVacunaDTO>> CargarNuevosVacunadosApi(RequestNuevasVacunacionesApiDTO model)
+        //{
+        //    try
+        //    {
+        //        ResponseCargarVacunaDTO response;
+        //        List<string> errores = new List<string>();
 
-                if (model.Email == null)
-                {
-                    errores.Add(string.Format("El email operador nacional es obligatorio"));
-                }
-                else
-                {
-                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(model.Email, errores);
-                }
+        //        if (model.Email == null)
+        //        {
+        //            errores.Add(string.Format("El email operador nacional es obligatorio"));
+        //        }
+        //        else
+        //        {
+        //            errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(model.Email, errores);
+        //        }
 
-                if (errores.Count > 0)
-                    response = new ResponseCargarVacunaDTO("Rechazada", true, errores, model.Email);
-                else
-                {
-                    List<VacunaAplicada> aplicadas = new List<VacunaAplicada>();
-                    List<string> tiposVacunas = new List<string>() { "arnn", "vector_viral", "subunidades_proteicas" };
-                    List<string> vacunasArnn = new List<string>();
-                    List<string> vacunasVectorViral = new List<string>();
-                    List<string> vacunasSubunidadesProteicas = new List<string>();
-                    List<LoteJurisdiccionDTO> lotesJurisdicciones = new List<LoteJurisdiccionDTO>();
-                    //bool existeLote = false;
-                    //int totalAplicadas = 0;
-                    DataWareHouseService servicio = new DataWareHouseService();
+        //        if (errores.Count > 0)
+        //            response = new ResponseCargarVacunaDTO("Rechazada", true, errores, model.Email);
+        //        else
+        //        {
+        //            List<VacunaAplicada> aplicadas = new List<VacunaAplicada>();
+        //            List<string> tiposVacunas = new List<string>() { "arnn", "vector_viral", "subunidades_proteicas" };
+        //            List<string> vacunasArnn = new List<string>();
+        //            List<string> vacunasVectorViral = new List<string>();
+        //            List<string> vacunasSubunidadesProteicas = new List<string>();
+        //            List<LoteJurisdiccionDTO> lotesJurisdicciones = new List<LoteJurisdiccionDTO>();
+        //            //bool existeLote = false;
+        //            //int totalAplicadas = 0;
+        //            DataWareHouseService servicio = new DataWareHouseService();
 
-                    foreach (UsuarioRenaperDTO usuarioRenaper in model.Usuarios)
-                    {
-                        List<string> tipoVacuna = GenerarCsvService.GetTipoVacuna(tiposVacunas, vacunasArnn, vacunasVectorViral, vacunasSubunidadesProteicas, usuarioRenaper.vacunas);
+        //            foreach (UsuarioRenaperDTO usuarioRenaper in model.Usuarios)
+        //            {
+        //                List<string> tipoVacuna = GenerarCsvService.GetTipoVacuna(tiposVacunas, vacunasArnn, vacunasVectorViral, vacunasSubunidadesProteicas, usuarioRenaper.vacunas);
                         
-                        if (tipoVacuna[1] == "No existe")
-                        {
-                            switch (tipoVacuna[0])
-                            {
-                                case "arnn":
-                                    vacunasArnn.Add(usuarioRenaper.vacunas);
-                                    break;
-                                case "vector_viral":
-                                    vacunasVectorViral.Add(usuarioRenaper.vacunas);
-                                    break;
-                                case "subunidades_proteicas":
-                                    vacunasSubunidadesProteicas.Add(usuarioRenaper.vacunas);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+        //                if (tipoVacuna[1] == "No existe")
+        //                {
+        //                    switch (tipoVacuna[0])
+        //                    {
+        //                        case "arnn":
+        //                            vacunasArnn.Add(usuarioRenaper.vacunas);
+        //                            break;
+        //                        case "vector_viral":
+        //                            vacunasVectorViral.Add(usuarioRenaper.vacunas);
+        //                            break;
+        //                        case "subunidades_proteicas":
+        //                            vacunasSubunidadesProteicas.Add(usuarioRenaper.vacunas);
+        //                            break;
+        //                        default:
+        //                            break;
+        //                    }
+        //                }
 
-                        string[] vacunas = usuarioRenaper.vacunas.Split("_");
-                        int anioNac = Convert.ToDateTime(usuarioRenaper.fecha_hora_nacimiento).Year;
-                        int anioHoy = DateTime.Now.Year;
-                        int decadas = (anioHoy - anioNac) / 10;
-                        int veintenas = (anioHoy - anioNac) / 20;
+        //                string[] vacunas = usuarioRenaper.vacunas.Split("_");
+        //                int anioNac = Convert.ToDateTime(usuarioRenaper.fecha_hora_nacimiento).Year;
+        //                int anioHoy = DateTime.Now.Year;
+        //                int decadas = (anioHoy - anioNac) / 10;
+        //                int veintenas = (anioHoy - anioNac) / 20;
 
-                        //foreach (LoteJurisdiccionDTO loteJuris in lotesJurisdicciones)
-                        //{
-                        //    if (loteJuris.Lote == usuarioRenaper.lotes)
-                        //    {
-                        //        existeLote = true;
-                        //        break;
-                        //    }
-                        //}
+        //                //foreach (LoteJurisdiccionDTO loteJuris in lotesJurisdicciones)
+        //                //{
+        //                //    if (loteJuris.Lote == usuarioRenaper.lotes)
+        //                //    {
+        //                //        existeLote = true;
+        //                //        break;
+        //                //    }
+        //                //}
 
-                        Jurisdiccion jurisdiccion = await GetJurisdiccion(usuarioRenaper.jurisdiccion);
+        //                Jurisdiccion jurisdiccion = await GetJurisdiccion(usuarioRenaper.jurisdiccion);
 
-                        //if (!existeLote)
-                        //{
-                        //    LoteJurisdiccionDTO loteJuris = new LoteJurisdiccionDTO(usuarioRenaper.lotes, vacunas[0], vacunas[1], tipoVacuna[0]);
-                        //    JurisdiccionVacunaAplicadaDTO jurisdiccionDTO = new JurisdiccionVacunaAplicadaDTO(jurisdiccion.Id, jurisdiccion.Descripcion, 0);
-                        //    loteJuris.JurisdiccionesADistribuir.Add(jurisdiccionDTO);
-                        //    lotesJurisdicciones.Add(loteJuris);
-                        //}
+        //                //if (!existeLote)
+        //                //{
+        //                //    LoteJurisdiccionDTO loteJuris = new LoteJurisdiccionDTO(usuarioRenaper.lotes, vacunas[0], vacunas[1], tipoVacuna[0]);
+        //                //    JurisdiccionVacunaAplicadaDTO jurisdiccionDTO = new JurisdiccionVacunaAplicadaDTO(jurisdiccion.Id, jurisdiccion.Descripcion, 0);
+        //                //    loteJuris.JurisdiccionesADistribuir.Add(jurisdiccionDTO);
+        //                //    lotesJurisdicciones.Add(loteJuris);
+        //                //}
 
-                        //foreach (LoteJurisdiccionDTO lote in lotesJurisdicciones)
-                        //{
-                        //    foreach (JurisdiccionVacunaAplicadaDTO jva in lote.JurisdiccionesADistribuir)
-                        //    {
-                        //        if (jva.IdJurisdiccion == jurisdiccion.Id)
-                        //        {
-                        //            jva.CantidadAplicadas++;
-                        //            totalAplicadas++;
-                        //            break;
-                        //        }
-                        //    }
-                        //}
+        //                //foreach (LoteJurisdiccionDTO lote in lotesJurisdicciones)
+        //                //{
+        //                //    foreach (JurisdiccionVacunaAplicadaDTO jva in lote.JurisdiccionesADistribuir)
+        //                //    {
+        //                //        if (jva.IdJurisdiccion == jurisdiccion.Id)
+        //                //        {
+        //                //            jva.CantidadAplicadas++;
+        //                //            totalAplicadas++;
+        //                //            break;
+        //                //        }
+        //                //    }
+        //                //}
 
-                        List<Lote> lotes = await _context.Lote.ToListAsync();
-                        int cantidadLotes = lotes.Count;
-                        Random r = new Random();
-                        int numLote = lotes[r.Next(0, cantidadLotes - 1)].Id;
-                        Dosis dosis = await _context.Dosis.FirstOrDefaultAsync();
+        //                List<Lote> lotes = await _context.Lote.ToListAsync();
+        //                int cantidadLotes = lotes.Count;
+        //                Random r = new Random();
+        //                int numLote = lotes[r.Next(0, cantidadLotes - 1)].Id;
+        //                Dosis dosis = await _context.Dosis.FirstOrDefaultAsync();
 
-                        VacunaAplicada vacunaAplicada = new VacunaAplicada();
-                        vacunaAplicada.Nombre = usuarioRenaper.nombre;
-                        vacunaAplicada.Apellido = usuarioRenaper.apellido;
-                        vacunaAplicada.Dni = usuarioRenaper.DNI;
-                        vacunaAplicada.Embarazada = usuarioRenaper.embarazada;
-                        vacunaAplicada.FechaHoraNacimiento = Convert.ToDateTime(usuarioRenaper.fecha_hora_nacimiento);
-                        vacunaAplicada.FechaVacunacion = DateTime.Now;
-                        vacunaAplicada.IdDosis = dosis.Id;
-                        vacunaAplicada.IdJurisdiccion = jurisdiccion.Id;
-                        vacunaAplicada.IdJurisdiccionResidencia = jurisdiccion.Id;
-                        vacunaAplicada.IdLote = numLote;
-                        vacunaAplicada.PersonalSalud = usuarioRenaper.personal_salud;
-                        vacunaAplicada.SexoBiologico = usuarioRenaper.genero;
-                        vacunaAplicada.Departamento = usuarioRenaper.ciudad;
-                        vacunaAplicada.EnviadoDw = false;
+        //                VacunaAplicada vacunaAplicada = new VacunaAplicada();
+        //                vacunaAplicada.Nombre = usuarioRenaper.nombre;
+        //                vacunaAplicada.Apellido = usuarioRenaper.apellido;
+        //                vacunaAplicada.Dni = usuarioRenaper.DNI;
+        //                vacunaAplicada.Embarazada = usuarioRenaper.embarazada;
+        //                vacunaAplicada.FechaHoraNacimiento = Convert.ToDateTime(usuarioRenaper.fecha_hora_nacimiento);
+        //                vacunaAplicada.FechaVacunacion = DateTime.Now;
+        //                vacunaAplicada.IdDosis = dosis.Id;
+        //                vacunaAplicada.IdJurisdiccion = jurisdiccion.Id;
+        //                vacunaAplicada.IdJurisdiccionResidencia = jurisdiccion.Id;
+        //                vacunaAplicada.IdLote = numLote;
+        //                vacunaAplicada.PersonalSalud = usuarioRenaper.personal_salud;
+        //                vacunaAplicada.SexoBiologico = usuarioRenaper.genero;
+        //                vacunaAplicada.Departamento = usuarioRenaper.ciudad;
+        //                vacunaAplicada.EnviadoDw = false;
 
-                        aplicadas.Add(vacunaAplicada);
+        //                aplicadas.Add(vacunaAplicada);
 
-                        //_context.VacunaAplicada.Add(vacunaAplicada);
-                        //_context.Entry(distribucion).State = EntityState.Modified;
-                        //await _context.SaveChangesAsync();
+        //                //_context.VacunaAplicada.Add(vacunaAplicada);
+        //                //_context.Entry(distribucion).State = EntityState.Modified;
+        //                //await _context.SaveChangesAsync();
 
-                        ////Agregación a tabla PendienteEnvioDW
-                        //PendienteEnvioDw pendienteEnvioDW = new PendienteEnvioDw();
-                        //pendienteEnvioDW.IdVacunaAplicada = vacunaAplicada.Id;
-                        //_context.PendienteEnvioDw.Add(pendienteEnvioDW);
-                        //await _context.SaveChangesAsync();
+        //                ////Agregación a tabla PendienteEnvioDW
+        //                //PendienteEnvioDw pendienteEnvioDW = new PendienteEnvioDw();
+        //                //pendienteEnvioDW.IdVacunaAplicada = vacunaAplicada.Id;
+        //                //_context.PendienteEnvioDw.Add(pendienteEnvioDW);
+        //                //await _context.SaveChangesAsync();
 
-                        //await servicio.CargarDataWareHouse2(_context2, usuarioRenaper, vacunas, tipoVacuna[0]);
-                        //existeLote = false;
-                    }
+        //                //await servicio.CargarDataWareHouse2(_context2, usuarioRenaper, vacunas, tipoVacuna[0]);
+        //                //existeLote = false;
+        //            }
 
-                    //foreach (LoteJurisdiccionDTO l in lotesJurisdicciones)
-                    //{
-                    //    EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Descripcion == "Recibida").FirstOrDefaultAsync();
+        //            //foreach (LoteJurisdiccionDTO l in lotesJurisdicciones)
+        //            //{
+        //            //    EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Descripcion == "Recibida").FirstOrDefaultAsync();
 
-                        //Alta marca comercial
-                        //MarcaComercial mc = await GetMarcaComercialByDescripcion(l.Laboratorio);
-                        //if (mc == null)
-                        //{
-                        //    mc = new MarcaComercial();
-                        //    mc.Descripcion = l.Laboratorio;
-                        //    _context.MarcaComercial.Add(mc);
-                        //    await _context.SaveChangesAsync();
-                        //}
+        //                //Alta marca comercial
+        //                //MarcaComercial mc = await GetMarcaComercialByDescripcion(l.Laboratorio);
+        //                //if (mc == null)
+        //                //{
+        //                //    mc = new MarcaComercial();
+        //                //    mc.Descripcion = l.Laboratorio;
+        //                //    _context.MarcaComercial.Add(mc);
+        //                //    await _context.SaveChangesAsync();
+        //                //}
 
-                        //Alta de vacuna
-                        //Vacuna vacuna = await GetVacunaByDescripcion(l.VacunaDesarrollada);
-                        //if (vacuna == null)
-                        //{
-                        //    vacuna = new Vacuna();
-                        //    vacuna.Descripcion = l.VacunaDesarrollada;
-                        //    vacuna.IdPandemia = 0;
-                        //    vacuna.IdTipoVacuna = 0;
-                        //    vacuna.CantidadDosis = 0;
-                        //    _context.Vacuna.Add(vacuna);
-                        //    await _context.SaveChangesAsync();
-                        //}
+        //                //Alta de vacuna
+        //                //Vacuna vacuna = await GetVacunaByDescripcion(l.VacunaDesarrollada);
+        //                //if (vacuna == null)
+        //                //{
+        //                //    vacuna = new Vacuna();
+        //                //    vacuna.Descripcion = l.VacunaDesarrollada;
+        //                //    vacuna.IdPandemia = 0;
+        //                //    vacuna.IdTipoVacuna = 0;
+        //                //    vacuna.CantidadDosis = 0;
+        //                //    _context.Vacuna.Add(vacuna);
+        //                //    await _context.SaveChangesAsync();
+        //                //}
 
-                        //AltaVacuna desarrollada
-                        //VacunaDesarrollada vacunaDesarrollada = new VacunaDesarrollada();
-                        //vacunaDesarrollada.IdMarcaComercial = mc.Id;
-                        //vacunaDesarrollada.IdVacuna = vacuna.Id;
-                        //vacunaDesarrollada.DiasDemoraEntrega = 0;
-                        //vacunaDesarrollada.PrecioVacuna = 2000;
-                        //vacunaDesarrollada.TipoVacunaDesarrollada = l.TipoVacunaDesarrollada;
-                        //vacunaDesarrollada.FechaDesde = DateTime.Now;
-                        //vacunaDesarrollada.FechaHasta = null;
-                        //_context.VacunaDesarrollada.Add(vacunaDesarrollada);
-                        //await _context.SaveChangesAsync();
+        //                //AltaVacuna desarrollada
+        //                //VacunaDesarrollada vacunaDesarrollada = new VacunaDesarrollada();
+        //                //vacunaDesarrollada.IdMarcaComercial = mc.Id;
+        //                //vacunaDesarrollada.IdVacuna = vacuna.Id;
+        //                //vacunaDesarrollada.DiasDemoraEntrega = 0;
+        //                //vacunaDesarrollada.PrecioVacuna = 2000;
+        //                //vacunaDesarrollada.TipoVacunaDesarrollada = l.TipoVacunaDesarrollada;
+        //                //vacunaDesarrollada.FechaDesde = DateTime.Now;
+        //                //vacunaDesarrollada.FechaHasta = null;
+        //                //_context.VacunaDesarrollada.Add(vacunaDesarrollada);
+        //                //await _context.SaveChangesAsync();
 
-                        //Alta de compra
-                        //Random randomCodigoCompra = new Random();
-                        //int codigoCompra = randomCodigoCompra.Next(1, 100000000);
+        //                //Alta de compra
+        //                //Random randomCodigoCompra = new Random();
+        //                //int codigoCompra = randomCodigoCompra.Next(1, 100000000);
 
-                        //while (await GetCompraExistente(codigoCompra) != null)
-                        //{
-                        //    codigoCompra = randomCodigoCompra.Next(1, 100000000);
-                        //}
+        //                //while (await GetCompraExistente(codigoCompra) != null)
+        //                //{
+        //                //    codigoCompra = randomCodigoCompra.Next(1, 100000000);
+        //                //}
 
-                        //Lote lote = new Lote(vacunaDesarrollada.Id, DateTime.Now.AddDays(365));
-                        //lote.Disponible = true;
-                        //_context.Lote.Add(lote);
-                        //await _context.SaveChangesAsync();
-                        //lote.Lotes = l.Lote;
-                        //_context.Entry(lote).State = EntityState.Modified;
-                        //await _context.SaveChangesAsync();
+        //                //Lote lote = new Lote(vacunaDesarrollada.Id, DateTime.Now.AddDays(365));
+        //                //lote.Disponible = true;
+        //                //_context.Lote.Add(lote);
+        //                //await _context.SaveChangesAsync();
+        //                //lote.Lotes = l.Lote;
+        //                //_context.Entry(lote).State = EntityState.Modified;
+        //                //await _context.SaveChangesAsync();
 
-                        //Compra compra = new Compra(lote.Lotes, estadoCompra.Id, (l.JurisdiccionesADistribuir.Count*10000), codigoCompra, DateTime.Now);
-                        //_context.Compra.Add(compra);
-                        //await _context.SaveChangesAsync();
+        //                //Compra compra = new Compra(lote.Lotes, estadoCompra.Id, (l.JurisdiccionesADistribuir.Count*10000), codigoCompra, DateTime.Now);
+        //                //_context.Compra.Add(compra);
+        //                //await _context.SaveChangesAsync();
 
-                        //Alta de distribuciones
-                        //foreach (JurisdiccionVacunaAplicadaDTO juris in l.JurisdiccionesADistribuir)
-                        //{
-                        //    Distribucion distribucion = new Distribucion(codigoCompra, juris.IdJurisdiccion, lote.Lotes, DateTime.Now, 10000, juris.CantidadAplicadas, 0);
-                        //    _context.Distribucion.Add(distribucion);
-                        //    await _context.SaveChangesAsync();
-                        //}
-                    //}
+        //                //Alta de distribuciones
+        //                //foreach (JurisdiccionVacunaAplicadaDTO juris in l.JurisdiccionesADistribuir)
+        //                //{
+        //                //    Distribucion distribucion = new Distribucion(codigoCompra, juris.IdJurisdiccion, lote.Lotes, DateTime.Now, 10000, juris.CantidadAplicadas, 0);
+        //                //    _context.Distribucion.Add(distribucion);
+        //                //    await _context.SaveChangesAsync();
+        //                //}
+        //            //}
 
-                    foreach (VacunaAplicada vacAplic in aplicadas)
-                    {
-                        PendienteEnvioDw pendiente = new PendienteEnvioDw();
-                        _context.VacunaAplicada.Add(vacAplic);
-                        await _context.SaveChangesAsync();
-                        pendiente.IdVacunaAplicada = vacAplic.Id;
-                        _context.PendienteEnvioDw.Add(pendiente);
-                        await _context.SaveChangesAsync();
-                    }
+        //            foreach (VacunaAplicada vacAplic in aplicadas)
+        //            {
+        //                PendienteEnvioDw pendiente = new PendienteEnvioDw();
+        //                _context.VacunaAplicada.Add(vacAplic);
+        //                await _context.SaveChangesAsync();
+        //                pendiente.IdVacunaAplicada = vacAplic.Id;
+        //                _context.PendienteEnvioDw.Add(pendiente);
+        //                await _context.SaveChangesAsync();
+        //            }
 
-                    response = new ResponseCargarVacunaDTO("Aceptada", true, errores, model.Email);
-                }
+        //            response = new ResponseCargarVacunaDTO("Aceptada", true, errores, model.Email);
+        //        }
 
-                return Ok(response);
-            }
-            catch (Exception error)
-            {
-                return BadRequest(error.Message);
-            }
-        }
+        //        return Ok(response);
+        //    }
+        //    catch (Exception error)
+        //    {
+        //        return BadRequest(error.Message);
+        //    }
+        //}
 
         // GET: api/VacunasAplicadas/Etl?emailOperadorNacional=juan@gmail.com
         [HttpGet]
