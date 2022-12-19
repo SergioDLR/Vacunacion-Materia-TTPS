@@ -33,5 +33,6 @@ const allUrls = {
   visualizarStockPorProvincia: `${urlBase}/Distribuciones/GetStockOperadorNacionalAllVacunasDisponibles`,
   etl: `${urlBase}/VacunasAplicadas/Etl`,
   cantResultados: `${urlBase}/VacunasAplicadas/GetCantidadResultados`,
+  vacunacionMasiva: `${urlBase}/VacunasAplicadas/CargarNuevosVacunadosApi`,
 };
 export default allUrls;
