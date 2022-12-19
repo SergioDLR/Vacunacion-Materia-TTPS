@@ -30,7 +30,7 @@ namespace VacunacionApi.Controllers
         [Route("GetAll")]
         public async Task<ActionResult<IEnumerable<Lote>>> GetAll()
         {
-            return await _context.Lote.Where(l => l.Lotes == 111 || l.Lotes == 222 || l.Lotes == 333 || l.Lotes == 444 || l.Lotes == 555 || l.Lotes == 666 || l.Lotes == 777 || l.Lotes == 888 || l.Lotes == 999) .ToListAsync();
+            return await _context.Lote.ToListAsync();
         }
 
         // POST: api/Lotes/VencerLote?email=juan@gmail.com&idLote=777
@@ -60,15 +60,15 @@ namespace VacunacionApi.Controllers
                     response = new ResponseCargarVacunaDTO("Rechazada", true, errores, email);
                 else
                 {
-                    Lote lote = await _context.Lote.Where(l => l.Lotes == idLote).FirstOrDefaultAsync();
+                    Lote lote = await _context.Lote.Where(l => l.Id == idLote).FirstOrDefaultAsync();
                     lote.FechaVencimiento = DateTime.Now;
                     lote.Disponible = false;
                     _context.Entry(lote).State = EntityState.Modified;
 
-                    Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Lotes).FirstOrDefaultAsync();
+                    Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Id).FirstOrDefaultAsync();
 
                     List<Distribucion> distribucionesLote = await _context.Distribucion
-                        .Where(d => d.IdLote == lote.Lotes).ToListAsync();
+                        .Where(d => d.IdLote == lote.Id).ToListAsync();
 
                     foreach (Distribucion distribucion in distribucionesLote)
                     {
@@ -80,7 +80,7 @@ namespace VacunacionApi.Controllers
                     _context.Entry(compra).State = EntityState.Modified;
                     
                     await _context.SaveChangesAsync();
-                    await new DataWareHouseService().CargarVencidasDataWareHouse(_context2, lote.Lotes);
+                    await new DataWareHouseService().CargarVencidasDataWareHouse(_context2, lote.Id);
                     response = new ResponseCargarVacunaDTO("Aceptada", false, errores, email);
                 }
             }
