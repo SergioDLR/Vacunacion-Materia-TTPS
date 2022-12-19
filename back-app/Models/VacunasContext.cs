@@ -21,6 +21,7 @@ namespace VacunacionApi.Models
         public virtual DbSet<Lote> Lote { get; set; }
         public virtual DbSet<MarcaComercial> MarcaComercial { get; set; }
         public virtual DbSet<Pandemia> Pandemia { get; set; }
+        public virtual DbSet<PendienteEnvioDw> PendienteEnvioDw { get; set; }
         public virtual DbSet<Regla> Regla { get; set; }
         public virtual DbSet<Rol> Rol { get; set; }
         public virtual DbSet<TipoVacuna> TipoVacuna { get; set; }
@@ -98,6 +99,15 @@ namespace VacunacionApi.Models
                     .HasForeignKey(d => d.IdVacunaDesarrollada)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Lote_Vacuna_Desarrollada");
+            });
+
+            modelBuilder.Entity<PendienteEnvioDw>(entity =>
+            {
+                entity.HasOne(d => d.IdVacunaAplicadaNavigation)
+                    .WithMany(p => p.PendienteEnvioDw)
+                    .HasForeignKey(d => d.IdVacunaAplicada)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Pendiente_Envio_DW_Vacuna_Aplicada");
             });
 
             modelBuilder.Entity<Usuario>(entity =>

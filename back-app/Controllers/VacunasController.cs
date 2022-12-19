@@ -737,59 +737,280 @@ namespace VacunacionApi.Controllers
 
             try
             {
+                var listaReglas = new List<ReglaDTO>();
+                var listaDescripcionesDosis = new List<string>();
+
                 switch (descripcionVacuna)
                 {
                     case "Hepatitis B (HB)":
-                        listaDosis = vacunaService.ArmarListaDosisDTOHepatitisBHB();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar antes de las 12 horas del nacimiento", null, 0, 0.5, null, false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 11 años", null, 4015, 0, null, false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar al mes de la primera dosis", null, 30, 180, "1", false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a los 6 meses de la primera dosis", null, 180, 0, "1", false, true),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis Nacimiento",
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                        };
+                        
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "BCG":
-                        listaDosis = vacunaService.ArmarListaDosisDTOBCG();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar antes de salir de la maternidad", null, 0, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Dosis Única Nacimiento",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+                        
                     case "Rotavirus":
-                        listaDosis = vacunaService.ArmarListaDosisDTORotavirus();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta las 14 semanas y 6 días", null, 60, 104, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Neumococo Conjugada":
-                        listaDosis = vacunaService.ArmarListaDosisNeumococoConjugada();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 12 meses", null, 120, 365, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 12 meses del nacimiento", null, 365, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Quíntuple Pentavalente":
-                        listaDosis = vacunaService.ArmarListaDosisQuintuplePentavalente();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 6 meses del nacimiento hasta los 15 meses", null, 180, 450, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 15 y 18 meses de nacimiento", null, 450, 540, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Salk IPV":
-                        listaDosis = vacunaService.ArmarListaDosisSalkIPV();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses (intramuscular)", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses (intramuscular)", null, 120, 180, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 6 meses del nacimiento hasta los 5 años (intramuscular)", null, 180, 1825, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años (intramuscular)", null, 1825, 2190, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Meningocócica Conjugada":
-                        listaDosis = vacunaService.ArmarListaDosisMeningococicaConjugada();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 3 meses del nacimiento hasta los 5 meses", null, 90, 150, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 5 meses del nacimiento hasta los 15 meses", null, 150, 450, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 15 meses del nacimiento hasta los 11 años", null, 450, 4015, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años", null, 4015, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                            descripcionVacuna + " - " + "Dosis Única",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Triple Viral (SRP)":
-                        listaDosis = vacunaService.ArmarListaDosisTripleViralSRP();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 12 meses del nacimiento hasta los 5 años", null, 365, 1825, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años", null, 1825, 2190, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años, si no recibió anteriores (1 dosis de triple viral + 1 dosis de doble viral)", null, 4015, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Refuerzo Triple Viral + Doble Viral",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Hepatitis A (HA)":
-                        listaDosis = vacunaService.ArmarListaDosisHepatitisAHA();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 12 meses del nacimiento", null, 365, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Dosis Única",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Varicela":
-                        listaDosis = vacunaService.ArmarListaDosisVaricela();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 15 meses del nacimiento hasta los 5 años", null, 450, 1825, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años", null, 1825, 2190, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Triple Bacteriana (DTP)":
-                        listaDosis = vacunaService.ArmarListaDosisTripleBacterianaDTP();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años", null, 1825, 2160, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Triple Bacteriana Acelular":
-                        listaDosis = vacunaService.ArmarListaDosisTripleBacterianaAcelular();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años", null, 4015, 0, null, true, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de la semana 20 de gestación", null, 0, 0, null, true, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a personal que atiende niños menores de 1 año. Revacunar a los 5 años", null, 0, 0, null, true, true),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Dosis Única",
+                            descripcionVacuna + " - " + "Dosis Embarazo",
+                            descripcionVacuna + " - " + "Dosis Personal Salud",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "VPH":
-                        listaDosis = vacunaService.ArmarListaDosisVPH();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años", null, 4015, 0, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a los 6 meses de la primera dosis", null, 180, 0, "0", false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Doble Bacteriana (DT)":
-                        listaDosis = vacunaService.ArmarListaDosisDobleBacterianaDT();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 18 años. Componente tétanos-difteria (refuerzo cada 10 años)", null, 6570, 0, null, true, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar después de la primera dosis. Componente tétanos-difteria (refuerzo cada 10 años)", null, 0, 0, null, true, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar después de la segunda dosis. Componente tétanos-difteria (refuerzo cada 10 años)", null, 0, 0, null, true, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Doble Viral (SR)":
-                        listaDosis = vacunaService.ArmarListaDosisDobleViralSR();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 11 años. Si no hay aplicaciones previas, aplicar 1 dosis o bien 1 dosis de Triple Viral + 1 dosis de Doble Viral", null, 4015, 0, null, false, true),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Fiebre Amarilla (FA)":
-                        listaDosis = vacunaService.ArmarListaDosisFiebreAmarillaFA();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 18 meses hasta los 11 años (para residentes en zona de riesgo)", null, 540, 4015, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a los 10 años de la primera dosis (para residentes en zona de riesgo)", null, 3650, 0, "0", false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     case "Fiebre Hemorrágica Argentina (FHA)":
-                        listaDosis = vacunaService.ArmarListaDosisFiebreHemorragicaArgentinaFHA();
+                        listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 15 años. Residentes o trabajadores con riesgo ocupacional en zonas de riesgo", null, 5475, 0, null, false, false),
+                        };
+
+                        listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                        };
+
+                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
+
                     default:
                         break;
                 }

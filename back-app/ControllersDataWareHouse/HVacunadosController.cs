@@ -75,24 +75,6 @@ namespace VacunacionApi.ControllersDataWareHouse
             return NoContent();
         }
 
-        // POST: api/HVacunados/SaveHVacunadosDataWareHouse
-        [HttpPost]
-        [Route("SaveHVacunadosDataWareHouse")]
-        public async Task<ActionResult<bool>> SaveHVacunadosDataWareHouse()
-        {
-            try
-            {
-                DataWareHouseService service = new DataWareHouseService();
-                await service.CargarDataWareHouse(_context);
-            }
-            catch(Exception error)
-            {
-                return BadRequest(error.Message);
-            }
-
-            return true;
-        }
-
         // DELETE: api/HVacunados/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<HVacunados>> DeleteHVacunados(int id)

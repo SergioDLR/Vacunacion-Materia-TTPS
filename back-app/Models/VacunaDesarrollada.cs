@@ -27,6 +27,8 @@ namespace VacunacionApi.Models
         public DateTime FechaDesde { get; set; }
         [Column("Fecha_Hasta", TypeName = "date")]
         public DateTime? FechaHasta { get; set; }
+        [Column("Tipo_Vacuna_Desarrollada")]
+        public string TipoVacunaDesarrollada { get; set; }
 
         [ForeignKey(nameof(IdMarcaComercial))]
         [InverseProperty(nameof(MarcaComercial.VacunaDesarrollada))]
