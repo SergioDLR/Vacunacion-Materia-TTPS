@@ -55,15 +55,7 @@ namespace VacunacionApi.Controllers
                 }
 
                 List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
-                if (skip != 0 && take != 0)
-                    vacunasAplicadas = vacunasAplicadas.Skip(skip).Take(take).ToList();
-
-                if (descripcionJurisdiccion != null)
-                {
-                    Jurisdiccion juris = await GetJurisdiccionByDescripcion(descripcionJurisdiccion);
-                    vacunasAplicadas = vacunasAplicadas.Where(v => v.IdJurisdiccion == juris.Id).ToList();
-                }
-                    
+                                   
                 if (vacunasAplicadas.Count == 0)
                 {
                     errores.Add("No existen vacunados en la base de datos");
@@ -81,6 +73,14 @@ namespace VacunacionApi.Controllers
                 {
                     transaccion = "Aceptada";
                     existenciaErrores = false;
+
+                    if (descripcionJurisdiccion != null)
+                    {
+                        Jurisdiccion juris = await GetJurisdiccionByDescripcion(descripcionJurisdiccion);
+                        vacunasAplicadas = vacunasAplicadas.Where(v => v.IdJurisdiccion == juris.Id).ToList();
+                    }
+
+                    vacunasAplicadas = vacunasAplicadas.Skip(skip).Take(take).ToList();
 
                     if (rolUsuario.Descripcion == "Analista Provincial")
                     {
@@ -485,30 +485,29 @@ namespace VacunacionApi.Controllers
         //    }
         //}
 
-        // GET: api/VacunasAplicadas/CargarNuevosVacunadosApi?emailOperadorNacional=juan@gmail.com
+        // POST: api/VacunasAplicadas/CargarNuevosVacunadosApi
         [HttpPost]
         [Route("CargarNuevosVacunadosApi")]
-        public async Task<ActionResult<ResponseCargarVacunaDTO>> CargarNuevosVacunadosApi(string emailOperadorNacional = null)
+        public async Task<ActionResult<ResponseCargarVacunaDTO>> CargarNuevosVacunadosApi(RequestNuevasVacunacionesApiDTO model)
         {
             try
             {
                 ResponseCargarVacunaDTO response;
                 List<string> errores = new List<string>();
 
-                if (emailOperadorNacional == null)
+                if (model.Email == null)
                 {
                     errores.Add(string.Format("El email operador nacional es obligatorio"));
                 }
                 else
                 {
-                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(emailOperadorNacional, errores);
+                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(model.Email, errores);
                 }
 
                 if (errores.Count > 0)
-                    response = new ResponseCargarVacunaDTO("Rechazada", true, errores, emailOperadorNacional);
+                    response = new ResponseCargarVacunaDTO("Rechazada", true, errores, model.Email);
                 else
                 {
-                    List<UsuarioRenaperDTO> usuarios = new List<UsuarioRenaperDTO>();
                     List<VacunaAplicada> aplicadas = new List<VacunaAplicada>();
                     List<string> tiposVacunas = new List<string>() { "arnn", "vector_viral", "subunidades_proteicas" };
                     List<string> vacunasArnn = new List<string>();
@@ -519,13 +518,10 @@ namespace VacunacionApi.Controllers
                     int totalAplicadas = 0;
                     DataWareHouseService servicio = new DataWareHouseService();
 
-                    usuarios = await GetUsuarios(31000000, 31001000);
-
-                    foreach (UsuarioRenaperDTO usuarioRenaper in usuarios)
+                    foreach (UsuarioRenaperDTO usuarioRenaper in model.Usuarios)
                     {
-                        //List<string> tipoVacuna = GenerarCsvService.GetTipoVacuna(tiposVacunas, vacunasArnn, vacunasVectorViral, vacunasSubunidadesProteicas, usuarioRenaper.vacunas);
-                        List<string> tipoVacuna = new List<string>() { "arnn" };
-
+                        List<string> tipoVacuna = GenerarCsvService.GetTipoVacuna(tiposVacunas, vacunasArnn, vacunasVectorViral, vacunasSubunidadesProteicas, usuarioRenaper.vacunas);
+                        
                         if (tipoVacuna[1] == "No existe")
                         {
                             switch (tipoVacuna[0])
@@ -693,7 +689,7 @@ namespace VacunacionApi.Controllers
                         await _context.SaveChangesAsync();
                     }
 
-                    response = new ResponseCargarVacunaDTO("Aceptada", true, errores, emailOperadorNacional);
+                    response = new ResponseCargarVacunaDTO("Aceptada", true, errores, model.Email);
                 }
 
                 return Ok(response);

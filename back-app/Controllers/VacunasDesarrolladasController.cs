@@ -250,17 +250,22 @@ namespace VacunacionApi.Controllers
                 }
 
                 //verifico si la marca comercial existe
-                MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == model.IdMarcaComercial).FirstOrDefaultAsync();
+                MarcaComercial marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Descripcion == model.MarcaComercial).FirstOrDefaultAsync();
                 if(marcaComercialExistente == null)
                 {
-                    errores.Add(String.Format("La marca comercial {0} no esta registrada en el sistema", model.IdMarcaComercial));
+                    MarcaComercial mc = new MarcaComercial();
+                    mc.Descripcion = model.MarcaComercial;
+                    _context.MarcaComercial.Add(mc);
+                    await _context.SaveChangesAsync();
                 }
+
+                marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Descripcion == model.MarcaComercial).FirstOrDefaultAsync();
 
                 //chequeo que no exista la marca ya creada
                 List<VacunaDesarrollada> vacunasDesarrolladas = await _context.VacunaDesarrollada.ToListAsync();
                 foreach (VacunaDesarrollada item in vacunasDesarrolladas)
                 {
-                    if (item.IdVacuna == model.IdVacuna && item.IdMarcaComercial == model.IdMarcaComercial && item.FechaHasta == null)
+                    if (item.IdVacuna == model.IdVacuna && item.IdMarcaComercial == marcaComercialExistente.Id && item.FechaHasta == null)
                     {
                         errores.Add(String.Format("La vacuna desarrollada con identificador de vacuna {0} con la marca comercial con identificador {1} ya esta registrada", item.IdVacuna, item.IdMarcaComercial));
                     }
@@ -279,7 +284,7 @@ namespace VacunacionApi.Controllers
                     //creo la instancia del objeto original. Del model
                     VacunaDesarrollada vacunaDesarrollada = new VacunaDesarrollada();
                     vacunaDesarrollada.IdVacuna = model.IdVacuna;
-                    vacunaDesarrollada.IdMarcaComercial = model.IdMarcaComercial;
+                    vacunaDesarrollada.IdMarcaComercial = marcaComercialExistente.Id;
                     vacunaDesarrollada.DiasDemoraEntrega = model.DiasDemoraEntrega;
                     vacunaDesarrollada.PrecioVacuna = model.PrecioVacunaDesarrollada;
                     vacunaDesarrollada.FechaDesde = DateTime.Now;   
@@ -296,7 +301,7 @@ namespace VacunacionApi.Controllers
                     responseVacunaDesarrolladaDTO.Errores = errores;
                     responseVacunaDesarrolladaDTO.ExistenciaErrores = false;
                     responseVacunaDesarrolladaDTO.EstadoTransaccion = "Aceptada";
-                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, model.IdVacuna, vacuna.Descripcion, model.IdMarcaComercial, marcaComercial.Descripcion, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada, null);
+                    responseVacunaDesarrolladaDTO.VacunaDesarrolladaDTO = new VacunaDesarrolladaDTO(vacunaDesarrollada.Id, model.IdVacuna, vacuna.Descripcion, marcaComercialExistente.Id, marcaComercial.Descripcion, model.DiasDemoraEntrega, model.PrecioVacunaDesarrollada, null);
                 }
                 return Ok(responseVacunaDesarrolladaDTO);
             }
