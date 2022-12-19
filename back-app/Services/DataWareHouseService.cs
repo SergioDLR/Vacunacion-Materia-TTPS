@@ -112,5 +112,34 @@ namespace VacunacionApi.Services
 
             return true;
         }
+
+        public async Task<bool> CargarVencidasDataWareHouse(DataWareHouseContext _context, int loteVencido)
+        {
+            //D_TIEMPO
+            DTiempo dTiempo = new DTiempo(DateTime.Now.Day, DateTime.Now.Month, DateTime.Now.Year);
+            _context.DTiempo.Add(dTiempo);
+            await _context.SaveChangesAsync();
+            
+            //D_VACUNA
+            List<DVacuna> dVacunas = _context.DVacuna.Where(v => v.IdLote == loteVencido).ToList();
+            foreach (DVacuna v in dVacunas)
+            {
+                List<HVacunados> vacunados = _context.HVacunados.Where(hv => hv.IdVacuna == v.Id).ToList();
+                foreach (HVacunados hv in vacunados)
+                {
+                    DLugar dLugar = _context.DLugar.Where(l => l.Id == hv.IdLugar).FirstOrDefault();
+                    HVencidas hVencida = new HVencidas();
+                    hVencida.IdTiempo = dTiempo.Id;
+                    hVencida.IdLugar = dLugar.Id;
+                    hVencida.IdVacuna = v.Id;
+                    _context.HVencidas.Add(hVencida);
+                }
+            }
+            
+            //OPERACIÓN DE GUARDADO
+            await _context.SaveChangesAsync();
+           
+            return true;
+        }
     }
 }
