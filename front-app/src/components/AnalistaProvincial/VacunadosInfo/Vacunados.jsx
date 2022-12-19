@@ -10,6 +10,10 @@ const Vacunados = () => {
   const { userSesion } = useContext(UserContext);
   const [vacunados, setVacunados] = useState([]);
   const [estaCargando, setEstaCargando] = useState(true);
+  const [cantPages, setCantPages] = useState(0);
+  const [initial, setInitial] = useState(0);
+  const [end, setEnd] = useState(0);
+
   const alert = useAlert();
   useEffect(() => {
     try {
@@ -24,6 +28,32 @@ const Vacunados = () => {
       alert.error(`Ocurrio un error del lado del servidor`);
     }
   }, []);
+
+  const handleChangePage = (evt, value) => {
+    setEstaCargando(true);
+    loadData();
+    setPage(value);
+  };
+
+  const calculatePages = () => {
+    //TODO: Tiene que calcular las paginas / 20
+    return 50;
+  };
+
+  useEffect(() => {
+    setCantPages(calculatePages());
+  }, []);
+
+  const loadData = (initial, end) => {
+    axios
+      .get(`${allUrls.vacunasAplidas}?emailUsuario=${userSesion.email}`)
+      .then((response) => {
+        setEstaCargando(false);
+        setVacunados(response?.data?.listaVacunasAplicadasDTO);
+      })
+      .catch((e) => console.log(e));
+  };
+
   return (
     <Container>
       {estaCargando && <CustomLoader />}

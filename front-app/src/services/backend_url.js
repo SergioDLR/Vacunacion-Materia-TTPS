@@ -31,5 +31,7 @@ const allUrls = {
   visualizarStockAnalista: `${urlBase}/Distribuciones/GetStockAnalistaProvincialAllVacunas`,
   cron: `${urlBase}/Vacunas/EjecutarCron`,
   visualizarStockPorProvincia: `${urlBase}/Distribuciones/GetStockOperadorNacionalAllVacunasDisponibles`,
+  etl: `${urlBase}/VacunasAplicadas/Etl`,
+  cantVacunados: `${urlBase}/VacunasAplicadas/GetCantidadResultados?descripcionJurisdiccion=Buenos Aires`,
 };
 export default allUrls;
