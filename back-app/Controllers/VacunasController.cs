@@ -733,7 +733,6 @@ namespace VacunacionApi.Controllers
         private List<DosisDTO> ArmarListaDosisDTO(string descripcionVacuna)
         {
             List<DosisDTO> listaDosis = new List<DosisDTO>();
-            VacunaService vacunaService = new VacunaService();
 
             try
             {
@@ -758,7 +757,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Tercera Dosis",
                         };
                         
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "BCG":
@@ -771,7 +770,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Dosis Única Nacimiento",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
                         
                     case "Rotavirus":
@@ -786,7 +785,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Segunda Dosis",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Neumococo Conjugada":
@@ -803,7 +802,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Refuerzo",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Quíntuple Pentavalente":
@@ -822,7 +821,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Refuerzo",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Salk IPV":
@@ -841,7 +840,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Refuerzo",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Meningocócica Conjugada":
@@ -860,7 +859,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Dosis Única",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Triple Viral (SRP)":
@@ -877,7 +876,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Refuerzo Triple Viral + Doble Viral",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Hepatitis A (HA)":
@@ -890,7 +889,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Dosis Única",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Varicela":
@@ -905,7 +904,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Segunda Dosis",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Triple Bacteriana (DTP)":
@@ -918,7 +917,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Refuerzo",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Triple Bacteriana Acelular":
@@ -935,7 +934,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Dosis Personal Salud",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "VPH":
@@ -950,7 +949,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Segunda Dosis",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Doble Bacteriana (DT)":
@@ -967,7 +966,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Tercera Dosis",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Doble Viral (SR)":
@@ -980,7 +979,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Primera Dosis",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Fiebre Amarilla (FA)":
@@ -995,7 +994,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Refuerzo",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     case "Fiebre Hemorrágica Argentina (FHA)":
@@ -1008,7 +1007,7 @@ namespace VacunacionApi.Controllers
                             descripcionVacuna + " - " + "Primera Dosis",
                         };
 
-                        listaDosis = vacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                        listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
                         break;
 
                     default:

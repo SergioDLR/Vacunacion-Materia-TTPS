@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VacunacionApi.DTO;
 using VacunacionApi.Models;
+using VacunacionApi.Services;
 
 namespace VacunacionApi.Controllers
 {
@@ -38,7 +39,7 @@ namespace VacunacionApi.Controllers
                 }
                 else
                 {
-                    errores = await VerificarCredencialesUsuarioOperadorNacional(emailOperadorNacional, errores);
+                    errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
 
                     if (idVacunaDesarrollada != 0)
                     {
@@ -141,7 +142,7 @@ namespace VacunacionApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CompraExists(id))
+                if (!CompraService.CompraExists(_context, id))
                 {
                     return NotFound();
                 }
@@ -170,7 +171,7 @@ namespace VacunacionApi.Controllers
                 if (estadoCompra == null)
                     errores.Add("Error de conexión al procesar los estados de compra");
 
-                VacunaDesarrollada vacunaDesarrolladaExistente = await GetVacunaDesarrollada(model.IdVacunaDesarrollada);
+                VacunaDesarrollada vacunaDesarrolladaExistente = VacunaDesarrolladaService.GetVacunaDesarrollada(_context, model.IdVacunaDesarrollada);
                 
                 if (vacunaDesarrolladaExistente == null)
                     errores.Add(string.Format("La vacuna desarrollada con identificador {0} no está registrada en el sistema", model.IdVacunaDesarrollada));
@@ -261,7 +262,7 @@ namespace VacunacionApi.Controllers
                         errores.Add("Error de conexión al procesar vacuna");
                 }
 
-                errores = await VerificarCredencialesUsuarioOperadorNacional(model.EmailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, model.EmailOperadorNacional, errores, "Operador Nacional");
                               
                 if (errores.Count > 0)
                     responseCompraDTO = new ResponseCompraDTO("Rechazada", true, errores, new CompraDTO(0, 0, null, model.IdVacunaDesarrollada, null, 0, null, model.CantidadVacunas, 0, null, null, 0, 0, 0));
@@ -270,7 +271,7 @@ namespace VacunacionApi.Controllers
                     Random randomCodigoCompra = new Random();
                     int codigoCompra = randomCodigoCompra.Next(1, 100000000);
 
-                    while (await GetCompraExistente(codigoCompra) != null)
+                    while (CompraService.GetCompraExistente(_context, codigoCompra) != null)
                     {
                         codigoCompra = randomCodigoCompra.Next(1, 100000000);
                     }
@@ -324,120 +325,6 @@ namespace VacunacionApi.Controllers
             await _context.SaveChangesAsync();
 
             return compra;
-        }
-
-
-
-        //Métodos privados de ayuda
-        private bool CompraExists(int id)
-        {
-            return _context.Compra.Any(e => e.Id == id);
-        }
-
-        private async Task<VacunaDesarrollada> GetVacunaDesarrollada(int idVacunaDesarrollada)
-        {
-            VacunaDesarrollada vacunaDesarrolladaExistente = null;
-
-            try
-            {
-                vacunaDesarrolladaExistente = await _context.VacunaDesarrollada
-                    .Where(vac => vac.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return vacunaDesarrolladaExistente;
-        }
-
-        private async Task<Compra> GetCompraExistente(int codigoCompra)
-        {
-            Compra compraExistente = null;
-
-            try
-            {
-                compraExistente = await _context.Compra
-                    .Where(c => c.Codigo == codigoCompra).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return compraExistente;
-        }
-
-        private async Task<Usuario> GetUsuario(string email)
-        {
-            try
-            {
-                Usuario cuentaExistente = new Usuario();
-                List<Usuario> listaUsuarios = await _context.Usuario.ToListAsync();
-
-                foreach (Usuario item in listaUsuarios)
-                {
-                    if (item.Email == email)
-                    {
-                        cuentaExistente.Id = item.Id;
-                        cuentaExistente.Email = item.Email;
-                        cuentaExistente.Password = item.Password;
-                        cuentaExistente.IdJurisdiccion = item.IdJurisdiccion.Value;
-                        cuentaExistente.IdRol = item.IdRol;
-                    }
-                }
-
-                if (cuentaExistente.Email != null)
-                    return cuentaExistente;
-            }
-            catch
-            {
-
-            }
-
-            return null;
-        }
-
-        private async Task<bool> TieneRolOperadorNacional(Usuario usuario)
-        {
-            try
-            {
-                Rol rolOperadorNacional = await _context.Rol
-                    .Where(rol => rol.Descripcion == "Operador Nacional").FirstOrDefaultAsync();
-
-                if (rolOperadorNacional.Id == usuario.IdRol)
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-
-            }
-
-            return false;
-        }
-
-        private async Task<List<string>> VerificarCredencialesUsuarioOperadorNacional(string emailOperadorNacional, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await GetUsuario(emailOperadorNacional);
-                if (usuarioSolicitante == null)
-                    errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailOperadorNacional));
-                else
-                {
-                    bool tieneRolOperadorNacional = await TieneRolOperadorNacional(usuarioSolicitante);
-                    if (!tieneRolOperadorNacional)
-                        errores.Add(string.Format("El usuario {0} no tiene rol operador nacional", emailOperadorNacional));
-                }
-            }
-            catch
-            {
-
-            }
-
-            return errores;
         }
     }
 }

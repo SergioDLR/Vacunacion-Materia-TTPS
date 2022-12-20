@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VacunacionApi.DTO;
+using VacunacionApi.Models;
 
 namespace VacunacionApi.Services
 {
-    public class VacunaService
+    public static class VacunaService
     {
-        public List<DosisDTO> ArmarListaDosisDTO(List<ReglaDTO> listaReglas, List<string> listaDescripcionesDosis)
+        public static Vacuna GetVacuna(VacunasContext _context, int idVacuna)
+        {
+            return _context.Vacuna
+                .Where(vac => vac.Id == idVacuna).FirstOrDefault();
+        }
+
+        public static List<DosisDTO> ArmarListaDosisDTO(List<ReglaDTO> listaReglas, List<string> listaDescripcionesDosis)
         {
             List<DosisDTO> listaDosis = new List<DosisDTO>();
 
