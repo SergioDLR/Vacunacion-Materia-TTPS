@@ -55,7 +55,7 @@ namespace VacunacionApi.Controllers
                 }
 
                 List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
-                                   
+
                 if (vacunasAplicadas.Count == 0)
                 {
                     errores.Add("No existen vacunados en la base de datos");
@@ -139,7 +139,7 @@ namespace VacunacionApi.Controllers
             try
             {
                 List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
-                
+
                 if (descripcionJurisdiccion != null)
                 {
                     Jurisdiccion juris = await GetJurisdiccionByDescripcion(descripcionJurisdiccion);
@@ -521,7 +521,7 @@ namespace VacunacionApi.Controllers
                     foreach (UsuarioRenaperDTO usuarioRenaper in model.Usuarios)
                     {
                         List<string> tipoVacuna = GenerarCsvService.GetTipoVacuna(tiposVacunas, vacunasArnn, vacunasVectorViral, vacunasSubunidadesProteicas, usuarioRenaper.vacunas);
-                        
+
                         if (tipoVacuna[1] == "No existe")
                         {
                             switch (tipoVacuna[0])
@@ -662,18 +662,18 @@ namespace VacunacionApi.Controllers
                         lote.Disponible = true;
                         _context.Lote.Add(lote);
                         await _context.SaveChangesAsync();
-                        lote.Lotes = l.Lote;
+                        lote.Id = l.Lote;
                         _context.Entry(lote).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
 
-                        Compra compra = new Compra(lote.Lotes, estadoCompra.Id, (l.JurisdiccionesADistribuir.Count*10000), codigoCompra, DateTime.Now);
+                        Compra compra = new Compra(lote.Id, estadoCompra.Id, (l.JurisdiccionesADistribuir.Count * 10000), codigoCompra, DateTime.Now);
                         _context.Compra.Add(compra);
                         await _context.SaveChangesAsync();
 
                         //Alta de distribuciones
                         foreach (JurisdiccionVacunaAplicadaDTO juris in l.JurisdiccionesADistribuir)
                         {
-                            Distribucion distribucion = new Distribucion(codigoCompra, juris.IdJurisdiccion, lote.Lotes, DateTime.Now, 10000, juris.CantidadAplicadas, 0);
+                            Distribucion distribucion = new Distribucion(codigoCompra, juris.IdJurisdiccion, lote.Id, DateTime.Now, 10000, juris.CantidadAplicadas, 0);
                             _context.Distribucion.Add(distribucion);
                             await _context.SaveChangesAsync();
                         }
@@ -731,13 +731,16 @@ namespace VacunacionApi.Controllers
 
                         if (vacunaAplicada != null)
                         {
+                            List<string> tiposVacunas = new List<string>() { "arnn", "vector_viral", "subunidades_proteicas" };
+                            Random random = new Random();                           
+
                             DataWareHouseService serviceDW = new DataWareHouseService();
                             Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(vacunaAplicada.IdJurisdiccionResidencia);
                             Lote lote = await GetLote(vacunaAplicada.IdLote);
                             VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
                             MarcaComercial mc = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
                             Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
-                            bool valido = await serviceDW.CargarDataWareHouse(_context2, vacunaAplicada, jurisdiccion.Descripcion, vacuna.Descripcion, mc.Descripcion, vacunaDesarrollada.TipoVacunaDesarrollada, lote.Id);
+                            bool valido = await serviceDW.CargarDataWareHouse(_context2, vacunaAplicada, jurisdiccion.Descripcion, vacuna.Descripcion, mc.Descripcion, tiposVacunas[random.Next(0, 2)], lote.Id);
 
                             if (valido)
                             {

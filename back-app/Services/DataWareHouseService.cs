@@ -15,7 +15,7 @@ namespace VacunacionApi.Services
             //D_TIEMPO
             DTiempo dTiempo = new DTiempo(vacunaAplicada.FechaVacunacion.Day, vacunaAplicada.FechaVacunacion.Month, vacunaAplicada.FechaVacunacion.Year);
             _context.DTiempo.Add(dTiempo);
-
+          
             //for(int i=1; i<=lineas.Count() - 1; i++)
             //{
             //    string[] lista = lineas[i].Split(",");
@@ -88,21 +88,19 @@ namespace VacunacionApi.Services
             //D_LUGAR
             DLugar dLugar = new DLugar(jurisdiccion, vacunaAplicada.Departamento);
             _context.DLugar.Add(dLugar);
-
+            
             //D_VACUNA
             DVacuna dVacuna = new DVacuna(vacuna, laboratorio, tipoVacunaDesarrollada, idLote);
             _context.DVacuna.Add(dVacuna);
-
+            
             //D_VACUNADO
             int anioActual = DateTime.Now.Year;
             int anio = vacunaAplicada.FechaHoraNacimiento.Year;
             int decadas = (anioActual - anio) / 10;
             int veintenas = (anioActual - anio) / 20;
-            string sexoBiologico = (vacunaAplicada.SexoBiologico.Equals("Masculino")) ? "M" : "F";
+            string sexoBiologico = vacunaAplicada.SexoBiologico;
             DVacunado dVacunado = new DVacunado(anio, decadas, veintenas, sexoBiologico, vacunaAplicada.Dni);
             _context.DVacunado.Add(dVacunado);
-
-            //OPERACIÓN DE GUARDADO
             await _context.SaveChangesAsync();
 
             //H_VACUNADOS
