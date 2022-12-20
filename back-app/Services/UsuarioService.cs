@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using VacunacionApi.DTO;
 using VacunacionApi.Models;
 
 namespace VacunacionApi.Services
@@ -32,6 +34,17 @@ namespace VacunacionApi.Services
         {
             return _context.Usuario
                 .Where(user => user.Email == email).FirstOrDefault();
+        }
+
+        public static bool TieneFormatoEmail(string email)
+        {
+            Regex regex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+            Match matchEmail = regex.Match(email);
+
+            if (matchEmail.Success)
+                return true;
+
+            return false;
         }
     }
 }

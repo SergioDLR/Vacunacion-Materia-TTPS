@@ -50,36 +50,15 @@ namespace VacunacionApi.Controllers
                 }
                 else
                 {
-                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(email, errores);
+                    errores = RolService.VerificarCredencialesUsuario(_context, email, errores, "Operador Nacional");
                 }
                 if (idLote == 0)
                     errores.Add(string.Format("El id de lote es incorrecto"));
-
 
                 if (errores.Count > 0)
                     response = new ResponseCargarVacunaDTO("Rechazada", true, errores, email);
                 else
                 {
-                    //Lote lote = await _context.Lote.Where(l => l.Id == idLote).FirstOrDefaultAsync();
-                    //lote.FechaVencimiento = DateTime.Now;
-                    //lote.Disponible = false;
-                    //_context.Entry(lote).State = EntityState.Modified;
-
-                    //Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Id).FirstOrDefaultAsync();
-
-                    //List<Distribucion> distribucionesLote = await _context.Distribucion
-                    //    .Where(d => d.IdLote == lote.Id).ToListAsync();
-
-                    //foreach (Distribucion distribucion in distribucionesLote)
-                    //{
-                    //    distribucion.Vencidas = distribucion.CantidadVacunas - distribucion.Aplicadas;
-                    //    _context.Entry(distribucion).State = EntityState.Modified;
-                    //}
-
-                    //compra.Vencidas = compra.CantidadVacunas - compra.Distribuidas;
-                    //_context.Entry(compra).State = EntityState.Modified;
-
-                    //await _context.SaveChangesAsync();
                     await new DataWareHouseService().CargarVencidasDataWareHouse(_context2, idLote);
                     response = new ResponseCargarVacunaDTO("Aceptada", false, errores, email);
                 }
@@ -169,31 +148,6 @@ namespace VacunacionApi.Controllers
         private bool LoteExists(int id)
         {
             return _context.Lote.Any(e => e.Id == id);
-        }
-
-        private async Task<List<string>> VerificarCredencialesUsuarioOperadorNacionalVacunador(string emailOperadorNacional, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await _context.Usuario.Where(u => u.Email == emailOperadorNacional).FirstOrDefaultAsync();
-                if (usuarioSolicitante == null)
-                    errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailOperadorNacional));
-                else
-                {
-                    Rol rol = await _context.Rol
-                        .Where(r => r.Id == usuarioSolicitante.IdRol
-                            && (r.Descripcion == "Operador Nacional" || r.Descripcion == "Vacunador"))
-                        .FirstOrDefaultAsync();
-                    if (rol == null)
-                        errores.Add(string.Format("El usuario {0} no tiene rol operador nacional o rol vacunador", emailOperadorNacional));
-                }
-            }
-            catch
-            {
-
-            }
-
-            return errores;
         }
     }
 }

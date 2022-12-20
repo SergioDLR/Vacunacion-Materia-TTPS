@@ -15,6 +15,12 @@ namespace VacunacionApi.Services
                 .Where(vac => vac.Id == idVacuna).FirstOrDefault();
         }
 
+        public static Vacuna GetVacunaByDescripcion(VacunasContext _context, string vacuna)
+        {
+            return _context.Vacuna
+                .Where(vac => vac.Descripcion == vacuna).FirstOrDefault();
+        }
+
         public static List<DosisDTO> ArmarListaDosisDTO(List<ReglaDTO> listaReglas, List<string> listaDescripcionesDosis)
         {
             List<DosisDTO> listaDosis = new List<DosisDTO>();

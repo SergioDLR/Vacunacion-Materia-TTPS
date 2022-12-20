@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using VacunacionApi.DTO;
 using VacunacionApi.Models;
+using VacunacionApi.Services;
 
 namespace VacunacionApi.Controllers
 {
@@ -38,7 +39,7 @@ namespace VacunacionApi.Controllers
                 bool existenciaErrores = true;
                 string transaccion = "";
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
 
                 if (errores.Count == 0)
                 {
@@ -84,11 +85,9 @@ namespace VacunacionApi.Controllers
                 bool existenciaErrores = true;
                 string transaccion = "";
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
                 
                 MarcaComercial marcaExistente = await _context.MarcaComercial.Where(mc => mc.Id == idMarcaComercial).FirstOrDefaultAsync();
-
-
 
                 if (marcaExistente == null)
                     errores.Add(String.Format("La marca comercial con identificador {0} no está registrada en el sistema", idMarcaComercial));
@@ -130,11 +129,11 @@ namespace VacunacionApi.Controllers
             {
                 ResponseMarcaComercialDTO responseMarcaComercialDTO = new ResponseMarcaComercialDTO();
                 List<string> errores = new List<string>();
-                Usuario usuarioExistente = await GetUsuario(model.EmailOperadorNacional);
+                Usuario usuarioExistente = UsuarioService.GetUsuario(_context, model.EmailOperadorNacional);
 
                 if (usuarioExistente != null)
                 {
-                    Rol rol = await GetRol(usuarioExistente.IdRol);
+                    Rol rol = RolService.GetRol(_context, usuarioExistente.IdRol);
                     
                     if (rol != null)
                     {
@@ -203,7 +202,7 @@ namespace VacunacionApi.Controllers
                 //lista vacia para los errores
                 List<string> errores = new List<string>();
 
-                errores = await VerificarCredencialesOperadorNacional(requestMarcaComercialDTO.EmailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, requestMarcaComercialDTO.EmailOperadorNacional, errores, "Operador Nacional");
 
                 MarcaComercial marcaExistente = await _context.MarcaComercial.Where(mc => mc.Descripcion == requestMarcaComercialDTO.DescripcionMarcaComercial).FirstOrDefaultAsync();
                 if (marcaExistente != null)
@@ -235,118 +234,6 @@ namespace VacunacionApi.Controllers
             {
                 return BadRequest(error.Message);
             }
-        }
-
-        //metodos privados-----------------------------------
-        private bool MarcaComercialExists(int id)
-        {
-            return _context.MarcaComercial.Any(e => e.Id == id);
-        }
-
-        private async Task<bool> TieneRolOperadorNacional(Usuario usuario)
-        {
-            try
-            {
-                Rol rolOperadorNacional = await _context.Rol
-                    .Where(rol => rol.Descripcion == "Operador Nacional").FirstOrDefaultAsync();
-
-                if (rolOperadorNacional.Id == usuario.IdRol)
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-
-            }
-            return false;
-        }
-
-        private async Task<Usuario> CuentaUsuarioExists(string email)
-        {
-            Usuario cuentaExistente = null;
-            try
-            {
-                cuentaExistente = await _context.Usuario
-                    .Where(user => user.Email == email).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return cuentaExistente;
-        }
-
-        private async Task<List<string>> VerificarCredencialesOperadorNacional(string emailOperadorNacional, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await CuentaUsuarioExists(emailOperadorNacional);
-                if (usuarioSolicitante != null)
-                {
-                    if (!await TieneRolOperadorNacional(usuarioSolicitante))
-                    {
-                        errores.Add(String.Format("El usuario {0} no tiene el rol de operador nacional", emailOperadorNacional));
-                    }
-                }
-                else
-                {
-                    errores.Add(string.Format("El usuario {0} no existe en el sistema", emailOperadorNacional));
-                }
-            }  
-            catch
-            {
-
-            }
-
-            return errores;
-        }
-
-        private async Task<Usuario> GetUsuario(string email)
-        {
-            try
-            {
-                Usuario cuentaExistente = new Usuario();
-                List<Usuario> listaUsuarios = await _context.Usuario.ToListAsync();
-
-                foreach (Usuario item in listaUsuarios)
-                {
-                    if (item.Email == email)
-                    {
-                        cuentaExistente.Id = item.Id;
-                        cuentaExistente.Email = item.Email;
-                        cuentaExistente.Password = item.Password;
-                        cuentaExistente.IdJurisdiccion = item.IdJurisdiccion.Value;
-                        cuentaExistente.IdRol = item.IdRol;
-                    }
-                }
-
-                if (cuentaExistente.Email != null)
-                    return cuentaExistente;
-            }
-            catch
-            {
-
-            }
-
-            return null;
-        }
-
-        private async Task<Rol> GetRol(int idRol)
-        {
-            Rol rolExistente = null;
-
-            try
-            {
-                rolExistente = await _context.Rol
-                    .Where(rol => rol.Id == idRol).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return rolExistente;
         }
     }
 }

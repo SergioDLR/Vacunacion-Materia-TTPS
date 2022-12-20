@@ -44,14 +44,14 @@ namespace VacunacionApi.Controllers
                 string transaccion = "Rechazada";
                 Rol rolUsuario = null;
 
-                Usuario usuarioExistente = await CuentaUsuarioExists(emailUsuario);
+                Usuario usuarioExistente = UsuarioService.CuentaUsuarioExists(_context, emailUsuario);
                 if (usuarioExistente == null)
                 {
                     errores.Add(String.Format("El usuario {0} no existe en el sistema", emailUsuario));
                 }
                 else
                 {
-                    rolUsuario = await GetRol(usuarioExistente.IdRol);
+                    rolUsuario = RolService.GetRol(_context, usuarioExistente.IdRol);
                 }
 
                 List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
@@ -76,7 +76,7 @@ namespace VacunacionApi.Controllers
 
                     if (descripcionJurisdiccion != null)
                     {
-                        Jurisdiccion juris = await GetJurisdiccionByDescripcion(descripcionJurisdiccion);
+                        Jurisdiccion juris = JurisdiccionService.GetJurisdiccionByDescripcion(_context, descripcionJurisdiccion);
                         vacunasAplicadas = vacunasAplicadas.Where(v => v.IdJurisdiccion == juris.Id).ToList();
                     }
 
@@ -86,12 +86,12 @@ namespace VacunacionApi.Controllers
                     {
                         foreach (VacunaAplicada item in vacunasAplicadas)
                         {
-                            Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(item.IdJurisdiccion);
-                            Lote lote = await GetLote(item.IdLote);
-                            VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                            Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
-                            MarcaComercial marcaComercial = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
-                            Dosis dosis = await GetDosis(item.IdDosis);
+                            Jurisdiccion jurisdiccion = JurisdiccionService.GetJurisdiccion(_context, item.IdJurisdiccion);
+                            Lote lote = LoteService.GetLote(_context, item.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = VacunaDesarrolladaService.GetVacunaDesarrollada(_context, lote.IdVacunaDesarrollada);
+                            Vacuna vacuna = VacunaService.GetVacuna(_context, vacunaDesarrollada.IdVacuna);
+                            MarcaComercial marcaComercial = MarcaComercialService.GetMarcaComercial(_context, vacunaDesarrollada.IdMarcaComercial);
+                            Dosis dosis = DosisService.GetDosis(_context, item.IdDosis);
 
                             if (jurisdiccion.Id == usuarioExistente.IdJurisdiccion)
                             {
@@ -104,12 +104,12 @@ namespace VacunacionApi.Controllers
                     {
                         foreach (VacunaAplicada item in vacunasAplicadas)
                         {
-                            Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(item.IdJurisdiccion);
-                            Lote lote = await GetLote(item.IdLote);
-                            VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                            Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
-                            MarcaComercial marcaComercial = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
-                            Dosis dosis = await GetDosis(item.IdDosis);
+                            Jurisdiccion jurisdiccion = JurisdiccionService.GetJurisdiccion(_context, item.IdJurisdiccion);
+                            Lote lote = LoteService.GetLote(_context, item.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = VacunaDesarrolladaService.GetVacunaDesarrollada(_context, lote.IdVacunaDesarrollada);
+                            Vacuna vacuna = VacunaService.GetVacuna(_context, vacunaDesarrollada.IdVacuna);
+                            MarcaComercial marcaComercial = MarcaComercialService.GetMarcaComercial(_context, vacunaDesarrollada.IdMarcaComercial);
+                            Dosis dosis = DosisService.GetDosis(_context, item.IdDosis);
 
                             VacunaAplicadaConsultaDTO vacunaAplicadaDTO = new VacunaAplicadaConsultaDTO(item.Dni, item.Apellido, item.Nombre, item.FechaVacunacion, jurisdiccion.Descripcion, item.IdLote, lote.IdVacunaDesarrollada, vacuna.Descripcion, marcaComercial.Descripcion, dosis.Descripcion);
                             vacunasAplicadasDTO.Add(vacunaAplicadaDTO);
@@ -142,7 +142,7 @@ namespace VacunacionApi.Controllers
 
                 if (descripcionJurisdiccion != null)
                 {
-                    Jurisdiccion juris = await GetJurisdiccionByDescripcion(descripcionJurisdiccion);
+                    Jurisdiccion juris = JurisdiccionService.GetJurisdiccionByDescripcion(_context, descripcionJurisdiccion);
                     vacunasAplicadas = vacunasAplicadas.Where(v => v.IdJurisdiccion == juris.Id).ToList();
                 }
 
@@ -169,7 +169,7 @@ namespace VacunacionApi.Controllers
                 bool existenciaErrores = true;
                 string transaccion = "Rechazada";
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
 
                 //obtengo la lista
                 List<VacunaAplicada> vacunasAplicadas = await _context.VacunaAplicada.ToListAsync();
@@ -185,7 +185,7 @@ namespace VacunacionApi.Controllers
                 }
 
                 //obtengo la jurisdiccion enviada por parametro
-                Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(idJurisdiccion);
+                Jurisdiccion jurisdiccion = JurisdiccionService.GetJurisdiccion(_context, idJurisdiccion);
 
                 if (jurisdiccion == null)
                 {
@@ -199,11 +199,11 @@ namespace VacunacionApi.Controllers
 
                     foreach (VacunaAplicada item in vacunasAplicadas)
                     {
-                        Lote lote = await GetLote(item.IdLote);
-                        VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                        Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
-                        MarcaComercial marcaComercial = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
-                        Dosis dosis = await GetDosis(item.IdDosis);
+                        Lote lote = LoteService.GetLote(_context, item.IdLote);
+                        VacunaDesarrollada vacunaDesarrollada = VacunaDesarrolladaService.GetVacunaDesarrollada(_context, lote.IdVacunaDesarrollada);
+                        Vacuna vacuna = VacunaService.GetVacuna(_context, vacunaDesarrollada.IdVacuna);
+                        MarcaComercial marcaComercial = MarcaComercialService.GetMarcaComercial(_context, vacunaDesarrollada.IdMarcaComercial);
+                        Dosis dosis = DosisService.GetDosis(_context, item.IdDosis);
 
                         if (idJurisdiccion == item.IdJurisdiccion)
                         {
@@ -260,7 +260,7 @@ namespace VacunacionApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!VacunaAplicadaExists(id))
+                if (!VacunaAplicadaService.VacunaAplicadaExists(_context, id))
                 {
                     return NotFound();
                 }
@@ -295,33 +295,33 @@ namespace VacunacionApi.Controllers
                 else if (distribucion.Aplicadas == distribucion.CantidadVacunas)
                     errores.Add(string.Format("El lote con identificador {0} no tiene vacunas disponibles", model.IdLote));
 
-                errores = await VerificarCredencialesUsuarioVacunador(model.EmailVacunador, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, model.EmailVacunador, errores, "Vacunador");
 
-                Vacuna vacunaExistente = await GetVacuna(model.IdVacuna);
+                Vacuna vacunaExistente = VacunaService.GetVacuna(_context, model.IdVacuna);
                 if (vacunaExistente == null)
                     errores.Add(string.Format("La vacuna con identificador {0} no está registrada en el sistema", model.IdVacuna));
 
-                Dosis dosisExistente = await GetDosis(model.IdDosis);
+                Dosis dosisExistente = DosisService.GetDosis(_context, model.IdDosis);
                 if (dosisExistente == null)
                     errores.Add(string.Format("La dosis con identificador {0} no está registrada en el sistema", model.IdDosis));
 
-                Regla reglaExistente = await GetRegla(model.IdRegla);
+                Regla reglaExistente = ReglaService.GetRegla(_context, model.IdRegla);
                 if (reglaExistente == null)
                     errores.Add(string.Format("La regla con identificador {0} no está registrada en el sistema", model.IdRegla));
 
-                Lote loteExistente = await GetLote(model.IdLote);
+                Lote loteExistente = LoteService.GetLote(_context, model.IdLote);
                 if (loteExistente == null)
                     errores.Add(string.Format("El lote con identificador {0} no está registrado en el sistema", model.IdLote));
 
-                VacunaDesarrollada vacunaDesarrolladaExistente = await GetVacunaDesarrollada(model.IdVacunaDesarrollada);
+                VacunaDesarrollada vacunaDesarrolladaExistente = VacunaDesarrolladaService.GetVacunaDesarrollada(_context, model.IdVacunaDesarrollada);
                 if (vacunaDesarrolladaExistente == null)
                     errores.Add(string.Format("La vacuna desarrollada con identificador {0} no está registrada en el sistema", model.IdVacunaDesarrollada));
 
-                Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(model.JurisdiccionResidencia);
+                Jurisdiccion jurisdiccionExistente = JurisdiccionService.GetJurisdiccionByDescripcion(_context, model.JurisdiccionResidencia);
                 if (jurisdiccionExistente == null)
                     errores.Add(string.Format("La jurisdicción {0} no está registrada en el sistema", model.JurisdiccionResidencia));
 
-                EntidadVacunaDosis entidadVacunaDosisExistente = await GetEntidadVacunaDosis(model.IdVacuna, model.IdDosis);
+                EntidadVacunaDosis entidadVacunaDosisExistente = EntidadVacunaDosisService.GetEntidadVacunaDosis(_context, model.IdVacuna, model.IdDosis);
                 if (entidadVacunaDosisExistente == null)
                     errores.Add(string.Format("La dosis con identificador {0} no está asociada a la vacuna con identificador {1}", model.IdDosis, model.IdVacuna));
 
@@ -337,7 +337,7 @@ namespace VacunacionApi.Controllers
                     vacunaAplicada.FechaHoraNacimiento = model.FechaHoraNacimiento;
                     vacunaAplicada.FechaVacunacion = DateTime.Now;
                     vacunaAplicada.IdDosis = model.IdDosis;
-                    vacunaAplicada.IdJurisdiccion = (await GetUsuario(model.EmailVacunador)).IdJurisdiccion.Value;
+                    vacunaAplicada.IdJurisdiccion = (UsuarioService.GetUsuario(_context, model.EmailVacunador)).IdJurisdiccion.Value;
                     vacunaAplicada.IdJurisdiccionResidencia = jurisdiccionExistente.Id;
                     vacunaAplicada.IdLote = model.IdLote;
                     vacunaAplicada.PersonalSalud = model.PersonalSalud;
@@ -369,337 +369,7 @@ namespace VacunacionApi.Controllers
                 return BadRequest(error.Message);
             }
         }
-
-        // GET: api/VacunasAplicadas/GenerarCsv?emailOperadorNacional=juan@gmail.com
-        //[HttpGet]
-        //[Route("GenerarCsv")]
-        //public async Task<ActionResult<ResponseCargarVacunaDTO>> GenerarCsv(string emailOperadorNacional = null)
-        //{
-        //    try
-        //    {
-        //        ResponseCargarVacunaDTO response;
-        //        List<string> errores = new List<string>();
-
-        //        if (emailOperadorNacional == null)
-        //        {
-        //            errores.Add(string.Format("El email operador nacional es obligatorio"));
-        //        }
-        //        else
-        //        {
-        //            errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(emailOperadorNacional, errores);
-        //        }
-
-        //        if (errores.Count > 0)
-        //            response = new ResponseCargarVacunaDTO("Rechazada", true, errores, emailOperadorNacional);
-        //        else
-        //        {
-        //            List<UsuarioRenaperDTO> usuarios = new List<UsuarioRenaperDTO>();
-        //            int id = 1;
-        //            string separador = ",";
-        //            List<string> tiposVacunas = new List<string>() { "arnn", "vector_viral", "subunidades_proteicas" };
-        //            List<string> vacunasArnn = new List<string>();
-        //            List<string> vacunasVectorViral = new List<string>();
-        //            List<string> vacunasSubunidadesProteicas = new List<string>();
-        //            DataWareHouseService servicio = new DataWareHouseService();
-
-        //            StringBuilder salidaDLugar = new StringBuilder();
-        //            StringBuilder salidaDTiempo = new StringBuilder();
-        //            StringBuilder salidaDVacuna = new StringBuilder();
-        //            StringBuilder salidaDVacunado = new StringBuilder();
-
-        //            string rutaDLugar = @"F:\D_lugar.csv";
-        //            string rutaDTiempo = @"F:\D_tiempo.csv";
-        //            string rutaDVacuna = @"F:\D_vacuna.csv";
-        //            string rutaDVacunado = @"F:\D_vacunado.csv";
-
-        //            string lineaDLugar = "id,provincia,departamentos";
-        //            string lineaDTiempo = "id,dia,mes,anio";
-        //            string lineaDVacuna = "id,Laboratorio,Tipo_vacuna_desarrollada,id_lote,Vacuna_desarrollada";
-        //            string lineaDVacunado = "id,anio,decadas,veintenas,sexo_biologico,dni";
-
-        //            salidaDLugar.AppendLine(string.Join(separador, lineaDLugar));
-        //            salidaDTiempo.AppendLine(string.Join(separador, lineaDTiempo));
-        //            salidaDVacuna.AppendLine(string.Join(separador, lineaDVacuna));
-        //            salidaDVacunado.AppendLine(string.Join(separador, lineaDVacunado));
-
-        //            usuarios = await GetUsuarios(30000000, 31000000);
-
-        //            foreach (UsuarioRenaperDTO usuarioRenaper in usuarios)
-        //            {
-        //                List<string> tipoVacuna = GenerarCsvService.GetTipoVacuna(tiposVacunas, vacunasArnn, vacunasVectorViral, vacunasSubunidadesProteicas, usuarioRenaper.vacunas);
-
-        //                if (tipoVacuna[1] == "No existe")
-        //                {
-        //                    switch (tipoVacuna[0])
-        //                    {
-        //                        case "arnn":
-        //                            vacunasArnn.Add(usuarioRenaper.vacunas);
-        //                            break;
-        //                        case "vector_viral":
-        //                            vacunasVectorViral.Add(usuarioRenaper.vacunas);
-        //                            break;
-        //                        case "subunidades_proteicas":
-        //                            vacunasSubunidadesProteicas.Add(usuarioRenaper.vacunas);
-        //                            break;
-        //                        default:
-        //                            break;
-        //                    }
-        //                }
-
-        //                string[] vacunas = usuarioRenaper.vacunas.Split("_");
-        //                int anioNac = Convert.ToDateTime(usuarioRenaper.fecha_hora_nacimiento).Year;
-        //                int anioHoy = DateTime.Now.Year;
-        //                int decadas = (anioHoy - anioNac) / 10;
-        //                int veintenas = (anioHoy - anioNac) / 20;
-
-        //                lineaDLugar = id + "," + usuarioRenaper.jurisdiccion + "," + usuarioRenaper.ciudad;
-        //                salidaDLugar.AppendLine(string.Join(separador, lineaDLugar));
-
-        //                lineaDTiempo = id + "," + Convert.ToDateTime(usuarioRenaper.fecha_vacunacion).Day + "," + Convert.ToDateTime(usuarioRenaper.fecha_vacunacion).Month + "," + Convert.ToDateTime(usuarioRenaper.fecha_vacunacion).Year;
-        //                salidaDTiempo.AppendLine(string.Join(separador, lineaDTiempo));
-
-        //                lineaDVacuna = id + "," + vacunas[1] + "," + tipoVacuna[0] + "," + usuarioRenaper.lotes + "," + vacunas[0];
-        //                salidaDVacuna.AppendLine(string.Join(separador, lineaDVacuna));
-
-        //                lineaDVacunado = id + "," + anioNac + "," + decadas + "," + veintenas + "," + usuarioRenaper.genero + "," + usuarioRenaper.DNI;
-        //                salidaDVacunado.AppendLine(string.Join(separador, lineaDVacunado));
-
-        //                id++;
-
-        //                //await servicio.CargarDataWareHouse2(_context2, usuarioRenaper, vacunas, tipoVacuna[0]);
-        //            }
-
-        //            GenerarCsvService.GenerarCsv(rutaDLugar, salidaDLugar);
-        //            GenerarCsvService.GenerarCsv(rutaDTiempo, salidaDTiempo);
-        //            GenerarCsvService.GenerarCsv(rutaDVacuna, salidaDVacuna);
-        //            GenerarCsvService.GenerarCsv(rutaDVacunado, salidaDVacunado);
-
-        //            response = new ResponseCargarVacunaDTO("Aceptada", true, errores, emailOperadorNacional);
-        //        }
-
-        //        return Ok(response);
-        //    }
-        //    catch (Exception error)
-        //    {
-        //        return BadRequest(error.Message);
-        //    }
-        //}
-
-        // POST: api/VacunasAplicadas/CargarNuevosVacunadosApi
-        [HttpPost]
-        [Route("CargarNuevosVacunadosApi")]
-        public async Task<ActionResult<ResponseCargarVacunaDTO>> CargarNuevosVacunadosApi(RequestNuevasVacunacionesApiDTO model)
-        {
-            try
-            {
-                ResponseCargarVacunaDTO response;
-                List<string> errores = new List<string>();
-
-                if (model.Email == null)
-                {
-                    errores.Add(string.Format("El email operador nacional es obligatorio"));
-                }
-                else
-                {
-                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(model.Email, errores);
-                }
-
-                if (errores.Count > 0)
-                    response = new ResponseCargarVacunaDTO("Rechazada", true, errores, model.Email);
-                else
-                {
-                    List<VacunaAplicada> aplicadas = new List<VacunaAplicada>();
-                    List<string> tiposVacunas = new List<string>() { "arnn", "vector_viral", "subunidades_proteicas" };
-                    List<string> vacunasArnn = new List<string>();
-                    List<string> vacunasVectorViral = new List<string>();
-                    List<string> vacunasSubunidadesProteicas = new List<string>();
-                    List<LoteJurisdiccionDTO> lotesJurisdicciones = new List<LoteJurisdiccionDTO>();
-                    bool existeLote = false;
-                    int totalAplicadas = 0;
-                    DataWareHouseService servicio = new DataWareHouseService();
-
-                    foreach (UsuarioRenaperDTO usuarioRenaper in model.Usuarios)
-                    {
-                        List<string> tipoVacuna = GenerarCsvService.GetTipoVacuna(tiposVacunas, vacunasArnn, vacunasVectorViral, vacunasSubunidadesProteicas, usuarioRenaper.vacunas);
-
-                        if (tipoVacuna[1] == "No existe")
-                        {
-                            switch (tipoVacuna[0])
-                            {
-                                case "arnn":
-                                    vacunasArnn.Add(usuarioRenaper.vacunas);
-                                    break;
-                                case "vector_viral":
-                                    vacunasVectorViral.Add(usuarioRenaper.vacunas);
-                                    break;
-                                case "subunidades_proteicas":
-                                    vacunasSubunidadesProteicas.Add(usuarioRenaper.vacunas);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-
-                        string[] vacunas = usuarioRenaper.vacunas.Split("_");
-                        int anioNac = Convert.ToDateTime(usuarioRenaper.fecha_hora_nacimiento).Year;
-                        int anioHoy = DateTime.Now.Year;
-                        int decadas = (anioHoy - anioNac) / 10;
-                        int veintenas = (anioHoy - anioNac) / 20;
-
-                        foreach (LoteJurisdiccionDTO loteJuris in lotesJurisdicciones)
-                        {
-                            if (loteJuris.Lote == usuarioRenaper.lotes)
-                            {
-                                existeLote = true;
-                                break;
-                            }
-                        }
-
-                        Jurisdiccion jurisdiccion = await GetJurisdiccion(usuarioRenaper.jurisdiccion);
-
-                        if (!existeLote)
-                        {
-                            LoteJurisdiccionDTO loteJuris = new LoteJurisdiccionDTO(usuarioRenaper.lotes, vacunas[0], vacunas[1], tipoVacuna[0]);
-                            JurisdiccionVacunaAplicadaDTO jurisdiccionDTO = new JurisdiccionVacunaAplicadaDTO(jurisdiccion.Id, jurisdiccion.Descripcion, 0);
-                            loteJuris.JurisdiccionesADistribuir.Add(jurisdiccionDTO);
-                            lotesJurisdicciones.Add(loteJuris);
-                        }
-
-                        foreach (LoteJurisdiccionDTO lote in lotesJurisdicciones)
-                        {
-                            foreach (JurisdiccionVacunaAplicadaDTO jva in lote.JurisdiccionesADistribuir)
-                            {
-                                if (jva.IdJurisdiccion == jurisdiccion.Id)
-                                {
-                                    jva.CantidadAplicadas++;
-                                    totalAplicadas++;
-                                    break;
-                                }
-                            }
-                        }
-
-                        VacunaAplicada vacunaAplicada = new VacunaAplicada();
-                        vacunaAplicada.Nombre = usuarioRenaper.nombre;
-                        vacunaAplicada.Apellido = usuarioRenaper.apellido;
-                        vacunaAplicada.Dni = usuarioRenaper.DNI;
-                        vacunaAplicada.Embarazada = usuarioRenaper.embarazada;
-                        vacunaAplicada.FechaHoraNacimiento = Convert.ToDateTime(usuarioRenaper.fecha_hora_nacimiento);
-                        vacunaAplicada.FechaVacunacion = DateTime.Now;
-                        vacunaAplicada.IdDosis = 0;
-                        vacunaAplicada.IdJurisdiccion = jurisdiccion.Id;
-                        vacunaAplicada.IdJurisdiccionResidencia = jurisdiccion.Id;
-                        vacunaAplicada.IdLote = usuarioRenaper.lotes;
-                        vacunaAplicada.PersonalSalud = usuarioRenaper.personal_salud;
-                        vacunaAplicada.SexoBiologico = usuarioRenaper.genero;
-                        vacunaAplicada.Departamento = usuarioRenaper.ciudad;
-                        vacunaAplicada.EnviadoDw = false;
-
-                        aplicadas.Add(vacunaAplicada);
-
-                        //_context.VacunaAplicada.Add(vacunaAplicada);
-                        //_context.Entry(distribucion).State = EntityState.Modified;
-                        //await _context.SaveChangesAsync();
-
-                        ////Agregación a tabla PendienteEnvioDW
-                        //PendienteEnvioDw pendienteEnvioDW = new PendienteEnvioDw();
-                        //pendienteEnvioDW.IdVacunaAplicada = vacunaAplicada.Id;
-                        //_context.PendienteEnvioDw.Add(pendienteEnvioDW);
-                        //await _context.SaveChangesAsync();
-
-                        //await servicio.CargarDataWareHouse2(_context2, usuarioRenaper, vacunas, tipoVacuna[0]);
-                        existeLote = false;
-                    }
-
-                    foreach (LoteJurisdiccionDTO l in lotesJurisdicciones)
-                    {
-                        EstadoCompra estadoCompra = await _context.EstadoCompra.Where(ec => ec.Descripcion == "Recibida").FirstOrDefaultAsync();
-
-                        //Alta marca comercial
-                        MarcaComercial mc = await GetMarcaComercialByDescripcion(l.Laboratorio);
-                        if (mc == null)
-                        {
-                            mc = new MarcaComercial();
-                            mc.Descripcion = l.Laboratorio;
-                            _context.MarcaComercial.Add(mc);
-                            await _context.SaveChangesAsync();
-                        }
-
-                        //Alta de vacuna
-                        Vacuna vacuna = await GetVacunaByDescripcion(l.VacunaDesarrollada);
-                        if (vacuna == null)
-                        {
-                            vacuna = new Vacuna();
-                            vacuna.Descripcion = l.VacunaDesarrollada;
-                            vacuna.IdPandemia = 0;
-                            vacuna.IdTipoVacuna = 0;
-                            vacuna.CantidadDosis = 0;
-                            _context.Vacuna.Add(vacuna);
-                            await _context.SaveChangesAsync();
-                        }
-
-                        //AltaVacuna desarrollada
-                        VacunaDesarrollada vacunaDesarrollada = new VacunaDesarrollada();
-                        vacunaDesarrollada.IdMarcaComercial = mc.Id;
-                        vacunaDesarrollada.IdVacuna = vacuna.Id;
-                        vacunaDesarrollada.DiasDemoraEntrega = 0;
-                        vacunaDesarrollada.PrecioVacuna = 2000;
-                        vacunaDesarrollada.TipoVacunaDesarrollada = l.TipoVacunaDesarrollada;
-                        vacunaDesarrollada.FechaDesde = DateTime.Now;
-                        vacunaDesarrollada.FechaHasta = null;
-                        _context.VacunaDesarrollada.Add(vacunaDesarrollada);
-                        await _context.SaveChangesAsync();
-
-                        //Alta de compra
-                        Random randomCodigoCompra = new Random();
-                        int codigoCompra = randomCodigoCompra.Next(1, 100000000);
-
-                        while (await GetCompraExistente(codigoCompra) != null)
-                        {
-                            codigoCompra = randomCodigoCompra.Next(1, 100000000);
-                        }
-
-                        Lote lote = new Lote(vacunaDesarrollada.Id, DateTime.Now.AddDays(365));
-                        lote.Disponible = true;
-                        _context.Lote.Add(lote);
-                        await _context.SaveChangesAsync();
-                        lote.Id = l.Lote;
-                        _context.Entry(lote).State = EntityState.Modified;
-                        await _context.SaveChangesAsync();
-
-                        Compra compra = new Compra(lote.Id, estadoCompra.Id, (l.JurisdiccionesADistribuir.Count * 10000), codigoCompra, DateTime.Now);
-                        _context.Compra.Add(compra);
-                        await _context.SaveChangesAsync();
-
-                        //Alta de distribuciones
-                        foreach (JurisdiccionVacunaAplicadaDTO juris in l.JurisdiccionesADistribuir)
-                        {
-                            Distribucion distribucion = new Distribucion(codigoCompra, juris.IdJurisdiccion, lote.Id, DateTime.Now, 10000, juris.CantidadAplicadas, 0);
-                            _context.Distribucion.Add(distribucion);
-                            await _context.SaveChangesAsync();
-                        }
-                    }
-
-                    foreach (VacunaAplicada vacAplic in aplicadas)
-                    {
-                        PendienteEnvioDw pendiente = new PendienteEnvioDw();
-                        _context.VacunaAplicada.Add(vacAplic);
-                        await _context.SaveChangesAsync();
-                        pendiente.IdVacunaAplicada = vacAplic.Id;
-                        _context.PendienteEnvioDw.Add(pendiente);
-                        await _context.SaveChangesAsync();
-                    }
-
-                    response = new ResponseCargarVacunaDTO("Aceptada", true, errores, model.Email);
-                }
-
-                return Ok(response);
-            }
-            catch (Exception error)
-            {
-                return BadRequest(error.Message);
-            }
-        }
-
+               
         // GET: api/VacunasAplicadas/Etl?emailOperadorNacional=juan@gmail.com
         [HttpGet]
         [Route("Etl")]
@@ -716,7 +386,7 @@ namespace VacunacionApi.Controllers
                 }
                 else
                 {
-                    errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(emailOperadorNacional, errores);
+                    errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
                 }
 
                 if (errores.Count > 0)
@@ -735,11 +405,11 @@ namespace VacunacionApi.Controllers
                             Random random = new Random();                           
 
                             DataWareHouseService serviceDW = new DataWareHouseService();
-                            Jurisdiccion jurisdiccion = await GetDescripcionJurisdiccion(vacunaAplicada.IdJurisdiccionResidencia);
-                            Lote lote = await GetLote(vacunaAplicada.IdLote);
-                            VacunaDesarrollada vacunaDesarrollada = await GetVacunaDesarrollada(lote.IdVacunaDesarrollada);
-                            MarcaComercial mc = await GetMarcaComercial(vacunaDesarrollada.IdMarcaComercial);
-                            Vacuna vacuna = await GetVacuna(vacunaDesarrollada.IdVacuna);
+                            Jurisdiccion jurisdiccion = JurisdiccionService.GetJurisdiccion(_context, vacunaAplicada.IdJurisdiccionResidencia);
+                            Lote lote = LoteService.GetLote(_context, vacunaAplicada.IdLote);
+                            VacunaDesarrollada vacunaDesarrollada = VacunaDesarrolladaService.GetVacunaDesarrollada(_context, lote.IdVacunaDesarrollada);
+                            MarcaComercial mc = MarcaComercialService.GetMarcaComercial(_context, vacunaDesarrollada.IdMarcaComercial);
+                            Vacuna vacuna = VacunaService.GetVacuna(_context, vacunaDesarrollada.IdVacuna);
                             bool valido = await serviceDW.CargarDataWareHouse(_context2, vacunaAplicada, jurisdiccion.Descripcion, vacuna.Descripcion, mc.Descripcion, tiposVacunas[random.Next(0, 2)], lote.Id);
 
                             if (valido)
@@ -773,12 +443,12 @@ namespace VacunacionApi.Controllers
                 ResponseVacunaAplicadaDTO responseVacunaAplicadaDTO = null;
                 List<string> errores = new List<string>();
 
-                errores = await VerificarCredencialesUsuarioVacunador(model.EmailVacunador, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, model.EmailVacunador, errores, "Vacunador");
 
                 if (await GetUsuarioRenaper(model.Dni) == null)
                     errores.Add(string.Format("El dni ingresado {0} no está registrado en Renaper", model.Dni));
 
-                Vacuna vacunaExistente = await GetVacuna(model.IdVacuna);
+                Vacuna vacunaExistente = VacunaService.GetVacuna(_context, model.IdVacuna);
                 if (vacunaExistente == null)
                     errores.Add(string.Format("La vacuna con identificador {0} no está registrada en el sistema", model.IdVacuna));
                 else
@@ -788,15 +458,15 @@ namespace VacunacionApi.Controllers
                         errores.Add(string.Format("No hay vacuna desarrollada en stock para la vacuna {0}", vacunaExistente.Descripcion));
                 }
 
-                Dosis dosisExistente = await GetDosis(model.IdDosis);
+                Dosis dosisExistente = DosisService.GetDosis(_context, model.IdDosis);
                 if (dosisExistente == null)
                     errores.Add(string.Format("La dosis con identificador {0} no está registrada en el sistema", model.IdDosis));
 
-                Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(model.JurisdiccionResidencia);
+                Jurisdiccion jurisdiccionExistente = JurisdiccionService.GetJurisdiccionByDescripcion(_context, model.JurisdiccionResidencia);
                 if (jurisdiccionExistente == null)
                     errores.Add(string.Format("La jurisdicción {0} no está registrada en el sistema", model.JurisdiccionResidencia));
 
-                EntidadVacunaDosis entidadVacunaDosisExistente = await GetEntidadVacunaDosis(model.IdVacuna, model.IdDosis);
+                EntidadVacunaDosis entidadVacunaDosisExistente = EntidadVacunaDosisService.GetEntidadVacunaDosis(_context, model.IdVacuna, model.IdDosis);
                 if (entidadVacunaDosisExistente == null)
                     errores.Add(string.Format("La dosis con identificador {0} no está asociada a la vacuna con identificador {1}", model.IdDosis, model.IdVacuna));
 
@@ -1035,23 +705,6 @@ namespace VacunacionApi.Controllers
 
 
         //Métodos privados de ayuda
-        private async Task<Compra> GetCompraExistente(int codigoCompra)
-        {
-            Compra compraExistente = null;
-
-            try
-            {
-                compraExistente = await _context.Compra
-                    .Where(c => c.Codigo == codigoCompra).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return compraExistente;
-        }
-
         private async Task<UsuarioRenaperDTO> GetUsuarioRenaper(int dni)
         {
             UsuarioRenaperDTO usuario = null;
@@ -1082,404 +735,7 @@ namespace VacunacionApi.Controllers
 
             return usuario;
         }
-
-        private async Task<List<UsuarioRenaperDTO>> GetUsuarios(int desde, int hasta)
-        {
-            List<UsuarioRenaperDTO> usuarios = new List<UsuarioRenaperDTO>();
-            UsuarioRenaperDTO usuario = null;
-
-            try
-            {
-                using (var httpClient = new HttpClient())
-                {
-                    for (int dni = desde; dni < hasta; dni++)
-                    {
-                        var respuesta = await httpClient.GetAsync("https://api.claudioraverta.com/personas/" + dni);
-
-                        if (respuesta.StatusCode == System.Net.HttpStatusCode.OK)
-                        {
-                            var respuestaString = await respuesta.Content.ReadAsStringAsync();
-                            usuario = JsonSerializer.Deserialize<UsuarioRenaperDTO>(respuestaString,
-                                new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
-
-                            if (usuario != null)
-                                usuarios.Add(usuario);
-                        }
-                    }
-                }
-            }
-            catch
-            {
-
-            }
-
-            return usuarios;
-        }
-
-        private bool VacunaAplicadaExists(int id)
-        {
-            return _context.VacunaAplicada.Any(e => e.Id == id);
-        }
-
-        private async Task<bool> TieneRolOperadorNacional(Usuario usuario)
-        {
-            try
-            {
-                Rol rolOperadorNacional = await _context.Rol
-                    .Where(rol => rol.Descripcion == "Operador Nacional").FirstOrDefaultAsync();
-
-                if (rolOperadorNacional.Id == usuario.IdRol)
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-
-            }
-            return false;
-        }
-
-        private async Task<Usuario> CuentaUsuarioExists(string email)
-        {
-            Usuario cuentaExistente = null;
-            try
-            {
-                cuentaExistente = await _context.Usuario
-                    .Where(user => user.Email == email).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return cuentaExistente;
-        }
-
-        private async Task<List<string>> VerificarCredencialesOperadorNacional(string emailOperadorNacional, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await CuentaUsuarioExists(emailOperadorNacional);
-                if (usuarioSolicitante != null)
-                {
-                    if (!await TieneRolOperadorNacional(usuarioSolicitante))
-                    {
-                        errores.Add(String.Format("El usuario {0} no tiene el rol de operador nacional", emailOperadorNacional));
-                    }
-                }
-                else
-                {
-                    errores.Add(string.Format("El usuario {0} no existe en el sistema", emailOperadorNacional));
-                }
-            }
-            catch
-            {
-
-            }
-
-            return errores;
-        }
-
-        private async Task<Usuario> GetUsuario(string email)
-        {
-            try
-            {
-                Usuario cuentaExistente = new Usuario();
-                List<Usuario> listaUsuarios = await _context.Usuario.ToListAsync();
-
-                foreach (Usuario item in listaUsuarios)
-                {
-                    if (item.Email == email)
-                    {
-                        cuentaExistente.Id = item.Id;
-                        cuentaExistente.Email = item.Email;
-                        cuentaExistente.Password = item.Password;
-                        cuentaExistente.IdJurisdiccion = item.IdJurisdiccion.Value;
-                        cuentaExistente.IdRol = item.IdRol;
-                    }
-                }
-
-                if (cuentaExistente.Email != null)
-                    return cuentaExistente;
-            }
-            catch
-            {
-
-            }
-
-            return null;
-        }
-
-        private async Task<Rol> GetRol(int idRol)
-        {
-            Rol rolExistente = null;
-
-            try
-            {
-                rolExistente = await _context.Rol
-                    .Where(rol => rol.Id == idRol).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return rolExistente;
-        }
-
-        private async Task<Jurisdiccion> GetDescripcionJurisdiccion(int idJurisdiccion)
-        {
-            Jurisdiccion jurisdiccionExistente = null;
-
-            try
-            {
-                jurisdiccionExistente = await _context.Jurisdiccion.Where(jurisdiccion => jurisdiccion.Id == idJurisdiccion).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return jurisdiccionExistente;
-        }
-
-        private async Task<Jurisdiccion> GetJurisdiccionByDescripcion(string descripcionJurisdiccion)
-        {
-            Jurisdiccion jurisdiccionExistente = null;
-
-            try
-            {
-                jurisdiccionExistente = await _context.Jurisdiccion.Where(jurisdiccion => jurisdiccion.Descripcion == descripcionJurisdiccion).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return jurisdiccionExistente;
-        }
-
-        private async Task<Dosis> getDosis(int idDosis)
-        {
-            Dosis dosisExistente = null;
-
-            try
-            {
-                dosisExistente = await _context.Dosis.Where(d => d.Id == idDosis).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return dosisExistente;
-        }
-
-        private async Task<MarcaComercial> GetMarcaComercial(int idMarcaComercial)
-        {
-            MarcaComercial marcaComercialExistente = null;
-
-            try
-            {
-                marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Id == idMarcaComercial).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return marcaComercialExistente;
-        }
-
-        private async Task<MarcaComercial> GetMarcaComercialByDescripcion(string marcaComercial)
-        {
-            MarcaComercial marcaComercialExistente = null;
-
-            try
-            {
-                marcaComercialExistente = await _context.MarcaComercial.Where(mc => mc.Descripcion == marcaComercial).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return marcaComercialExistente;
-        }
-
-        private async Task<bool> TieneRolVacunador(Usuario usuario)
-        {
-            try
-            {
-                Rol rolVacunador = await _context.Rol
-                    .Where(rol => rol.Descripcion == "Vacunador").FirstOrDefaultAsync();
-
-                if (rolVacunador.Id == usuario.IdRol)
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-
-            }
-
-            return false;
-        }
-
-        private async Task<List<string>> VerificarCredencialesUsuarioVacunador(string emailVacunador, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await GetUsuario(emailVacunador);
-                if (usuarioSolicitante == null)
-                    errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailVacunador));
-                else
-                {
-                    bool tieneRolVacunador = await TieneRolVacunador(usuarioSolicitante);
-                    if (!tieneRolVacunador)
-                        errores.Add(string.Format("El usuario {0} no tiene rol vacunador", emailVacunador));
-                }
-            }
-            catch
-            {
-
-            }
-
-            return errores;
-        }
-
-        private async Task<EntidadVacunaDosis> GetEntidadVacunaDosis(int idVacuna, int idDosis)
-        {
-            EntidadVacunaDosis entidadVacunaDosisExistente = null;
-
-            try
-            {
-                entidadVacunaDosisExistente = await _context.EntidadVacunaDosis
-                    .Where(evd => evd.IdVacuna == idVacuna && evd.IdDosis == idDosis).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return entidadVacunaDosisExistente;
-        }
-
-        private async Task<Jurisdiccion> GetJurisdiccion(string jurisdiccion)
-        {
-            Jurisdiccion jurisdiccionExistente = null;
-
-            try
-            {
-                jurisdiccionExistente = await _context.Jurisdiccion
-                    .Where(j => j.Descripcion == jurisdiccion).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return jurisdiccionExistente;
-        }
-
-        private async Task<Lote> GetLote(int idLote)
-        {
-            Lote loteExistente = null;
-
-            try
-            {
-                loteExistente = await _context.Lote
-                    .Where(l => l.Id == idLote).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return loteExistente;
-        }
-
-        private async Task<Vacuna> GetVacuna(int idVacuna)
-        {
-            Vacuna vacunaExistente = null;
-
-            try
-            {
-                vacunaExistente = await _context.Vacuna
-                    .Where(vac => vac.Id == idVacuna).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return vacunaExistente;
-        }
-
-        private async Task<Vacuna> GetVacunaByDescripcion(string vacuna)
-        {
-            Vacuna vacunaExistente = null;
-
-            try
-            {
-                vacunaExistente = await _context.Vacuna
-                    .Where(vac => vac.Descripcion == vacuna).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return vacunaExistente;
-        }
-
-        private async Task<VacunaDesarrollada> GetVacunaDesarrollada(int idVacunaDesarrollada)
-        {
-            VacunaDesarrollada vacunaDesarrolladaExistente = null;
-
-            try
-            {
-                vacunaDesarrolladaExistente = await _context.VacunaDesarrollada
-                    .Where(vac => vac.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return vacunaDesarrolladaExistente;
-        }
-
-        private async Task<Dosis> GetDosis(int idDosis)
-        {
-            Dosis dosisExistente = null;
-
-            try
-            {
-                dosisExistente = await _context.Dosis
-                    .Where(d => d.Id == idDosis).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return dosisExistente;
-        }
-
-        private async Task<Regla> GetRegla(int idRegla)
-        {
-            Regla reglaExistente = null;
-
-            try
-            {
-                reglaExistente = await _context.Regla
-                    .Where(r => r.Id == idRegla).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return reglaExistente;
-        }
-
+              
         private async Task<VacunaDesarrolladaVacunacionDTO> GetVacunaDesarrolladaAplicacion(Vacuna vacuna, string emailVacunador)
         {
             VacunaDesarrolladaVacunacionDTO vacunaDesarrolladaDTO = null;
@@ -2968,31 +2224,6 @@ namespace VacunacionApi.Controllers
             }
 
             return listaResultado;
-        }
-
-        private async Task<List<string>> VerificarCredencialesUsuarioOperadorNacionalVacunador(string emailOperadorNacional, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await _context.Usuario.Where(u => u.Email == emailOperadorNacional).FirstOrDefaultAsync();
-                if (usuarioSolicitante == null)
-                    errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailOperadorNacional));
-                else
-                {
-                    Rol rol = await _context.Rol
-                        .Where(r => r.Id == usuarioSolicitante.IdRol
-                            && (r.Descripcion == "Operador Nacional" || r.Descripcion == "Vacunador"))
-                        .FirstOrDefaultAsync();
-                    if (rol == null)
-                        errores.Add(string.Format("El usuario {0} no tiene rol operador nacional o rol vacunador", emailOperadorNacional));
-                }
-            }
-            catch
-            {
-
-            }
-
-            return errores;
         }
     }
 }

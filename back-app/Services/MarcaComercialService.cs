@@ -13,5 +13,16 @@ namespace VacunacionApi.Services
             return _context.MarcaComercial
                 .Where(mc => mc.Id == idMarcaComercial).FirstOrDefault();
         }
+
+        public static MarcaComercial GetMarcaComercialByDescripcion(VacunasContext _context, string descripcionMarcaComercial)
+        {
+            return _context.MarcaComercial
+                .Where(mc => mc.Descripcion == descripcionMarcaComercial).FirstOrDefault();
+        }
+
+        public static bool MarcaComercialExists(VacunasContext _context, int id)
+        {
+            return _context.MarcaComercial.Any(e => e.Id == id);
+        }
     }
 }

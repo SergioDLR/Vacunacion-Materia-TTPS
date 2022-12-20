@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.EntityFrameworkCore;
 using VacunacionApi.DTO;
 using VacunacionApi.Models;
+using VacunacionApi.Services;
 
 namespace VacunacionApi.Controllers
 {
@@ -36,7 +37,7 @@ namespace VacunacionApi.Controllers
                 bool existenciaErrores = true;
                 string transaccion = "";
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
 
                 if(errores.Count == 0)
                 {
@@ -86,7 +87,7 @@ namespace VacunacionApi.Controllers
                 bool existenciaErrores = true;
                 string transaccion = "";
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
 
                 if (errores.Count == 0)
                 {
@@ -139,7 +140,7 @@ namespace VacunacionApi.Controllers
                 bool existenciaErrores = true;
                 string transaccion = "";
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
 
                 if (errores.Count == 0)
                 {
@@ -190,7 +191,7 @@ namespace VacunacionApi.Controllers
                 //lista vacia para los errores
                 List<string> errores = new List<string>();
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
 
                 VacunaDesarrollada vacunaDesarrolladaExistente = await _context.VacunaDesarrollada.Where(vd => vd.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
                 if (vacunaDesarrolladaExistente == null)
@@ -240,7 +241,7 @@ namespace VacunacionApi.Controllers
                 //lista vacia para los errores
                 List<string> errores = new List<string>();
 
-                errores = await VerificarCredencialesOperadorNacional(model.EmailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, model.EmailOperadorNacional, errores, "Operador Nacional");
 
                 //verifico si existe la vacuna en la lista
                 Vacuna vacunaExistente = await _context.Vacuna.Where(vd => vd.Id == model.IdVacuna).FirstOrDefaultAsync();
@@ -323,7 +324,7 @@ namespace VacunacionApi.Controllers
                 //lista vacia para los errores
                 List<string> errores = new List<string>();
 
-                errores = await VerificarCredencialesOperadorNacional(emailOperadorNacional, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
                 VacunaDesarrollada vacunaDesarrollada = await _context.VacunaDesarrollada.Where(vd => vd.Id == idVacunaDesarrollada).FirstOrDefaultAsync();
                 
                 if (vacunaDesarrollada == null)
@@ -364,71 +365,6 @@ namespace VacunacionApi.Controllers
             {
                 return BadRequest(ex.Message);  
             }
-        }
-
-        //metodos privados ------------------------
-        private bool VacunaDesarrolladaExists(int id)
-        {
-            return _context.VacunaDesarrollada.Any(e => e.Id == id);
-        }
-
-        private async Task<bool> TieneRolOperadorNacional(Usuario usuario)
-        {
-            try
-            {
-                Rol rolOperadorNacional = await _context.Rol
-                    .Where(rol => rol.Descripcion == "Operador Nacional").FirstOrDefaultAsync();
-
-                if (rolOperadorNacional.Id == usuario.IdRol)
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-
-            }
-            return false;
-        }
-
-        private async Task<Usuario> CuentaUsuarioExists(string email)
-        {
-            Usuario cuentaExistente = null;
-            try
-            {
-                cuentaExistente = await _context.Usuario
-                    .Where(user => user.Email == email).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-            return cuentaExistente;
-        }
-
-        private async Task<List<string>> VerificarCredencialesOperadorNacional(string emailOperadorNacional, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await CuentaUsuarioExists(emailOperadorNacional);
-                if (usuarioSolicitante != null)
-                {
-                    if (!await TieneRolOperadorNacional(usuarioSolicitante))
-                    {
-                        errores.Add(String.Format("El usuario {0} no tiene el rol de operador nacional", emailOperadorNacional));
-                    }
-                }
-                else
-                {
-                    errores.Add(string.Format("El usuario {0} no existe en el sistema", emailOperadorNacional));
-                }
-            }
-            catch
-            {
-
-            }
-
-            return errores;
         }
     }
 }

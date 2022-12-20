@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VacunacionApi.DTO;
 using VacunacionApi.Models;
+using VacunacionApi.Services;
 
 namespace VacunacionApi.Controllers
 {
@@ -35,12 +36,12 @@ namespace VacunacionApi.Controllers
 
                 if (idJurisdiccion != 0)
                 {
-                    List<List<string>> listaVerificacionJurisdiccion = await VerificarJurisdiccion(errores, idJurisdiccion);
+                    List<List<string>> listaVerificacionJurisdiccion = JurisdiccionService.VerificarJurisdiccion(_context, errores, idJurisdiccion);
                     errores = listaVerificacionJurisdiccion[0];
                 }
                 if (idRol != 0)
                 {
-                    List<List<string>> listaVerificacionRol = await VerificarRol(errores, idRol);
+                    List<List<string>> listaVerificacionRol = RolService.VerificarRol(_context, errores, idRol);
                     errores = listaVerificacionRol[0];
                 }
 
@@ -50,7 +51,7 @@ namespace VacunacionApi.Controllers
                 }
                 else
                 {
-                    errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
+                    errores = RolService.VerificarCredencialesUsuario(_context, emailAdministrador, errores, "Administrador");
                 }
 
                 if (errores.Count > 0)
@@ -78,8 +79,8 @@ namespace VacunacionApi.Controllers
 
                     foreach (Usuario usuario in usuarios)
                     {
-                        Jurisdiccion jurisdiccion = await GetJurisdiccion(usuario.IdJurisdiccion.Value);
-                        Rol rol = await GetRol(usuario.IdRol);
+                        Jurisdiccion jurisdiccion = JurisdiccionService.GetJurisdiccion(_context, usuario.IdJurisdiccion.Value);
+                        Rol rol = RolService.GetRol(_context, usuario.IdRol);
                         UsuarioDTO usuarioDTO = new UsuarioDTO(usuario.Id, usuario.Email, usuario.Password, 
                             usuario.IdJurisdiccion.Value, usuario.IdRol, jurisdiccion.Descripcion, rol.Descripcion);
                         listaUsuariosDTO.Add(usuarioDTO);
@@ -111,7 +112,7 @@ namespace VacunacionApi.Controllers
                     errores.Add("Las credenciales de usuario son incorrectas");
                 else
                 {
-                    if(TieneFormatoEmail(email))
+                    if(UsuarioService.TieneFormatoEmail(email))
                     {
                         usuario = await _context.Usuario.Where(usu => usu.Email == email && usu.Password == password).FirstOrDefaultAsync();
                         if (usuario == null)
@@ -125,8 +126,8 @@ namespace VacunacionApi.Controllers
                     responseLoginDTO = new ResponseLoginDTO("Rechazada", true, errores, new UsuarioDTO(0, email, password, 0, 0, null, null));
                 else
                 {
-                    Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(usuario.IdJurisdiccion.Value);
-                    Rol rolExistente = await GetRol(usuario.IdRol);
+                    Jurisdiccion jurisdiccionExistente = JurisdiccionService.GetJurisdiccion(_context, usuario.IdJurisdiccion.Value);
+                    Rol rolExistente = RolService.GetRol(_context, usuario.IdRol);
 
                     responseLoginDTO = new ResponseLoginDTO("Aceptada", false, errores, new UsuarioDTO(usuario.Id, usuario.Email,
                         usuario.Password, usuario.IdJurisdiccion.Value, usuario.IdRol, jurisdiccionExistente.Descripcion, rolExistente.Descripcion));
@@ -161,10 +162,10 @@ namespace VacunacionApi.Controllers
                 }
                 else
                 {
-                    if (!TieneFormatoEmail(emailAdministrador))
+                    if (!UsuarioService.TieneFormatoEmail(emailAdministrador))
                         errores.Add(string.Format("El email {0} no tiene un formato válido", emailAdministrador));
                     else
-                        errores = await VerificarCredencialesUsuarioAdministrador(emailAdministrador, errores);
+                        errores = RolService.VerificarCredencialesUsuario(_context, emailAdministrador, errores, "Administrador");
 
                     if (idUsuario != 0)
                         usuarioExistente = await _context.Usuario.Where(usuario => usuario.Id == idUsuario).FirstOrDefaultAsync();
@@ -173,10 +174,10 @@ namespace VacunacionApi.Controllers
                     {
                         if (emailUsuario != null)
                         {
-                            if (!TieneFormatoEmail(emailUsuario))
+                            if (!UsuarioService.TieneFormatoEmail(emailUsuario))
                                 errores.Add(string.Format("El email {0} no tiene un formato válido", emailUsuario));
                             else
-                                usuarioExistente = await GetUsuario(emailUsuario);
+                                usuarioExistente = UsuarioService.GetUsuario(_context, emailUsuario);
                         }
                     }   
                 }
@@ -191,8 +192,8 @@ namespace VacunacionApi.Controllers
                         new Usuario(0, emailUsuario, null, 0, 0), null, null);
                 else
                 {
-                    Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(usuarioExistente.IdJurisdiccion.Value);
-                    Rol rolExistente = await GetRol(usuarioExistente.IdRol);
+                    Jurisdiccion jurisdiccionExistente = JurisdiccionService.GetJurisdiccion(_context, usuarioExistente.IdJurisdiccion.Value);
+                    Rol rolExistente = RolService.GetRol(_context, usuarioExistente.IdRol);
                     
                     responseUsuarioDTO = LoadResponseUsuarioDTO("Aceptada", false, errores, emailAdministrador, usuarioExistente, jurisdiccionExistente.Descripcion, rolExistente.Descripcion);
                 }
@@ -220,12 +221,12 @@ namespace VacunacionApi.Controllers
                 //Verificación de nuevos datos
                 if (model.IdJurisdiccionNuevo != 0)
                 {
-                    listaVerificacionJurisdiccion = await VerificarJurisdiccion(errores, model.IdJurisdiccionNuevo);
+                    listaVerificacionJurisdiccion = JurisdiccionService.VerificarJurisdiccion(_context, errores, model.IdJurisdiccionNuevo);
                     errores = listaVerificacionJurisdiccion[0];
                 }
                 if (model.IdRolNuevo != 0)
                 {
-                    listaVerificacionRol = await VerificarRol(errores, model.IdRolNuevo);
+                    listaVerificacionRol = RolService.VerificarRol(_context, errores, model.IdRolNuevo);
                     errores = listaVerificacionRol[0];
                 }
                 if (errores.Count == 0 && model.IdJurisdiccionNuevo != 0 && model.IdRolNuevo != 0)
@@ -255,26 +256,26 @@ namespace VacunacionApi.Controllers
                     }
                 }
 
-                Usuario usuarioExistente = await GetUsuario(model.Email);
+                Usuario usuarioExistente = UsuarioService.GetUsuario(_context, model.Email);
                 if (usuarioExistente == null)
                     errores.Add(string.Format("El email {0} no está registrado en el sistema", model.Email));
                 else if (errores.Count == 0)
                 {
                     if (model.IdJurisdiccionNuevo != 0 && model.IdRolNuevo == 0)
                     {
-                        Rol rolUsuario = await GetRol(usuarioExistente.IdRol);
+                        Rol rolUsuario = RolService.GetRol(_context, usuarioExistente.IdRol);
                         if (rolUsuario.Descripcion == "Operador Nacional" && listaVerificacionJurisdiccion[1][0] != "Nación")
                             errores.Add(string.Format("El rol {0} no puede ser asociado a la jurisdicción {1}", rolUsuario.Descripcion, listaVerificacionJurisdiccion[1][0]));
                     }
                     if (model.IdRolNuevo != 0 && model.IdJurisdiccionNuevo == 0)
                     {
-                        Jurisdiccion jurisUsuario = await GetJurisdiccion(usuarioExistente.IdJurisdiccion.Value);
+                        Jurisdiccion jurisUsuario = JurisdiccionService.GetJurisdiccion(_context, usuarioExistente.IdJurisdiccion.Value);
                         if (jurisUsuario.Descripcion == "Nación" && listaVerificacionRol[1][0] != "Operador Nacional")
                             errores.Add(string.Format("El rol {0} no puede ser asociado a la jurisdicción {1}", listaVerificacionRol[1][0], jurisUsuario.Descripcion));
                     }
                 }
 
-                errores = await VerificarCredencialesUsuarioAdministrador(model.EmailAdministrador, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, model.EmailAdministrador, errores, "Administrador");
 
                 if (model.Email == model.EmailAdministrador)
                     errores.Add(string.Format("El usuario {0} no tiene permisos para editar sus propias credenciales", model.EmailAdministrador));
@@ -296,8 +297,8 @@ namespace VacunacionApi.Controllers
                     _context.Entry(usuarioExistente).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
 
-                    Jurisdiccion juris = await GetJurisdiccion(usuarioExistente.IdJurisdiccion.Value);
-                    Rol rol = await GetRol(usuarioExistente.IdRol);
+                    Jurisdiccion juris = JurisdiccionService.GetJurisdiccion(_context, usuarioExistente.IdJurisdiccion.Value);
+                    Rol rol = RolService.GetRol(_context, usuarioExistente.IdRol);
 
                     responseUsuarioDTO = LoadResponseUsuarioDTO("Aceptada", false, errores, model.EmailAdministrador,
                         usuarioExistente, juris.Descripcion, rol.Descripcion);
@@ -321,15 +322,15 @@ namespace VacunacionApi.Controllers
                 ResponseUsuarioDTO responseUsuarioDTO = null;
                 List<string> errores = new List<string>();
                
-                List<List<string>> listaVerificacionJurisdiccion = await VerificarJurisdiccion(errores, model.IdJurisdiccion);
+                List<List<string>> listaVerificacionJurisdiccion = JurisdiccionService.VerificarJurisdiccion(_context, errores, model.IdJurisdiccion);
                 errores = listaVerificacionJurisdiccion[0];
-                List<List<string>> listaVerificacionRol = await VerificarRol(errores, model.IdRol);
+                List<List<string>> listaVerificacionRol = RolService.VerificarRol(_context, errores, model.IdRol);
                 errores = listaVerificacionRol[0];
 
                 if (errores.Count == 0)
                 {
-                    Jurisdiccion juris = await GetJurisdiccion(model.IdJurisdiccion);
-                    Rol rol = await GetRol(model.IdRol);
+                    Jurisdiccion juris = JurisdiccionService.GetJurisdiccion(_context, model.IdJurisdiccion);
+                    Rol rol = RolService.GetRol(_context, model.IdRol);
 
                     if ((rol.Descripcion == "Operador Nacional" && juris.Descripcion != "Nación") || (rol.Descripcion != "Operador Nacional" && juris.Descripcion == "Nación"))
                     {
@@ -337,9 +338,9 @@ namespace VacunacionApi.Controllers
                     }
                 }
 
-                errores = await VerificarCredencialesUsuarioAdministrador(model.EmailAdministrador, errores);
+                errores = RolService.VerificarCredencialesUsuario(_context, model.EmailAdministrador, errores, "Administrador");
 
-                Usuario usuarioExistente = await GetUsuario(model.Email);
+                Usuario usuarioExistente = UsuarioService.GetUsuario(_context, model.Email);
                 if (usuarioExistente != null)
                     errores.Add(string.Format("El email {0} está registrado en el sistema", model.Email));
                               
@@ -365,9 +366,7 @@ namespace VacunacionApi.Controllers
             }
         }
 
-
-
-        // Métodos privados de ayuda
+        // Método privado de ayuda
         private ResponseUsuarioDTO LoadResponseUsuarioDTO(string estadoTransaccion, bool existenciaErrores, List<string> errores, string emailAdministrador,
             Usuario usuario, string descripcionJurisdiccion, string descripcionRol)
         {
@@ -375,186 +374,6 @@ namespace VacunacionApi.Controllers
             ResponseUsuarioDTO responseUsuarioDTO = new ResponseUsuarioDTO(estadoTransaccion, existenciaErrores, errores, emailAdministrador, usuarioDTO);
 
             return responseUsuarioDTO;
-        }
-
-        private async Task<bool> TieneRolAdministrador(Usuario usuario)
-        {
-            try
-            {
-                Rol rolAdministrador = await _context.Rol
-                    .Where(rol => rol.Descripcion == "Administrador").FirstOrDefaultAsync();
-
-                if (rolAdministrador.Id == usuario.IdRol) 
-                {
-                    return true;
-                }
-            }
-            catch 
-            { 
-            
-            }
-
-            return false;
-        }
-
-        private async Task<Usuario> GetUsuario(string email)
-        {
-            try
-            {
-                Usuario cuentaExistente = new Usuario();
-                List<Usuario> listaUsuarios = await _context.Usuario.ToListAsync();
-
-                foreach (Usuario item in listaUsuarios)
-                {
-                    if (item.Email == email)
-                    {
-                        cuentaExistente.Id = item.Id;
-                        cuentaExistente.Email = item.Email;
-                        cuentaExistente.Password = item.Password;
-                        cuentaExistente.IdJurisdiccion = item.IdJurisdiccion.Value;
-                        cuentaExistente.IdRol = item.IdRol;
-                    }
-                }
-
-                if (cuentaExistente.Email != null)
-                    return cuentaExistente;
-            }
-            catch
-            {
-                
-            }
-
-            return null;
-        }
-
-        private async Task<Jurisdiccion> GetJurisdiccion(int idJurisdiccion)
-        {
-            Jurisdiccion jurisdiccionExistente = null;
-
-            try
-            {
-                jurisdiccionExistente = await _context.Jurisdiccion
-                    .Where(juris => juris.Id == idJurisdiccion).FirstOrDefaultAsync();
-            }
-            catch 
-            { 
-            
-            }
-
-            return jurisdiccionExistente;
-        }
-
-        private async Task<Rol> GetRol(int idRol)
-        {
-            Rol rolExistente = null;
-
-            try
-            {
-                rolExistente = await _context.Rol
-                    .Where(rol => rol.Id == idRol).FirstOrDefaultAsync();
-            }
-            catch
-            {
-
-            }
-
-            return rolExistente;
-        }
-
-        private async Task<List<string>> VerificarCredencialesUsuarioAdministrador(string emailAdministrador, List<string> errores)
-        {
-            try
-            {
-                Usuario usuarioSolicitante = await GetUsuario(emailAdministrador);
-                if (usuarioSolicitante == null)
-                    errores.Add(string.Format("El usuario {0} no está registrado en el sistema", emailAdministrador));
-                else
-                {
-                    bool tieneRolAdministrador = await TieneRolAdministrador(usuarioSolicitante);
-                    if (!tieneRolAdministrador)
-                        errores.Add(string.Format("El usuario {0} no tiene rol administrador", emailAdministrador));
-                }
-            }
-            catch
-            { 
-            
-            }
-
-            return errores;
-        }
-
-        private async Task<List<List<string>>> VerificarJurisdiccion(List<string> errores, int idJurisdiccion)
-        {
-            List<List<string>> erroresConcatDescripciones = new List<List<string>>();
-            
-            try
-            {
-                List<string> descripciones = new List<string>();
-                Jurisdiccion jurisdiccionExistente = await GetJurisdiccion(idJurisdiccion);
-                
-                if (jurisdiccionExistente == null)
-                {
-                    errores.Add(string.Format("La jurisdicción con identificador {0} no está registrada en el sistema", idJurisdiccion));
-                    descripciones.Add(null);
-                }
-                else
-                    descripciones.Add(jurisdiccionExistente.Descripcion);
-
-                erroresConcatDescripciones.Add(errores);
-                erroresConcatDescripciones.Add(descripciones);
-            }
-            catch
-            {
-                
-            }
-
-            return erroresConcatDescripciones;
-        }
-
-        private async Task<List<List<string>>> VerificarRol(List<string> errores, int idRol)
-        {
-            List<List<string>> erroresConcatDescripciones = new List<List<string>>();
-
-            try
-            {
-                List<string> descripciones = new List<string>();
-                Rol rolExistente = await GetRol(idRol);
-
-                if (rolExistente == null)
-                {
-                    errores.Add(string.Format("El rol con identificador {0} no está registrado en el sistema", idRol));
-                    descripciones.Add(null);
-                }
-                else
-                    descripciones.Add(rolExistente.Descripcion);
-
-                erroresConcatDescripciones.Add(errores);
-                erroresConcatDescripciones.Add(descripciones);
-            }
-            catch
-            {
-
-            }
-
-            return erroresConcatDescripciones;
-        }
-
-        private bool TieneFormatoEmail(string email)
-        {
-            try
-            {
-                Regex regex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$"); 
-                Match matchEmail = regex.Match(email);
-                
-                if (matchEmail.Success) 
-                    return true;
-            }
-            catch
-            {
-
-            }
-
-            return false;
         }
     }
 }
