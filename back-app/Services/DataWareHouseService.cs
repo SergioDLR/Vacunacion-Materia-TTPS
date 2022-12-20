@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -122,20 +123,18 @@ namespace VacunacionApi.Services
             List<DVacuna> dVacunas = _context.DVacuna.Where(v => v.IdLote == loteVencido).ToList();
             foreach (DVacuna v in dVacunas)
             {
-                List<HVacunados> vacunados = _context.HVacunados.Where(hv => hv.IdVacuna == v.Id).ToList();
-                foreach (HVacunados hv in vacunados)
+                HVacunados vacunado = await _context.HVacunados.Where(hv => hv.IdVacuna == v.Id).FirstOrDefaultAsync();
+                if (vacunado != null)
                 {
-                    DLugar dLugar = _context.DLugar.Where(l => l.Id == hv.IdLugar).FirstOrDefault();
+                    DLugar dLugar = await _context.DLugar.Where(l => l.Id == vacunado.IdLugar).FirstOrDefaultAsync();
                     HVencidas hVencida = new HVencidas();
                     hVencida.IdTiempo = dTiempo.Id;
                     hVencida.IdLugar = dLugar.Id;
                     hVencida.IdVacuna = v.Id;
                     _context.HVencidas.Add(hVencida);
+                    await _context.SaveChangesAsync();
                 }
             }
-            
-            //OPERACIÓN DE GUARDADO
-            await _context.SaveChangesAsync();
            
             return true;
         }
