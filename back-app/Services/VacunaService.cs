@@ -9,6 +9,11 @@ namespace VacunacionApi.Services
 {
     public static class VacunaService
     {
+        public static bool VacunaExists(VacunasContext _context, int id)
+        {
+            return _context.Vacuna.Any(e => e.Id == id);
+        }
+
         public static Vacuna GetVacuna(VacunasContext _context, int idVacuna)
         {
             return _context.Vacuna
@@ -33,546 +38,387 @@ namespace VacunacionApi.Services
             return listaDosis;
         }
 
-        //public List<DosisDTO> ArmarListaDosisDTOHepatitisBHB()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis en nacimiento
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Hepatitis B (HB) - Aplicar antes de las 12 horas del nacimiento", null, 0, 0.5, null, false, true);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Hepatitis B (HB) - Primera Dosis Nacimiento", listaReglas1);
-
-        //        //Primera dosis  
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Hepatitis B (HB) - Aplicar desde los 11 años", null, 4015, 0, null, false, true);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Hepatitis B (HB) - Primera Dosis", listaReglas2);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Hepatitis B (HB) - Aplicar al mes de la primera dosis", null, 30, 180, "1", false, true);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Hepatitis B (HB) - Segunda Dosis", listaReglas3);
-
-        //        //Tercera dosis
-        //        List<ReglaDTO> listaReglas4 = new List<ReglaDTO>();
-        //        ReglaDTO regla4 = new ReglaDTO(0, "Hepatitis B (HB) - Aplicar a los 6 meses de la primera dosis", null, 180, 0, "1", false, true);
-        //        listaReglas4.Add(regla4);
-        //        DosisDTO dosisDTO4 = new DosisDTO(0, 3, "Hepatitis B (HB) - Tercera Dosis", listaReglas4);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //        listaDosis.Add(dosisDTO4);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisDTOBCG()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis en nacimiento
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "BCG - Aplicar antes de salir de la maternidad", null, 0, 0, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "BCG - Dosis Única Nacimiento", listaReglas1);
-
-        //        listaDosis.Add(dosisDTO1);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisDTORotavirus()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Rotavirus - Aplicar desde los 2 meses del nacimiento hasta las 14 semanas y 6 días", null, 60, 104, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Rotavirus - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Rotavirus - Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Rotavirus - Segunda Dosis", listaReglas2);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisNeumococoConjugada()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Neumococo Conjugada - Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Neumococo Conjugada - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Neumococo Conjugada - Aplicar desde los 4 meses del nacimiento hasta los 12 meses", null, 120, 365, null, false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Neumococo Conjugada - Segunda Dosis", listaReglas2);
-
-        //        //Refuerzo
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Neumococo Conjugada - Aplicar desde los 12 meses del nacimiento", null, 365, 0, null, false, false);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Neumococo Conjugada - Refuerzo", listaReglas3);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisQuintuplePentavalente()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Quíntuple Pentavalente - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Quíntuple Pentavalente - Segunda Dosis", listaReglas2);
-
-        //        //Tercera dosis
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar desde los 6 meses del nacimiento hasta los 15 meses", null, 180, 450, null, false, false);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Quíntuple Pentavalente - Tercera Dosis", listaReglas3);
-
-        //        //Refuerzo
-        //        List<ReglaDTO> listaReglas4 = new List<ReglaDTO>();
-        //        ReglaDTO regla4 = new ReglaDTO(0, "Quíntuple Pentavalente - Aplicar entre los 15 y 18 meses de nacimiento", null, 450, 540, null, false, false);
-        //        listaReglas4.Add(regla4);
-        //        DosisDTO dosisDTO4 = new DosisDTO(0, 3, "Quíntuple Pentavalente - Refuerzo", listaReglas4);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //        listaDosis.Add(dosisDTO4);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisSalkIPV()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Salk IPV - Aplicar desde los 2 meses del nacimiento hasta los 4 meses (intramuscular)", null, 60, 120, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Salk IPV - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Salk IPV - Aplicar desde los 4 meses del nacimiento hasta los 6 meses (intramuscular)", null, 120, 180, null, false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Salk IPV - Segunda Dosis", listaReglas2);
-
-        //        //Tercera dosis
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Salk IPV - Aplicar desde los 6 meses del nacimiento hasta los 5 años (intramuscular)", null, 180, 1825, null, false, false);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Salk IPV - Tercera Dosis", listaReglas3);
-
-        //        //Refuerzo
-        //        List<ReglaDTO> listaReglas4 = new List<ReglaDTO>();
-        //        ReglaDTO regla4 = new ReglaDTO(0, "Salk IPV - Aplicar entre los 5 y 6 años (intramuscular)", null, 1825, 2190, null, false, false);
-        //        listaReglas4.Add(regla4);
-        //        DosisDTO dosisDTO4 = new DosisDTO(0, 3, "Salk IPV - Refuerzo", listaReglas4);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //        listaDosis.Add(dosisDTO4);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisMeningococicaConjugada()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Meningocócica Conjugada - Aplicar desde los 3 meses del nacimiento hasta los 5 meses", null, 90, 150, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Meningocócica Conjugada - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Meningocócica Conjugada - Aplicar desde los 5 meses del nacimiento hasta los 15 meses", null, 150, 450, null, false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Meningocócica Conjugada - Segunda Dosis", listaReglas2);
-
-        //        //Refuerzo
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Meningocócica Conjugada - Aplicar desde los 15 meses del nacimiento hasta los 11 años", null, 450, 4015, null, false, false);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Meningocócica Conjugada - Refuerzo", listaReglas3);
-
-        //        //Dosis única
-        //        List<ReglaDTO> listaReglas4 = new List<ReglaDTO>();
-        //        ReglaDTO regla4 = new ReglaDTO(0, "Meningocócica Conjugada - Aplicar a partir de los 11 años", null, 4015, 0, null, false, false);
-        //        listaReglas4.Add(regla4);
-        //        DosisDTO dosisDTO4 = new DosisDTO(0, 3, "Meningocócica Conjugada - Dosis Única", listaReglas4);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //        listaDosis.Add(dosisDTO4);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisTripleViralSRP()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Triple Viral (SRP) - Aplicar desde los 12 meses del nacimiento hasta los 5 años", null, 365, 1825, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Triple Viral (SRP) - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Triple Viral (SRP) - Aplicar entre los 5 y 6 años", null, 1825, 2190, null, false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Triple Viral (SRP) - Segunda Dosis", listaReglas2);
-
-        //        //Refuerzo
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Triple Viral (SRP) - Aplicar a partir de los 11 años, si no recibió anteriores (1 dosis de triple viral + 1 dosis de doble viral)", null, 4015, 0, null, false, false);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Triple Viral (SRP) - Refuerzo Triple Viral + Doble Viral", listaReglas3);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisHepatitisAHA()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Dosis única
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Hepatitis A (HA) - Aplicar desde los 12 meses del nacimiento", null, 365, 0, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Hepatitis A (HA) - Dosis Única", listaReglas1);
-
-        //        listaDosis.Add(dosisDTO1);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisVaricela()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Varicela - Aplicar desde los 15 meses del nacimiento hasta los 5 años", null, 450, 1825, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Varicela - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Varicela - Aplicar entre los 5 y 6 años", null, 1825, 2190, null, false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Varicela - Segunda Dosis", listaReglas2);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisTripleBacterianaDTP()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Refuerzo
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Triple Bacteriana (DTP) - Aplicar entre los 5 y 6 años", null, 1825, 2160, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Triple Bacteriana (DTP) - Refuerzo", listaReglas1);
-
-        //        listaDosis.Add(dosisDTO1);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisTripleBacterianaAcelular()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Dosis única
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Triple Bacteriana Acelular - Aplicar a partir de los 11 años", null, 4015, 0, null, true, true);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Triple Bacteriana Acelular - Dosis Única", listaReglas1);
-
-        //        //Dosis Embarazo
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Triple Bacteriana Acelular - Aplicar a partir de la semana 20 de gestación", null, 0, 0, null, true, true);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Triple Bacteriana Acelular - Dosis Embarazo", listaReglas2);
-
-        //        //Dosis Personal Salud
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Triple Bacteriana Acelular - Aplicar a personal que atiende niños menores de 1 año. Revacunar a los 5 años", null, 0, 0, null, true, true);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Triple Bacteriana Acelular - Dosis Personal Salud", listaReglas3);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisVPH()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "VPH - Aplicar a partir de los 11 años", null, 4015, 0, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "VPH - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "VPH - Aplicar a los 6 meses de la primera dosis", null, 180, 0, "0", false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "VPH - Segunda Dosis", listaReglas2);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisDobleBacterianaDT()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Doble Bacteriana (DT) - Aplicar a partir de los 18 años. Componente tétanos-difteria (refuerzo cada 10 años)", null, 6570, 0, null, true, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Doble Bacteriana (DT) - Primera Dosis", listaReglas1);
-
-        //        //Segunda dosis
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Doble Bacteriana (DT) - Aplicar después de la primera dosis. Componente tétanos-difteria (refuerzo cada 10 años)", null, 0, 0, null, true, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Doble Bacteriana (DT) - Segunda Dosis", listaReglas2);
-
-        //        //Tercera dosis
-        //        List<ReglaDTO> listaReglas3 = new List<ReglaDTO>();
-        //        ReglaDTO regla3 = new ReglaDTO(0, "Doble Bacteriana (DT) - Aplicar después de la segunda dosis. Componente tétanos-difteria (refuerzo cada 10 años)", null, 0, 0, null, true, false);
-        //        listaReglas3.Add(regla3);
-        //        DosisDTO dosisDTO3 = new DosisDTO(0, 2, "Doble Bacteriana (DT) - Tercera Dosis", listaReglas3);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //        listaDosis.Add(dosisDTO3);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisDobleViralSR()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Doble Viral (SR) - Aplicar desde los 11 años. Si no hay aplicaciones previas, aplicar 1 dosis o bien 1 dosis de Triple Viral + 1 dosis de Doble Viral", null, 4015, 0, null, false, true);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Doble Viral (SR) - Primera Dosis", listaReglas1);
-
-        //        listaDosis.Add(dosisDTO1);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisFiebreAmarillaFA()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Fiebre Amarilla (FA) - Aplicar a partir de los 18 meses hasta los 11 años (para residentes en zona de riesgo)", null, 540, 4015, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Fiebre Amarilla (FA) - Primera Dosis", listaReglas1);
-
-        //        //Refuerzo
-        //        List<ReglaDTO> listaReglas2 = new List<ReglaDTO>();
-        //        ReglaDTO regla2 = new ReglaDTO(0, "Fiebre Amarilla (FA) - Aplicar a los 10 años de la primera dosis (para residentes en zona de riesgo)", null, 3650, 0, "0", false, false);
-        //        listaReglas2.Add(regla2);
-        //        DosisDTO dosisDTO2 = new DosisDTO(0, 1, "Fiebre Amarilla (FA) - Refuerzo", listaReglas2);
-
-        //        listaDosis.Add(dosisDTO1);
-        //        listaDosis.Add(dosisDTO2);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
-
-        //public List<DosisDTO> ArmarListaDosisFiebreHemorragicaArgentinaFHA()
-        //{
-        //    List<DosisDTO> listaDosis = new List<DosisDTO>();
-
-        //    try
-        //    {
-        //        //Primera dosis
-        //        List<ReglaDTO> listaReglas1 = new List<ReglaDTO>();
-        //        ReglaDTO regla1 = new ReglaDTO(0, "Fiebre Hemorrágica Argentina (FHA) - Aplicar desde los 15 años. Residentes o trabajadores con riesgo ocupacional en zonas de riesgo", null, 5475, 0, null, false, false);
-        //        listaReglas1.Add(regla1);
-        //        DosisDTO dosisDTO1 = new DosisDTO(0, 0, "Fiebre Hemorrágica Argentina (FHA) - Primera Dosis", listaReglas1);
-
-        //        listaDosis.Add(dosisDTO1);
-        //    }
-        //    catch
-        //    {
-
-        //    }
-
-        //    return listaDosis;
-        //}
+        public static VacunaCalendarioAnualPandemiaDTO RespaldarDosisReglasByVacuna(VacunasContext _context, VacunaCalendarioAnualPandemiaDTO vacunaCalendario = null)
+        {
+            foreach (DosisDTO dosisDTO in vacunaCalendario.Dosis)
+            {
+                Dosis dosis = new Dosis(0, dosisDTO.Descripcion);
+                _context.Dosis.Add(dosis);
+                _context.SaveChangesAsync();
+                EntidadVacunaDosis entidadVacunaDosis = new EntidadVacunaDosis(vacunaCalendario.Id, dosis.Id, dosisDTO.Orden);
+                _context.EntidadVacunaDosis.Add(entidadVacunaDosis);
+                _context.SaveChangesAsync();
+                dosisDTO.Id = dosis.Id;
+
+                foreach (ReglaDTO reglaDTO in dosisDTO.Reglas)
+                {
+                    Regla reglaExistente = _context.Regla.Where(r => r.Descripcion == reglaDTO.Descripcion).FirstOrDefault();
+                    int idRegla = 0;
+
+                    if (reglaExistente == null)
+                    {
+                        Regla regla = new Regla(reglaDTO.Descripcion, reglaDTO.MesesVacunacion, reglaDTO.LapsoMinimoDias, reglaDTO.LapsoMaximoDias, reglaDTO.Otros, reglaDTO.Embarazada, reglaDTO.PersonalSalud);
+                        _context.Regla.Add(regla);
+                        _context.SaveChangesAsync();
+                        idRegla = regla.Id;
+                    }
+                    else
+                        idRegla = reglaExistente.Id;
+
+                    reglaDTO.Id = idRegla;
+
+                    EntidadDosisRegla entidadDosisRegla = new EntidadDosisRegla(dosis.Id, idRegla);
+                    _context.EntidadDosisRegla.Add(entidadDosisRegla);
+                    _context.SaveChangesAsync();
+                }
+            }
+
+            return vacunaCalendario;
+        }
+
+        public static List<DescripcionVacunaCalendarioAnualDTO> GetDescripcionesVacunasCalendario()
+        {
+            List<DescripcionVacunaCalendarioAnualDTO> descripcionesVacunasCalendario = new List<DescripcionVacunaCalendarioAnualDTO>();
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(1, "Hepatitis B (HB)"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(2, "BCG"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(3, "Rotavirus"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(4, "Neumococo Conjugada"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(5, "Quíntuple Pentavalente"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(6, "Salk IPV"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(7, "Meningocócica Conjugada"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(8, "Triple Viral (SRP)"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(9, "Hepatitis A (HA)"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(10, "Varicela"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(11, "Triple Bacteriana (DTP)"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(12, "Triple Bacteriana Acelular"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(13, "VPH"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(14, "Doble Bacteriana (DT)"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(15, "Doble Viral (SR)"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(16, "Fiebre Amarilla (FA)"));
+            descripcionesVacunasCalendario.Add(new DescripcionVacunaCalendarioAnualDTO(17, "Fiebre Hemorrágica Argentina (FHA)"));
+
+            return descripcionesVacunasCalendario;
+        }
+
+        public static List<DescripcionVacunaCalendarioAnualDTO> GetVacunasAnuales()
+        {
+            List<DescripcionVacunaCalendarioAnualDTO> descripcionesVacunasAnuales = new List<DescripcionVacunaCalendarioAnualDTO>();
+            descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(1, "Antigripal"));
+            descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(2, "Neumonía"));
+            descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(3, "Sarampión"));
+            descripcionesVacunasAnuales.Add(new DescripcionVacunaCalendarioAnualDTO(4, "Tos Ferina"));
+
+            return descripcionesVacunasAnuales;
+        }
+
+        public static List<VacunaCalendarioAnualPandemiaDTO> GetVacunasCalendario()
+        {
+            List<VacunaCalendarioAnualPandemiaDTO> vacunasCalendario = new List<VacunaCalendarioAnualPandemiaDTO>()
+                {
+                    new VacunaCalendarioAnualPandemiaDTO(1, "Hepatitis B (HB)", ArmarListaDosisDTO("Hepatitis B (HB)")),
+                    new VacunaCalendarioAnualPandemiaDTO(2, "BCG", ArmarListaDosisDTO("BCG")),
+                    new VacunaCalendarioAnualPandemiaDTO(3, "Rotavirus", ArmarListaDosisDTO("Rotavirus")),
+                    new VacunaCalendarioAnualPandemiaDTO(4, "Neumococo Conjugada", ArmarListaDosisDTO("Neumococo Conjugada")),
+                    new VacunaCalendarioAnualPandemiaDTO(5, "Quíntuple Pentavalente", ArmarListaDosisDTO("Quíntuple Pentavalente")),
+                    new VacunaCalendarioAnualPandemiaDTO(6, "Salk IPV", ArmarListaDosisDTO("Salk IPV")),
+                    new VacunaCalendarioAnualPandemiaDTO(7, "Meningocócica Conjugada", ArmarListaDosisDTO("Meningocócica Conjugada")),
+                    new VacunaCalendarioAnualPandemiaDTO(8, "Triple Viral (SRP)", ArmarListaDosisDTO("Triple Viral (SRP)")),
+                    new VacunaCalendarioAnualPandemiaDTO(9, "Hepatitis A (HA)", ArmarListaDosisDTO("Hepatitis A (HA)")),
+                    new VacunaCalendarioAnualPandemiaDTO(10, "Varicela", ArmarListaDosisDTO("Varicela")),
+                    new VacunaCalendarioAnualPandemiaDTO(11, "Triple Bacteriana (DTP)", ArmarListaDosisDTO("Triple Bacteriana (DTP)")),
+                    new VacunaCalendarioAnualPandemiaDTO(12, "Triple Bacteriana Acelular", ArmarListaDosisDTO("Triple Bacteriana Acelular")),
+                    new VacunaCalendarioAnualPandemiaDTO(13, "VPH", ArmarListaDosisDTO("VPH")),
+                    new VacunaCalendarioAnualPandemiaDTO(14, "Doble Bacteriana (DT)", ArmarListaDosisDTO("Doble Bacteriana (DT)")),
+                    new VacunaCalendarioAnualPandemiaDTO(15, "Doble Viral (SR)", ArmarListaDosisDTO("Doble Viral (SR)")),
+                    new VacunaCalendarioAnualPandemiaDTO(16, "Fiebre Amarilla (FA)", ArmarListaDosisDTO("Fiebre Amarilla (FA)")),
+                    new VacunaCalendarioAnualPandemiaDTO(17, "Fiebre Hemorrágica Argentina (FHA)", ArmarListaDosisDTO("Fiebre Hemorrágica Argentina (FHA)"))
+                };
+         
+            return vacunasCalendario;
+        }
+
+        public static List<DosisDTO> ArmarListaDosisDTO(string descripcionVacuna)
+        {
+            List<DosisDTO> listaDosis = new List<DosisDTO>();
+            var listaReglas = new List<ReglaDTO>();
+            var listaDescripcionesDosis = new List<string>();
+
+            switch (descripcionVacuna)
+            {
+                case "Hepatitis B (HB)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar antes de las 12 horas del nacimiento", null, 0, 0.5, null, false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 11 años", null, 4015, 0, null, false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar al mes de la primera dosis", null, 30, 180, "1", false, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a los 6 meses de la primera dosis", null, 180, 0, "1", false, true),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis Nacimiento",
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "BCG":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar antes de salir de la maternidad", null, 0, 0, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Dosis Única Nacimiento",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Rotavirus":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta las 14 semanas y 6 días", null, 60, 104, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Neumococo Conjugada":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 12 meses", null, 120, 365, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 12 meses del nacimiento", null, 365, 0, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Quíntuple Pentavalente":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses", null, 120, 180, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 6 meses del nacimiento hasta los 15 meses", null, 180, 450, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 15 y 18 meses de nacimiento", null, 450, 540, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Salk IPV":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 2 meses del nacimiento hasta los 4 meses (intramuscular)", null, 60, 120, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 4 meses del nacimiento hasta los 6 meses (intramuscular)", null, 120, 180, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 6 meses del nacimiento hasta los 5 años (intramuscular)", null, 180, 1825, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años (intramuscular)", null, 1825, 2190, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Meningocócica Conjugada":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 3 meses del nacimiento hasta los 5 meses", null, 90, 150, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 5 meses del nacimiento hasta los 15 meses", null, 150, 450, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 15 meses del nacimiento hasta los 11 años", null, 450, 4015, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años", null, 4015, 0, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                            descripcionVacuna + " - " + "Dosis Única",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Triple Viral (SRP)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 12 meses del nacimiento hasta los 5 años", null, 365, 1825, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años", null, 1825, 2190, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años, si no recibió anteriores (1 dosis de triple viral + 1 dosis de doble viral)", null, 4015, 0, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Refuerzo Triple Viral + Doble Viral",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Hepatitis A (HA)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 12 meses del nacimiento", null, 365, 0, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Dosis Única",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Varicela":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 15 meses del nacimiento hasta los 5 años", null, 450, 1825, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años", null, 1825, 2190, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Triple Bacteriana (DTP)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar entre los 5 y 6 años", null, 1825, 2160, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Triple Bacteriana Acelular":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años", null, 4015, 0, null, true, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de la semana 20 de gestación", null, 0, 0, null, true, true),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a personal que atiende niños menores de 1 año. Revacunar a los 5 años", null, 0, 0, null, true, true),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Dosis Única",
+                            descripcionVacuna + " - " + "Dosis Embarazo",
+                            descripcionVacuna + " - " + "Dosis Personal Salud",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "VPH":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 11 años", null, 4015, 0, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a los 6 meses de la primera dosis", null, 180, 0, "0", false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Doble Bacteriana (DT)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 18 años. Componente tétanos-difteria (refuerzo cada 10 años)", null, 6570, 0, null, true, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar después de la primera dosis. Componente tétanos-difteria (refuerzo cada 10 años)", null, 0, 0, null, true, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar después de la segunda dosis. Componente tétanos-difteria (refuerzo cada 10 años)", null, 0, 0, null, true, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Segunda Dosis",
+                            descripcionVacuna + " - " + "Tercera Dosis",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Doble Viral (SR)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 11 años. Si no hay aplicaciones previas, aplicar 1 dosis o bien 1 dosis de Triple Viral + 1 dosis de Doble Viral", null, 4015, 0, null, false, true),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Fiebre Amarilla (FA)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a partir de los 18 meses hasta los 11 años (para residentes en zona de riesgo)", null, 540, 4015, null, false, false),
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar a los 10 años de la primera dosis (para residentes en zona de riesgo)", null, 3650, 0, "0", false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                            descripcionVacuna + " - " + "Refuerzo",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                case "Fiebre Hemorrágica Argentina (FHA)":
+                    listaReglas = new List<ReglaDTO>()
+                        {
+                            new ReglaDTO(0, descripcionVacuna + " - " + "Aplicar desde los 15 años. Residentes o trabajadores con riesgo ocupacional en zonas de riesgo", null, 5475, 0, null, false, false),
+                        };
+
+                    listaDescripcionesDosis = new List<string>(){
+                            descripcionVacuna + " - " + "Primera Dosis",
+                        };
+
+                    listaDosis = VacunaService.ArmarListaDosisDTO(listaReglas, listaDescripcionesDosis);
+                    break;
+
+                default:
+                    break;
+            }
+
+            return listaDosis;
+        }
     }
 }
