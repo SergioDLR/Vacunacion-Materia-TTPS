@@ -1,4 +1,4 @@
-export const urlBase = "https://localhost:44385/api";
+export const urlBase = "https://localhost:5001/api";
 
 const allUrls = {
   user: `${urlBase}/Usuarios/`,
@@ -34,5 +34,7 @@ const allUrls = {
   etl: `${urlBase}/VacunasAplicadas/Etl`,
   cantResultados: `${urlBase}/VacunasAplicadas/GetCantidadResultados`,
   vacunacionMasiva: `${urlBase}/VacunasAplicadas/CargarNuevosVacunadosApi`,
+  displayLotes: `${urlBase}/Lotes/GetAll`,
+  vencerLote: `${urlBase}/Lotes/VencerLote`,
 };
 export default allUrls;

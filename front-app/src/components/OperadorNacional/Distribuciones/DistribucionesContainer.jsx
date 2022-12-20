@@ -9,23 +9,27 @@ import CustomLoader from "@/components/utils/CustomLoader";
 import CustomModal from "@/components/utils/Modal";
 import { useAlert } from "react-alert";
 import CrearDistribucion from "./CrearDistribucion";
-import { Box } from "@mui/material";
+import { Box, MenuItem, Select } from "@mui/material";
 const DistribucionesContainer = () => {
   const { userSesion } = useContext(UserContext);
   const [distribuciones, setDistribuciones] = useState([]);
   const [estaCargando, setEstaCargando] = useState(true);
   const [open, setOpen] = useState(false);
   const [jurisdicciones, setJurisdicciones] = useState([]);
+  const [lotes, setLotes] = useState([]);
+  const [selectedLote, setSelectedLote] = useState(0);
   const alert = useAlert();
   useEffect(() => {
     try {
       cargarDistribuciones();
+      cargarLotes();
+
       axios.get(`${allUrls.jurisdiccion}GetAll`).then((response) => setJurisdicciones(response.data));
     } catch (e) {
       alert.error(`Ocurrio un error del lado del servidor ${e}`);
     }
   }, []);
-
+  console.log(lotes);
   const cargarDistribuciones = () => {
     axios
       .get(`${allUrls.visualizarDistribuciones}?emailOperadorNacional=${userSesion.email}`)
@@ -38,6 +42,21 @@ const DistribucionesContainer = () => {
       })
       .catch(() => alert.error("Ocurrio un error"))
       .finally(() => setEstaCargando(false));
+  };
+
+  const cargarLotes = () => {
+    axios.get(allUrls.displayLotes).then((response) => setLotes(response.data));
+  };
+
+  const handleDeleteLote = () => {
+    axios
+      .post(`${allUrls.vencerLote}?email=${userSesion.email}&idLote=${selectedLote}`)
+      .then((response) => alert.success("El lote se vencio con exito"));
+    cargarLotes();
+  };
+
+  const handleChangeLote = (evt) => {
+    setSelectedLote(evt.target.value);
   };
   return (
     <Container>
@@ -53,6 +72,26 @@ const DistribucionesContainer = () => {
         </CustomModal>
       </Box>
       <TableDistribuciones distribuciones={distribuciones} />
+      <h4>Vencer un lote:</h4>
+      <Select
+        labelId="Selecciona_lote"
+        id="tipo-de-pandemia-select"
+        value={selectedLote}
+        label="Selecciona un lote"
+        onChange={handleChangeLote}
+      >
+        <MenuItem value={0}>Selecciona un lote </MenuItem>
+        {lotes.map((element, index) => (
+          <MenuItem key={index} value={element}>
+            {element}
+          </MenuItem>
+        ))}
+      </Select>
+      {selectedLote !== 0 && (
+        <CustomButton onClick={handleDeleteLote} variant={"outlined"} color={"info"} textColor={"#2e7994"}>
+          Vencer lote
+        </CustomButton>
+      )}
     </Container>
   );
 };
