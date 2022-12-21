@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VacunacionApi.DTO;
 using VacunacionApi.Models;
+using VacunacionApi.ModelsDataWareHouse;
 using VacunacionApi.Services;
 
 namespace VacunacionApi.Controllers
@@ -16,10 +17,12 @@ namespace VacunacionApi.Controllers
     public class VacunasController : ControllerBase
     {
         private readonly VacunasContext _context;
+        private readonly DataWareHouseContext _context2;
 
-        public VacunasController(VacunasContext context)
+        public VacunasController(VacunasContext context, DataWareHouseContext context2)
         {
             _context = context;
+            _context2 = context2;
         }
 
         // GET: api/Vacunas/EjecutarCron?emailOperadorNacional=maria@gmail.com
@@ -243,6 +246,90 @@ namespace VacunacionApi.Controllers
                 }
 
                 return Ok(responseListaVacunasDTO);
+            }
+            catch (Exception error)
+            {
+                return BadRequest(error.Message);
+            }
+        }
+
+        // GET: api/Vacunas/GetHistoricos?emailOperadorNacional=juan@gmail.com&vacunaDesarrollada=anticovid_pfizer&idLote=111&fechaDesde=10/07/2022&fechaHasta=18/12/2022&jurisdiccion=Buenos Aires
+        [HttpGet]
+        [Route("GetHistoricos")]
+        public async Task<ActionResult<ResponseHistoricoDTO>> GetHistoricos(string emailOperadorNacional, string vacunaDesarrollada, int idLote, DateTime fechaDesde, DateTime fechaHasta, string jurisdiccion)
+        {
+            try
+            {
+                ResponseHistoricoDTO responseHistoricoDTO = null;
+                List<string> errores = new List<string>();
+                string[] vacunas = null;
+                int diaDesde = fechaDesde.Day;
+                int mesDesde = fechaDesde.Month;
+                int anioDesde = fechaDesde.Year;
+                int diaHasta = fechaHasta.Day;
+                int mesHasta = fechaHasta.Month;
+                int anioHasta = fechaHasta.Year;
+
+                if (emailOperadorNacional == null || vacunaDesarrollada == null || idLote == 0 || fechaDesde == null || fechaHasta == null || jurisdiccion == null)
+                    errores.Add("Faltan parámetros de consulta. Verifique por favor");
+                else
+                {
+                    errores = RolService.VerificarCredencialesUsuario(_context, emailOperadorNacional, errores, "Operador Nacional");
+                    vacunas = vacunaDesarrollada.Split("_");
+                }
+
+                if (errores.Count > 0)
+                    responseHistoricoDTO = new ResponseHistoricoDTO("Rechazada", true, errores, jurisdiccion, idLote, vacunaDesarrollada, 0, 0, new List<DetalleMesAnioDTO>(), emailOperadorNacional);
+                else
+                {
+                    List<int> idsLugares = await _context2.DLugar.Where(a => a.Provincia == jurisdiccion).Select(t => t.Id).ToListAsync();
+                    List<int> idsVacunas = await _context2.DVacuna.Where(a => a.IdLote == idLote && a.VacunaDesarrollada == vacunas[0] && a.Laboratorio == vacunas[1]).Select(t => t.Id).ToListAsync();
+                    List<int> idsTiempos = await _context2.DTiempo.Where(a => a.Dia >= diaDesde && a.Mes >= mesDesde && a.Anio >= anioDesde && a.Dia <= diaHasta && a.Mes <= mesHasta && a.Anio <= anioHasta).Select(t => t.Id).ToListAsync();
+                    List<DVacuna> dVacunas = await _context2.DVacuna.Where(a => a.IdLote == idLote && a.VacunaDesarrollada == vacunas[0] && a.Laboratorio == vacunas[1]).ToListAsync();
+                    List<DetalleMesAnioDTO> detalles = new List<DetalleMesAnioDTO>();
+                    List<HVacunados> vacunados = new List<HVacunados>();
+                    int totalAplicadas = 0;
+
+                    foreach (DVacuna vac in dVacunas)
+                    {
+                        HVacunados hVacunado = await _context2.HVacunados.Where(a => a.IdVacuna == vac.Id).FirstOrDefaultAsync();
+                        if (hVacunado != null)
+                        {
+                            if (idsLugares.Contains(hVacunado.IdLugar) && idsVacunas.Contains(hVacunado.IdVacuna) && idsTiempos.Contains(hVacunado.IdTiempo))
+                                vacunados.Add(hVacunado);
+                        }
+                    }
+
+                    foreach (HVacunados vac in vacunados)
+                    {
+                        DTiempo dTiempo = await _context2.DTiempo.Where(a => a.Id == vac.IdTiempo).FirstOrDefaultAsync();
+                        bool existe = false;
+
+                        foreach (DetalleMesAnioDTO det in detalles)
+                        {
+                            if (det.NumeroMes == dTiempo.Mes && det.NumeroAnio == dTiempo.Anio)
+                            {
+                                existe = true;
+                                det.Aplicadas++;
+                                break;
+                            }
+                        }
+
+                        if (!existe)
+                        {
+                            DetalleMesAnioDTO d = new DetalleMesAnioDTO(dTiempo.Mes, dTiempo.Anio, 1);
+                        }
+                    }
+
+                    foreach (DetalleMesAnioDTO d in detalles)
+                    {
+                        totalAplicadas += d.Aplicadas;
+                    }
+
+                    responseHistoricoDTO = new ResponseHistoricoDTO("Aceptada", false, errores, jurisdiccion, idLote, vacunaDesarrollada, totalAplicadas, (idLote*5000 - totalAplicadas), detalles, emailOperadorNacional);
+                }
+
+                return Ok(responseHistoricoDTO);
             }
             catch (Exception error)
             {

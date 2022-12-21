@@ -1913,7 +1913,7 @@ namespace VacunacionApi.Controllers
                     }
                     else if ((DateTime.Now - fechaNacimiento).TotalDays >= 4015)
                     {
-                        proximaDosis = string.Format("{0} - Primera Dosis", descripcionVacuna);
+                        proximaDosis = string.Format("{0} - Segunda Dosis", descripcionVacuna);
                     }
                 }
                 else
