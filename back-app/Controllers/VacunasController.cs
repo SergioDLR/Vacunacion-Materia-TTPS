@@ -262,7 +262,6 @@ namespace VacunacionApi.Controllers
             {
                 ResponseHistoricoDTO responseHistoricoDTO = null;
                 List<string> errores = new List<string>();
-                string[] vacunas = null;
                 int diaDesde = Convert.ToDateTime(fechaDesde).Day;
                 int mesDesde = Convert.ToDateTime(fechaDesde).Month;
                 int anioDesde = Convert.ToDateTime(fechaDesde).Year;
@@ -332,6 +331,7 @@ namespace VacunacionApi.Controllers
                         if (!existe)
                         {
                             DetalleMesAnioDTO d = new DetalleMesAnioDTO(vac.FechaVacunacion.Month, vac.FechaVacunacion.Year, 1);
+                            detalles.Add(d);
                             totalAplicadas++;
                         }
                     }
