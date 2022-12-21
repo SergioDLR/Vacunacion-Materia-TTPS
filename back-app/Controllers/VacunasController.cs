@@ -256,19 +256,19 @@ namespace VacunacionApi.Controllers
         // GET: api/Vacunas/GetHistoricos?emailOperadorNacional=juan@gmail.com&vacunaDesarrollada=anticovid_pfizer&idLote=111&fechaDesde=10/07/2022&fechaHasta=18/12/2022&jurisdiccion=Buenos Aires
         [HttpGet]
         [Route("GetHistoricos")]
-        public async Task<ActionResult<ResponseHistoricoDTO>> GetHistoricos(string emailOperadorNacional, string vacunaDesarrollada, int idLote, DateTime fechaDesde, DateTime fechaHasta, string jurisdiccion)
+        public async Task<ActionResult<ResponseHistoricoDTO>> GetHistoricos(string emailOperadorNacional, string vacunaDesarrollada, int idLote, string fechaDesde, string fechaHasta, string jurisdiccion)
         {
             try
             {
                 ResponseHistoricoDTO responseHistoricoDTO = null;
                 List<string> errores = new List<string>();
                 string[] vacunas = null;
-                int diaDesde = fechaDesde.Day;
-                int mesDesde = fechaDesde.Month;
-                int anioDesde = fechaDesde.Year;
-                int diaHasta = fechaHasta.Day;
-                int mesHasta = fechaHasta.Month;
-                int anioHasta = fechaHasta.Year;
+                int diaDesde = Convert.ToDateTime(fechaDesde).Day;
+                int mesDesde = Convert.ToDateTime(fechaDesde).Month;
+                int anioDesde = Convert.ToDateTime(fechaDesde).Year;
+                int diaHasta = Convert.ToDateTime(fechaHasta).Day;
+                int mesHasta = Convert.ToDateTime(fechaHasta).Month;
+                int anioHasta = Convert.ToDateTime(fechaHasta).Year;
 
                 if (emailOperadorNacional == null || vacunaDesarrollada == null || idLote == 0 || fechaDesde == null || fechaHasta == null || jurisdiccion == null)
                     errores.Add("Faltan parámetros de consulta. Verifique por favor");
