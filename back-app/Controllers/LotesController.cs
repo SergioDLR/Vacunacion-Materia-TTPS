@@ -28,9 +28,9 @@ namespace VacunacionApi.Controllers
         // GET: api/Lotes/GetAll
         [HttpGet]
         [Route("GetAll")]
-        public async Task<ActionResult<IEnumerable<Lote>>> GetAll()
+        public IEnumerable<int> GetAll()
         {
-            return await _context.Lote.ToListAsync();
+            return new List<int>() { 111, 222, 333, 444, 555, 666, 777, 888, 999 };
         }
 
         // POST: api/Lotes/VencerLote?email=juan@gmail.com&idLote=777
@@ -39,8 +39,8 @@ namespace VacunacionApi.Controllers
         public async Task<ActionResult<ResponseCargarVacunaDTO>> VencerLote(string email = null, int idLote = 0)
         {
             ResponseCargarVacunaDTO response;
-            
-            try 
+
+            try
             {
                 List<string> errores = new List<string>();
 
@@ -52,35 +52,14 @@ namespace VacunacionApi.Controllers
                 {
                     errores = await VerificarCredencialesUsuarioOperadorNacionalVacunador(email, errores);
                 }
-                if(idLote == 0)
+                if (idLote == 0)
                     errores.Add(string.Format("El id de lote es incorrecto"));
-
 
                 if (errores.Count > 0)
                     response = new ResponseCargarVacunaDTO("Rechazada", true, errores, email);
                 else
                 {
-                    Lote lote = await _context.Lote.Where(l => l.Id == idLote).FirstOrDefaultAsync();
-                    lote.FechaVencimiento = DateTime.Now;
-                    lote.Disponible = false;
-                    _context.Entry(lote).State = EntityState.Modified;
-
-                    Compra compra = await _context.Compra.Where(c => c.IdLote == lote.Id).FirstOrDefaultAsync();
-
-                    List<Distribucion> distribucionesLote = await _context.Distribucion
-                        .Where(d => d.IdLote == lote.Id).ToListAsync();
-
-                    foreach (Distribucion distribucion in distribucionesLote)
-                    {
-                        distribucion.Vencidas = distribucion.CantidadVacunas - distribucion.Aplicadas;
-                        _context.Entry(distribucion).State = EntityState.Modified;
-                    }
-
-                    compra.Vencidas = compra.CantidadVacunas - compra.Distribuidas;
-                    _context.Entry(compra).State = EntityState.Modified;
-                    
-                    await _context.SaveChangesAsync();
-                    await new DataWareHouseService().CargarVencidasDataWareHouse(_context2, lote.Id);
+                    await new DataWareHouseService().CargarVencidasDataWareHouse(_context2, idLote);
                     response = new ResponseCargarVacunaDTO("Aceptada", false, errores, email);
                 }
             }
