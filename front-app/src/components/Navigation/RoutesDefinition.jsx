@@ -17,6 +17,7 @@ import CompraContainer from "../OperadorNacional/Compras/CompraContainer";
 import DistribucionesContainer from "../OperadorNacional/Distribuciones/DistribucionesContainer";
 import StockContainer from "../OperadorNacional/Stock/StockContainer";
 import allUrls from "@/services/backend_url";
+import HistoricoContainer from "../OperadorNacional/Historico/HistoricoContainer";
 const RoutesDefinition = () => {
   return (
     <Routes>
@@ -144,6 +145,16 @@ const RoutesDefinition = () => {
           <ProtectedRoute role={3}>
             <OperadorWraper>
               <Vacunados />
+            </OperadorWraper>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/operador/historico"
+        element={
+          <ProtectedRoute role={3}>
+            <OperadorWraper>
+              <HistoricoContainer />
             </OperadorWraper>
           </ProtectedRoute>
         }

@@ -109,6 +109,21 @@ const OperadorNavBar = () => {
               Stock
             </CustomButton>
           </NavLink>
+          <NavLink
+            to={"/operador/historico"}
+            style={({ isActive }) =>
+              isActive
+                ? activeStyle
+                : {
+                    textDecoration: "none",
+                    marginRight: 2,
+                  }
+            }
+          >
+            <CustomButton textColor="white" color="info" variant="contained">
+              Consultar historico
+            </CustomButton>
+          </NavLink>
           <CustomButton
             textColor="white"
             sx={{ marginLeft: "auto", minWidth: "max-content" }}

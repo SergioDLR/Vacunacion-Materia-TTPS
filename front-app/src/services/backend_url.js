@@ -36,5 +36,6 @@ const allUrls = {
   vacunacionMasiva: `${urlBase}/VacunasAplicadas/CargarNuevosVacunadosApi`,
   displayLotes: `${urlBase}/Lotes/GetAll`,
   vencerLote: `${urlBase}/Lotes/VencerLote`,
+  historico: `${urlBase}/Vacunas/GetHistoricos`,
 };
 export default allUrls;
